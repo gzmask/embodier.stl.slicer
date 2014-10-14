@@ -1,14 +1,16 @@
 # embodier-stl-slicer
 
-A Clojure library designed to ... well, that part is up to you.
+A clojure command line stl slicer.
+
+Features:
+  single extrusion whenever possible
+  infill pattern that promotes single extrusions.
 
 ## Usage
 
-FIXME
+embodier -in <in.stl> -out <out.gcode>
 
 ## License
-
-Copyright © 2014 FIXME
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
