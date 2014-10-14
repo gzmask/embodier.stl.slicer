@@ -8,7 +8,7 @@ Features:
 
 ## Usage
 
-embodier -in <in.stl> -out <out.gcode>
+embodier -in stl-file -out gcode-file
 
 ## License
 
