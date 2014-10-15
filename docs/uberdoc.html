@@ -2866,26 +2866,47 @@ net.brehaut.ClojureTools = (function (SH) {
   };
 })(SyntaxHighlighter);
 </script><title>slicer -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name"><a href="http://example.com/FIXME">slicer</a></h1><h2 class="project-version">0.1.0-SNAPSHOT</h2><br /><p>FIXME: write description</p>
-</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.5.1</td></tr><tr><td class="dep-name">org.clojure/tools.cli</td><td class="dotted"><hr /></td><td class="dep-version">0.3.1</td></tr><tr><td class="dep-name">gloss</td><td class="dotted"><hr /></td><td class="dep-version">0.2.3</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#slicer.core">slicer.core</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.core" name="slicer.core"><h1 class="project-name">slicer.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>The Core</h1>
+</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.5.1</td></tr><tr><td class="dep-name">org.clojure/tools.cli</td><td class="dotted"><hr /></td><td class="dep-version">0.3.1</td></tr><tr><td class="dep-name">gloss</td><td class="dotted"><hr /></td><td class="dep-version">0.2.3</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#slicer.core">slicer.core</a></li><li><a href="#slicer.file">slicer.file</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.core" name="slicer.core"><h1 class="project-name">slicer.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>The Core</h1>
 
-<p>First of all, we need to take care of the cmd line parameters
-I heard that tools.clj is pretty good
-Also lein bin makes cmd easier
-lein bin will generate target/embodier as the final executable</p>
+<p>First of all, we need to take care of the cmd line parameters.
+I heard that tools.clj is pretty good.
+Also lein bin makes cmd easier.
+lein bin will generate target/embodier as the final executable.
+Literature programming with margonilia for help doc.
+Lein marg will generate this html help doc in docs folder.</p>
 </td><td class="codes"><pre class="brush: clojure">(ns slicer.core
-  (:require [clojure.tools.cli :refer [parse-opts]])
+  (:require [clojure.tools.cli :refer [parse-opts]]
+            [slicer.file :as f])
   (:gen-class))</pre></td></tr><tr><td class="docs"><h2>cli specs</h2>
 
 <p>declare the specs for the cmd args</p>
 </td><td class="codes"><pre class="brush: clojure">(def cli-options
   [[&quot;-h&quot; &quot;--help&quot;]
-   ])</pre></td></tr><tr><td class="docs"><h2>Main function, entry point of the command</h2>
+   [&quot;-s&quot; &quot;--stl STL-file&quot; &quot;embodier -s [stl-file-name].&quot; :id :stl :validate [#(re-find #&quot;.+\.stl&quot; %) &quot;Must be a binary STL file.&quot;]]
+   [&quot;-g&quot; &quot;--gcode Gcode-file&quot; &quot;embodier -g [gcode-file-name].&quot; :id :gcode :default &quot;out.gcode&quot;]
+   ])</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(def help-txt &quot;To slice STL, simply run: \&quot;embodier -s [stl-file-name] -g [gcode-file-name]\&quot; &quot;)</pre></td></tr><tr><td class="docs"><h2>the exit</h2>
+</td><td class="codes"><pre class="brush: clojure">(defn exit [status &amp; msg]
+  (when msg (println msg))
+  (System/exit status))</pre></td></tr><tr><td class="docs"><h2>Main function, entry point of the command</h2>
 
-<p>first destructed the map from tools.cli, making it more readable.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn -main [&amp; args] 
-  (let [{opts :options args :arguments summary :summary errs :errors} 
+<p>first destructed the map from tools.cli, making it more readable.
+If there are no errors and it's not a help request, process with file IO</p>
+</td><td class="codes"><pre class="brush: clojure">(defn -main [&amp; args]
+  (let [{opts :options args :arguments summary :summary errs :errors}
         (parse-opts args cli-options) ]
-    (prn (prn-str opts))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_slicer.core">slicer.core</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+    (when (not (empty? errs))
+      (doseq [err errs]
+        (println err))
+      (exit 1))
+    (when (:help opts)
+      (println help-txt)
+      (exit 0 summary))
+    (when (:stl opts)
+      (println (prn-str opts)))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.file" name="slicer.file"><h1 class="project-name">slicer.file</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>File processing</h1>
+
+<p>Reading the binary STL is done with the gloss library.</p>
+</td><td class="codes"><pre class="brush: clojure">(ns slicer.file)</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_slicer.core">slicer.core</li><li class="floating-toc-li" id="floating-toc_slicer.file">slicer.file</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
 SyntaxHighlighter.all();
 
 // hackity hack

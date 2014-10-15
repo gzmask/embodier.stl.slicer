@@ -3,12 +3,12 @@
 A clojure command line stl slicer.
 
 Features:
-  single extrusion whenever possible
-  infill pattern that promotes single extrusions.
+  1.Single extrusion whenever possible.
+  2.Infill pattern that promotes single extrusions.
 
 ## Usage
 
-embodier -in stl-file -out gcode-file
+embodier -s stl-file -g gcode-file
 
 ## License
 
