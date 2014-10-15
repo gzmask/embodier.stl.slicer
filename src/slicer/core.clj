@@ -40,5 +40,5 @@
       (println help-txt)
       (exit 0 summary))
     (when (:stl opts)
-      (println (prn-str opts)))
+      (println (prn-str (f/parse-stl (:stl opts)))))
     ))
