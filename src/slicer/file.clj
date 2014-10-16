@@ -77,6 +77,8 @@
 
 ;; ## parse file
 ;; 115 111 108 105 100 are the magic numbers for "solid"
+;; At first it keeps giving incifient bytes errors.
+;; Then I tested the codec and finds out that it's the endianess that is messing with me.
 (defn parse-stl [stl-file]
   (let [length (.length (file stl-file))
         buffer (byte-array length)]
@@ -85,8 +87,6 @@
       (adecode buffer)
       (decode b-stl buffer))))
 
-;; At first it keeps giving incifient bytes errors.
-;; Then I tested the codec and finds out that it's the endianess that is messing with me.
 ;(vec (.array (contiguous
 ;(encode b-stl
 ;        ["012345678911234567892123456789312345678941234567895123456789612345678971234567898123456789"
