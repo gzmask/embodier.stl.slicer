@@ -1,4 +1,5 @@
 ;; # File processing
+
 ;; Reading the binary STL is done with the gloss library.
 ;; Serialization order might not be a problem when encoding/decoding through gloss codec.
 ;; But if I am decoding an externally defined STL format into a map I will need to use Gloss' ordered-map which encodes/decodes map values in the order they are defined.
@@ -10,6 +11,7 @@
 (def delimiters ["\r" "\r\n" "\n" \newline])
 
 ;; ## binary triangle frame
+
 (defcodec b-triangle
   (ordered-map
    :normal (ordered-map
@@ -23,6 +25,7 @@
    :attribute :uint16))
 
 ;; ## ascii triangle frame
+
 (defcodec a-triangle
   (ordered-map
    :_ (string :utf-8 :delimiters ["normal "])
@@ -51,6 +54,7 @@
   )
 
 ;; ## binary stl frame
+
 ;; [header triangles]
 ;; another way to interpret header is (vec (repeat 80 :byte))
 (defcodec b-stl
@@ -60,6 +64,7 @@
 
 
 ;; ## Ascii stl frame decode
+
 ;; The number of appearance of "normal" will be exactly how many triangles
 ;; Gloss documentation gives the following method:
 ;;:triangles (repeated a-triangle :delmiters ["endsolid"]) .
@@ -76,6 +81,7 @@
 
 
 ;; ## parse file
+
 ;; 115 111 108 105 100 are the magic numbers for "solid"
 ;; At first it keeps giving incifient bytes errors.
 ;; Then I tested the codec and finds out that it's the endianess that is messing with me.
@@ -87,17 +93,17 @@
       (adecode buffer)
       (decode b-stl buffer))))
 
-;(vec (.array (contiguous
-;(encode b-stl
-;        ["012345678911234567892123456789312345678941234567895123456789612345678971234567898123456789"
-;         [{:normal [1.0 1.0 1.0]
-;           :vertex-1 [1.0 2.0 3.0]
-;           :vertex-2 [2.0 1.0 1.0]
-;           :vertex-3 [3.0 1.0 1.0]
-;           :attribute 0}
-;          {:normal [1.0 1.0 1.0]
-;           :vertex-1 [1.0 2.0 3.0]
-;           :vertex-2 [2.0 1.0 1.0]
-;           :vertex-3 [3.0 1.0 1.0]
-;           :attribute 0}]
-;         ]))))
+;;  (vec (.array (contiguous
+;;  (encode b-stl
+;;         ["012345678911234567892123456789312345678941234567895123456789612345678971234567898123456789"
+;;          [{:normal [1.0 1.0 1.0]
+;;            :vertex-1 [1.0 2.0 3.0]
+;;            :vertex-2 [2.0 1.0 1.0]
+;;            :vertex-3 [3.0 1.0 1.0]
+;;            :attribute 0}
+;;           {:normal [1.0 1.0 1.0]
+;;            :vertex-1 [1.0 2.0 3.0]
+;;            :vertex-2 [2.0 1.0 1.0]
+;;            :vertex-3 [3.0 1.0 1.0]
+;;            :attribute 0}]
+;;          ]))))

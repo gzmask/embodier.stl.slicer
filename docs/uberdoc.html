@@ -2904,8 +2904,7 @@ If there are no errors and it's not a help request, process with file IO</p>
       (exit 0 summary))
     (when (:stl opts)
       (println (prn-str (f/parse-stl (:stl opts)))))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.file" name="slicer.file"><h1 class="project-name">slicer.file</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>File processing</h1>
-
-<p>Reading the binary STL is done with the gloss library.
+</td><td class="codes"></td></tr><tr><td class="docs"><p>Reading the binary STL is done with the gloss library.
 Serialization order might not be a problem when encoding/decoding through gloss codec.
 But if I am decoding an externally defined STL format into a map I will need to use Gloss' ordered-map which encodes/decodes map values in the order they are defined.</p>
 </td><td class="codes"><pre class="brush: clojure">(ns slicer.file
@@ -2913,6 +2912,7 @@ But if I am decoding an externally defined STL format into a map I will need to 
         gloss.io
         clojure.java.io))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(def delimiters [&quot;\r&quot; &quot;\r\n&quot; &quot;\n&quot; \newline])</pre></td></tr><tr><td class="docs"><h2>binary triangle frame</h2>
+</td><td class="codes"></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defcodec b-triangle
   (ordered-map
    :normal (ordered-map
@@ -2924,6 +2924,7 @@ But if I am decoding an externally defined STL format into a map I will need to 
    :vertex-3 (ordered-map
               :x :float32-le :y :float32-le :z :float32-le)
    :attribute :uint16))</pre></td></tr><tr><td class="docs"><h2>ascii triangle frame</h2>
+</td><td class="codes"></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defcodec a-triangle
   (ordered-map
    :_ (string :utf-8 :delimiters [&quot;normal &quot;])
@@ -2948,15 +2949,13 @@ But if I am decoding an externally defined STL format into a map I will need to 
               :z (string-float :utf-8 :delimiters delimiters))
    :_ (string :utf-8 :delimiters [&quot;endfacet&quot;])
    :_ (string :utf-8 :delimiters delimiters)))</pre></td></tr><tr><td class="docs"><h2>binary stl frame</h2>
-
-<p>[header triangles]
+</td><td class="codes"></td></tr><tr><td class="docs"><p>[header triangles]
 another way to interpret header is (vec (repeat 80 :byte))</p>
 </td><td class="codes"><pre class="brush: clojure">(defcodec b-stl
   (ordered-map
    :header (string :utf-8 :length 80)
    :triangles (repeated b-triangle :prefix :uint32-le)))</pre></td></tr><tr><td class="docs"><h2>Ascii stl frame decode</h2>
-
-<p>The number of appearance of "normal" will be exactly how many triangles
+</td><td class="codes"></td></tr><tr><td class="docs"><p>The number of appearance of "normal" will be exactly how many triangles
 Gloss documentation gives the following method:
 :triangles (repeated a-triangle :delmiters ["endsolid"]) .
 But this does not work.
@@ -2969,8 +2968,7 @@ Thus I have to count the words manually</p>
                 :triangles (vec (repeat n a-triangle))
                 :_ (string :utf-8 :delimiters delimiters)))]
     (decode a-stl buffer false)))</pre></td></tr><tr><td class="docs"><h2>parse file</h2>
-
-<p>115 111 108 105 100 are the magic numbers for "solid"
+</td><td class="codes"></td></tr><tr><td class="docs"><p>115 111 108 105 100 are the magic numbers for "solid"
 At first it keeps giving incifient bytes errors.
 Then I tested the codec and finds out that it's the endianess that is messing with me.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn parse-stl [stl-file]
@@ -2979,54 +2977,69 @@ Then I tested the codec and finds out that it's the endianess that is messing wi
     (.read (input-stream stl-file) buffer)
     (if (= '(115 111 108 105 100) (first (split-at 5 buffer)))
       (adecode buffer)
-      (decode b-stl buffer))))</pre></td></tr><tr><td class="docs"><p>(vec (.array (contiguous
-(encode b-stl
-       ["012345678911234567892123456789312345678941234567895123456789612345678971234567898123456789"
-        [{:normal [1.0 1.0 1.0]
-          :vertex-1 [1.0 2.0 3.0]
-          :vertex-2 [2.0 1.0 1.0]
-          :vertex-3 [3.0 1.0 1.0]
-          :attribute 0}
-         {:normal [1.0 1.0 1.0]
-          :vertex-1 [1.0 2.0 3.0]
-          :vertex-2 [2.0 1.0 1.0]
-          :vertex-3 [3.0 1.0 1.0]
-          :attribute 0}]
-        ]))))</p>
+      (decode b-stl buffer))))</pre></td></tr><tr><td class="docs"><p> (vec (.array (contiguous
+ (encode b-stl
+        ["012345678911234567892123456789312345678941234567895123456789612345678971234567898123456789"
+         [{:normal [1.0 1.0 1.0]
+           :vertex-1 [1.0 2.0 3.0]
+           :vertex-2 [2.0 1.0 1.0]
+           :vertex-3 [3.0 1.0 1.0]
+           :attribute 0}
+          {:normal [1.0 1.0 1.0]
+           :vertex-1 [1.0 2.0 3.0]
+           :vertex-2 [2.0 1.0 1.0]
+           :vertex-3 [3.0 1.0 1.0]
+           :attribute 0}]
+         ]))))</p>
 </td><td class="codes"></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.slice" name="slicer.slice"><h1 class="project-name">slicer.slice</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>slicing algorithms</h1>
 
 <p>This is the core of the algorithm.
 Mainly to get the intersection between triangles and a sequence of Z planes.</p>
-</td><td class="codes"><pre class="brush: clojure">(ns slicer.slice)</pre></td></tr><tr><td class="docs"><p>  ## dot product
-  This is a lazy version of dot product just for 3-tuples</p>
+</td><td class="codes"><pre class="brush: clojure">(ns slicer.slice)</pre></td></tr><tr><td class="docs"><p>  Dot Product</p>
+
+<p>  This is a lazy version of dot product just for 3-tuples</p>
 </td><td class="codes"><pre class="brush: clojure">(defn dot*
   [[x1 y1 z1 :as p1]
    [x2 y2 z2 :as p2]]
   (+
    (* x1 x2)
    (* y1 y2)
-   (* z1 z2)))</pre></td></tr><tr><td class="docs"><p>  ## norm of a vector</p>
+   (* z1 z2)))</pre></td></tr><tr><td class="docs"><p>  Norm of a vector</p>
 </td><td class="codes"><pre class="brush: clojure">(defn norm
   [[x y z :as v]]
-  (Math/sqrt (dot* v v)))</pre></td></tr><tr><td class="docs"><p>  ## Distance from point to plane
-  Returns the distance.
+  (Math/sqrt (dot* v v)))</pre></td></tr><tr><td class="docs"><p>  Distance from point to plane</p>
+
+<p>  Returns the distance.
   If result is positive, point is at the side of the normal,
   if the result is negative, point is at the other side of the normal.</p>
+
+<p>  i.e</p>
+
+<pre><code>(point-plane [0 -1 0] [[0 1 0] [0 0 0]]) =&gt; -1
+(point-plane [0 1 0] [[0 1 0] [0 0 0]]) =&gt; 1
+(point-plane [0 0 0] [[0 1 0] [0 0 0]]) =&gt; 0
+</code></pre>
 </td><td class="codes"><pre class="brush: clojure">(defn point-plane 
   [[x0 y0 z0 :as point]
    [[x2 y2 z2 :as normal] [x1 y1 z1 :as position] :as plane]]
   (/
     (dot* normal (map - point position))
-    (norm normal)))</pre></td></tr><tr><td class="docs"><p>  ## Ray/Segment and Plane intersection
-  line is represented by start-point and end-point
+    (norm normal)))</pre></td></tr><tr><td class="docs"><p>  Ray/Segment and Plane intersection</p>
+
+<p>  line is represented by start-point and end-point
   plane is represented by normal direction vector (from original) and the position point
   returns the intersection point if there is one, 
   returns nil when not having any, 
-  returns the line when the line is on the plane.
-  i.e:
-  (plane-line-inc [[5 1.1 0] [-2 1.1 0]] [[1 0 0] [0 0 0]]) => [0 1 0]
-  (plane-line-inc [[5 1.1 0] [-2 1.1 0]] [[0 1 0] [0 0 0]]) => nil
-  (plane-line-inc [[5 1.1 0] [-2 1.1 0]] [[0 1 0] [0 1.1 0]]) => [[5 1.1 0] [-2 1.1 0]]</p>
+  returns the line when the line is on the plane.</p>
+
+<p>  i.e</p>
+
+<pre><code>(plane-line-inc [[5 1.1 0] [-2 1.1 0]] [[1 0 0] [0 0 0]]) =&gt; [0 1 0]
+(plane-line-inc [[5 1.1 0] [-2 1.1 0]] [[0 1 0] [0 0 0]]) =&gt; nil
+(plane-line-inc [[0 1 0] [0 2 0]] [[0 1 0] [0 0 0]]) =&gt; nil
+(plane-line-inc [[0 0.1 0] [0 2 0]] [[0 1 0] [0 0 0]]) =&gt; nil
+(plane-line-inc [[5 1.1 0] [-2 1.1 0]] [[0 1 0] [0 1.1 0]]) =&gt; [[5 1.1 0] [-2 1.1 0]]
+</code></pre>
 </td><td class="codes"><pre class="brush: clojure">(defn plane-line-inc
   [[[x1 y1 z1 :as start-point]  [x2 y2 z2 :as end-point] :as line]
    [[x3 y3 z3 :as normal] [x4 y4 z4 :as position] :as plane]]
@@ -3036,7 +3049,38 @@ Mainly to get the intersection between triangles and a sequence of Z planes.</p>
           :else (let [r (/ (dot* normal (map - position start-point)) d)] 
                   (if (and (&lt;= r 1) (&gt;= r 0)) 
                     (vec (map + start-point (map * [r r r] (map - end-point start-point))))
-                    nil)))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_slicer.core">slicer.core</li><li class="floating-toc-li" id="floating-toc_slicer.file">slicer.file</li><li class="floating-toc-li" id="floating-toc_slicer.slice">slicer.slice</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+                    nil)))))</pre></td></tr><tr><td class="docs"><p>  Triangle and Plane intersection</p>
+
+<pre><code>(triangle-plane-inc [[0.0 1 0] [-1 -1 0] [1 -1 0]] [[0 1 0] [0 0 0]]) =&gt; ([-0.5 0 0] [0.5 0 0])
+(triangle-plane-inc [[0 0 0] [-1 -1 0] [1 -1 0]] [[0 1 0] [0 0 0]]) =&gt; [0 0 0]
+(triangle-plane-inc [[0 -1 0] [-1 -2 0] [1 -2 0]] [[0 1 0] [0 0 0]]) =&gt; nil
+</code></pre>
+</td><td class="codes"><pre class="brush: clojure">(defn triangle-plane-inc
+  [[[x1 y1 z1 :as p1]
+    [x2 y2 z2 :as p2]
+    [x3 y3 z3 :as p3] :as triangle]
+   [[x4 y4 z4 :as normal] 
+    [x5 y5 z5 :as position] :as plane]]
+  (let [ds (map #(point-plane % plane) triangle)]
+    (cond 
+      (= 3 (count (filter zero? ds))) 
+      triangle
+      (= 2 (count (filter zero? ds))) 
+      (filter #(zero? (point-plane % plane)) triangle)
+      (= 1 (count (filter zero? ds))) 
+      (if (neg? (apply * (filter (complement zero?) ds)))
+        [(first (filter #(zero? (point-plane % plane)) triangle))
+         (plane-line-inc 
+           (vec (filter #(not (zero? (point-plane % plane))) triangle)) 
+           plane)] 
+        (first (filter #(zero? (point-plane % plane)) triangle)))
+      :else 
+      (if (or (empty? (filter neg? ds)) (empty? (filter pos? ds)))
+        nil
+        (filter (complement nil?)
+                [(plane-line-inc [p1 p2] plane) 
+                 (plane-line-inc [p2 p3] plane) 
+                 (plane-line-inc [p3 p1] plane)])))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_slicer.core">slicer.core</li><li class="floating-toc-li" id="floating-toc_slicer.file">slicer.file</li><li class="floating-toc-li" id="floating-toc_slicer.slice">slicer.slice</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
 SyntaxHighlighter.all();
 
 // hackity hack
