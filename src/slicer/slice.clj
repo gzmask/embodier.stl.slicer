@@ -110,9 +110,22 @@
 
 (defn slicing-plane
   "
-  Given a y axis value, returns the plane [[x y z :as normal] [x y z :as plane]]
+  Given a x/y/z axis value and the axis keyword :x/:y/:z, returns the plane [[x y z :as normal] [x y z :as plane]]
   "
-  [y]
-  {:pre [(float? y)]}
-  [[0.0 1.0 0.0]
-   [0.0 y 0.0]])
+  [a b]
+  {:pre [(float? a)
+         (keyword? b)]}
+  (cond
+   (= b :x) [[1.0 0.0 0.0] [a 0.0 0.0]]
+   (= b :y) [[0.0 1.0 0.0] [0.0 a 0.0]]
+   (= b :z) [[0.0 0.0 1.0] [0.0 0.0 a]]))
+
+(defn gen-planes
+  [start end step axis]
+  {:pre [(number? start)
+         (number? end)
+         (number? step)
+         (keyword? axis)]}
+  (vec
+   (for [i (range (bigdec start) (bigdec (+ end step)) (bigdec step))]
+     (slicing-plane (double i) axis))))
