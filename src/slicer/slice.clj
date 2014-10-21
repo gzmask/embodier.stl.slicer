@@ -107,3 +107,12 @@
                  (plane-line-inc [p2 p3] plane)
                  (plane-line-inc [p3 p1] plane)])
         ))))
+
+(defn slicing-plane
+  "
+  Given a y axis value, returns the plane [[x y z :as normal] [x y z :as plane]]
+  "
+  [y]
+  {:pre [(float? y)]}
+  [[0.0 1.0 0.0]
+   [0.0 y 0.0]])
