@@ -14,14 +14,10 @@
 
 (defcodec b-triangle
   (ordered-map
-   :normal (ordered-map
-            :x :float32-le :y :float32-le :z :float32-le)
-   :vertex-1 (ordered-map
-              :x :float32-le :y :float32-le :z :float32-le)
-   :vertex-2 (ordered-map
-              :x :float32-le :y :float32-le :z :float32-le)
-   :vertex-3 (ordered-map
-              :x :float32-le :y :float32-le :z :float32-le)
+   :normal [:float32-le :float32-le :float32-le]
+   :vertex-1 [:float32-le :float32-le :float32-le]
+   :vertex-2 [:float32-le :float32-le :float32-le]
+   :vertex-3 [:float32-le :float32-le :float32-le]
    :attribute :uint16))
 
 ;; ## ascii triangle frame
@@ -29,25 +25,21 @@
 (defcodec a-triangle
   (ordered-map
    :_ (string :utf-8 :delimiters ["normal "])
-   :normal (ordered-map
-            :x (string-float :utf-8 :delimiters [\space])
-            :y (string-float :utf-8 :delimiters [\space])
-            :z (string-float :utf-8 :delimiters delimiters))
+   :normal [(string-float :utf-8 :delimiters [\space])
+            (string-float :utf-8 :delimiters [\space])
+            (string-float :utf-8 :delimiters delimiters)]
    :_ (string :utf-8 :delimiters ["vertex "])
-   :vertex-1 (ordered-map
-              :x (string-float :utf-8 :delimiters [\space])
-              :y (string-float :utf-8 :delimiters [\space])
-              :z (string-float :utf-8 :delimiters delimiters))
+   :vertex-1 [(string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters delimiters)]
    :_ (string :utf-8 :delimiters ["vertex "])
-   :vertex-2 (ordered-map
-              :x (string-float :utf-8 :delimiters [\space])
-              :y (string-float :utf-8 :delimiters [\space])
-              :z (string-float :utf-8 :delimiters delimiters))
+   :vertex-2 [(string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters delimiters)]
    :_ (string :utf-8 :delimiters ["vertex "])
-   :vertex-3 (ordered-map
-              :x (string-float :utf-8 :delimiters [\space])
-              :y (string-float :utf-8 :delimiters [\space])
-              :z (string-float :utf-8 :delimiters delimiters))
+   :vertex-3 [(string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters delimiters)]
    :_ (string :utf-8 :delimiters ["endfacet"])
    :_ (string :utf-8 :delimiters delimiters)
    )

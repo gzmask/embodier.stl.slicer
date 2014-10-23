@@ -2,6 +2,7 @@
   (:require [clojure.repl :refer :all]
             [clojure.test :refer :all]
             [slicer.slice :refer :all]
+            [slicer.file :refer :all]
             [slicer.core :refer :all]))
 
 (deftest test-point-plane
@@ -57,7 +58,16 @@
             [[1.0 0.0 0.0] [3.0 0.0 0.0]]] (gen-planes 0.0 3.0 0.3 :x)))
     ))
 
-(range 0.0 3.0 0.3)
-(range 0.0M 1.0M 0.1M)
-(= 0.3M (+ 0.1M 0.2M))
-(double (+ 0.1M 0.2M))
+(def asc (parse-stl "asc.stl"))
+(deftest test-parse-stl
+  (testing "parsing stl files"
+    (is (= [10.0 10.0 0.0] (:vertex-1 (first (:triangles asc)))))
+    (is (= [-10.0 -10.0 0.0] (:vertex-2 (first (:triangles asc)))))
+    (is (= [-10.0 10.0 0.0] (:vertex-3 (first (:triangles asc)))))
+    (is (= [0.0 0.0 -1.0] (:normal (first (:triangles asc)))))
+    ))
+
+(deftest test-sort-triangles
+  (testing ""
+    (is (= true true))
+    ))
