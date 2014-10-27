@@ -32,6 +32,25 @@
     (is (= [[0.0 0.0 1.0] [0.0 0.0 0.0]] (slicing-plane 0.0 :z)))
     ))
 
+(def asc (parse-stl "asc.stl"))
+(def bin (parse-stl "bin.stl"))
+(defn s=
+  [a b d]
+  "similarly equal: the difference of each element in a and b are less than d"
+  (reduce #(and %1 %2) (map #(< (Math/abs (- %1 %2)) d) a b)))
+
+(deftest test-parse-stl
+  (testing "parsing stl files"
+    (is (= [10.0 10.0 0.0] (:vertex-1 (first (:triangles asc)))))
+    (is (= [-10.0 -10.0 0.0] (:vertex-2 (first (:triangles asc)))))
+    (is (= [-10.0 10.0 0.0] (:vertex-3 (first (:triangles asc)))))
+    (is (= [0.0 0.0 -1.0] (:normal (first (:triangles asc)))))
+    (is (s= [2.029 1.628 0.9109999] (:vertex-1 (first (:triangles bin))) 0.0001))
+    (is (s= [2.229 1.628 0.9109999] (:vertex-2 (first (:triangles bin))) 0.0001))
+    (is (s= [2.229 1.672 0.9109999] (:vertex-3 (first (:triangles bin))) 0.0001))
+    (is (= [0.0 0.0 1.0] (:normal (first (:triangles bin)))))
+    ))
+
 (deftest test-planes-generator
   (testing "generates planes from an interval"
     (is (= [[[0.0 1.0 0.0] [0.0 0.0 0.0]]
@@ -58,26 +77,10 @@
             [[1.0 0.0 0.0] [3.0 0.0 0.0]]] (gen-planes 0.0 3.0 0.3 :x)))
     ))
 
-(def asc (parse-stl "asc.stl"))
-(def bin (parse-stl "bin.stl"))
-(defn s= 
-  [a b d]
-  "similarly equal: the difference of each element in a and b are less than d"
-  (reduce #(and %1 %2) (map #(< (Math/abs (- %1 %2)) d) a b)))
-
-(deftest test-parse-stl
-  (testing "parsing stl files"
-    (is (= [10.0 10.0 0.0] (:vertex-1 (first (:triangles asc)))))
-    (is (= [-10.0 -10.0 0.0] (:vertex-2 (first (:triangles asc)))))
-    (is (= [-10.0 10.0 0.0] (:vertex-3 (first (:triangles asc)))))
-    (is (= [0.0 0.0 -1.0] (:normal (first (:triangles asc)))))
-    (is (= [0.0 0.0 1.0] (:normal (first (:triangles bin)))))
-    (is (s= [2.029 1.628 0.9109999] (:vertex-1 (first (:triangles bin))) 0.0001))
-    (is (s= [2.229 1.628 0.9109999] (:vertex-2 (first (:triangles bin))) 0.0001))
-    (is (s= [2.229 1.672 0.9109999] (:vertex-3 (first (:triangles bin))) 0.0001))
-    ))
-
-(deftest test-sort-triangles
-  (testing ""
+(deftest test-make-triangles-dictionary
+  (testing "make triangles dictionary according to x/y/z axis"
+    (is (= [[0.0 [{:vertex-1 [10.0 10.0 0.0] :vertex-2 [-10.0 -10.0 0.0] :vertex-3 [-10.0 10.0 0.0]} :normal [0.0 0.0 -1.0]]]
+            [0.3 [{:vertex-1 [10.0 10.0 0.0] :vertex-2 [-10.0 -10.0 0.0] :vertex-3 [-10.0 10.0 0.0]} :normal [0.0 0.0 -1.0]]]
+            ] (gen-dict asc (gen-planes 0.0 3.0 0.3 :y))))
     (is (= true true))
     ))
