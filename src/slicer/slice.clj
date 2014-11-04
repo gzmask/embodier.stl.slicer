@@ -129,3 +129,7 @@
   (vec
    (for [i (range (bigdec start) (bigdec (+ end step)) (bigdec step))]
      (slicing-plane (double i) axis))))
+
+(defn gen-dict
+  [triangles planes]
+  )
