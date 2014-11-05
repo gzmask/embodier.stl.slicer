@@ -74,6 +74,7 @@
   If the entire triangle sits on the plane, returns the whole triangle;
   If one segment of the triangle sits on the plane, that's what you got;
   If a point of the triangle sits there, you have it;
+  If not intersecting, nil;
   Otherwise, you have the intersection
   "
   [[[x1 y1 z1 :as p1]
