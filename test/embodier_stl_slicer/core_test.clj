@@ -36,7 +36,7 @@
 (def bin (parse-stl "bin.stl"))
 (defn s=
   [a b d]
-  "similarly equal: the difference of each element in a and b are less than d"
+  "let a and b be vectors of floating numbers. similarly equal: the difference of each element in a and b are less than d"
   (reduce #(and %1 %2) (map #(< (Math/abs (- %1 %2)) d) a b)))
 
 (deftest test-parse-stl

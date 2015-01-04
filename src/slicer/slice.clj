@@ -7,7 +7,7 @@
   "
   Dot Product
 
-  This is a lazy version of dot product just for 3-tuples"
+  This is a simple version of dot product just for 3-tuples"
   [[x1 y1 z1 :as p1]
    [x2 y2 z2 :as p2]]
   {:pre [(float? x1) (float? y1) (float? z1)
@@ -122,6 +122,9 @@
    (= b :z) [[0.0 0.0 1.0] [0.0 0.0 a]]))
 
 (defn gen-planes
+  "
+  Generate a series of slicing-planes from 'start' to 'end' each 'step' along the provided 'axis'
+  "
   [start end step axis]
   {:pre [(number? start)
          (number? end)
@@ -132,5 +135,12 @@
      (slicing-plane (double i) axis))))
 
 (defn gen-dict
-  [triangles planes]
-  )
+  [triangles planes axis]
+  (for [triangle triangles
+        plane planes] 
+    (if-not (nil? (triangle-plane-inc triangle plane))
+      [(cond (= axis :x) (first plane)
+             (= axis :y) (second plane)
+             (= axis :z) (last plane))
+       triangle]
+      )))

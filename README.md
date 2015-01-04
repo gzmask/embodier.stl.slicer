@@ -3,8 +3,22 @@
 A clojure command line stl slicer.
 
 Features:
+
   1.Single extrusion whenever possible.
+
   2.Infill pattern that promotes single extrusions.
+
+## Compilation
+
+Lein bin
+
+## Documentation Generating
+
+lein marg
+
+## Run test
+
+Lein test
 
 ## Usage
 
