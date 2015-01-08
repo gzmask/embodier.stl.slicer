@@ -139,16 +139,18 @@
   [{v3 :vertex-3, v2 :vertex-2, v1 :vertex-1, :as triangle}]
   [v1 v2 v3])
 
-(defn gen-dict
+(defn slice
+  "slice every triangle of the model with every plane along the axis"
   [triangles planes axis]
   (for [triangle triangles
         plane planes] 
-    (if-not (nil? (triangle-plane-inc (triangle-map2vector triangle) plane))
-      [(cond (= axis :x) (first plane)
-             (= axis :y) (second plane)
-             (= axis :z) (last plane))
-       triangle]
-      )))
+    (let [line (triangle-plane-inc (triangle-map2vector triangle) plane)]
+      (if-not (nil? line)
+        [(cond (= axis :x) (first plane)
+               (= axis :y) (second plane)
+               (= axis :z) (last plane))
+         triangle 
+         line]))))
 
 (comment
   "parsing result"

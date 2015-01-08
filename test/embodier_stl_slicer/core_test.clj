@@ -77,14 +77,18 @@
             [[1.0 0.0 0.0] [3.0 0.0 0.0]]] (gen-planes 0.0 3.0 0.3 :x)))
     ))
 
-(clojure.pprint/pprint (gen-dict (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))
+;(clojure.pprint/pprint (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))
+;(print "triangles")
+;(clojure.pprint/pprint  (count (:triangles asc)))
+;(print "planes")
+;(clojure.pprint/pprint  (count (gen-planes 0.0 3.0 0.3 :y)))
+;(print "lines")
+;(clojure.pprint/pprint  (count (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y)))
 
-(comment
 (deftest test-make-triangles-dictionary
   (testing "make triangles dictionary according to x/y/z axis"
-    (is (= [[0.0 [{:vertex-1 [10.0 10.0 0.0] :vertex-2 [-10.0 -10.0 0.0] :vertex-3 [-10.0 10.0 0.0]} :normal [0.0 0.0 -1.0]]]
-            [0.3 [{:vertex-1 [10.0 10.0 0.0] :vertex-2 [-10.0 -10.0 0.0] :vertex-3 [-10.0 10.0 0.0]} :normal [0.0 0.0 -1.0]]]
-            ] (subvec (gen-dict (:triangles asc) (gen-planes 0.0 3.0 0.3 :y)) 0 2)))
-    (is (= true true))
+    (is (= (* 
+             (count (:triangles asc)) 
+             (count (gen-planes 0.0 3.0 0.3 :y))) 
+           (count (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))))
     ))
-)
