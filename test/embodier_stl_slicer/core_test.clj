@@ -77,6 +77,9 @@
             [[1.0 0.0 0.0] [3.0 0.0 0.0]]] (gen-planes 0.0 3.0 0.3 :x)))
     ))
 
+(clojure.pprint/pprint (gen-dict (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))
+
+(comment
 (deftest test-make-triangles-dictionary
   (testing "make triangles dictionary according to x/y/z axis"
     (is (= [[0.0 [{:vertex-1 [10.0 10.0 0.0] :vertex-2 [-10.0 -10.0 0.0] :vertex-3 [-10.0 10.0 0.0]} :normal [0.0 0.0 -1.0]]]
@@ -84,3 +87,4 @@
             ] (subvec (gen-dict (:triangles asc) (gen-planes 0.0 3.0 0.3 :y)) 0 2)))
     (is (= true true))
     ))
+)

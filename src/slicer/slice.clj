@@ -134,13 +134,35 @@
    (for [i (range (bigdec start) (bigdec (+ end step)) (bigdec step))]
      (slicing-plane (double i) axis))))
 
+(defn triangle-map2vector
+  "convert triangle map to vector"
+  [{v3 :vertex-3, v2 :vertex-2, v1 :vertex-1, :as triangle}]
+  [v1 v2 v3])
+
 (defn gen-dict
   [triangles planes axis]
   (for [triangle triangles
         plane planes] 
-    (if-not (nil? (triangle-plane-inc triangle plane))
+    (if-not (nil? (triangle-plane-inc (triangle-map2vector triangle) plane))
       [(cond (= axis :x) (first plane)
              (= axis :y) (second plane)
              (= axis :z) (last plane))
        triangle]
       )))
+
+(comment
+  "parsing result"
+  {:triangles [{:vertex-3 [-10.0 10.0 0.0], :vertex-2 [-10.0 -10.0 0.0], :vertex-1 [10.0 10.0 0.0], :normal [0.0 0.0 -1.0], :_ ""} 
+               {:vertex-3 [10.0 -10.0 0.0], :vertex-2 [10.0 10.0 0.0], :vertex-1 [-10.0 -10.0 0.0], :normal [0.0 0.0 -1.0], :_ ""} 
+               {:vertex-3 [-10.0 -10.0 10.0], :vertex-2 [-10.0 10.0 10.0], :vertex-1 [10.0 -10.0 10.0], :normal [0.0 0.0 1.0], :_ ""} 
+               {:vertex-3 [10.0 10.0 10.0], :vertex-2 [10.0 -10.0 10.0], :vertex-1 [-10.0 10.0 10.0], :normal [0.0 0.0 1.0], :_ ""} 
+               {:vertex-3 [10.0 -10.0 0.0], :vertex-2 [10.0 -10.0 10.0], :vertex-1 [10.0 10.0 0.0], :normal [1.0 0.0 0.0], :_ ""} 
+               {:vertex-3 [10.0 10.0 10.0], :vertex-2 [10.0 10.0 0.0], :vertex-1 [10.0 -10.0 10.0], :normal [1.0 0.0 0.0], :_ ""} 
+               {:vertex-3 [10.0 -10.0 0.0], :vertex-2 [-10.0 -10.0 0.0], :vertex-1 [10.0 -10.0 10.0], :normal [-0.0 -1.0 -0.0], :_ ""} 
+               {:vertex-3 [-10.0 -10.0 10.0], :vertex-2 [10.0 -10.0 10.0], :vertex-1 [-10.0 -10.0 0.0], :normal [-0.0 -1.0 -0.0], :_ ""} 
+               {:vertex-3 [-10.0 -10.0 10.0], :vertex-2 [-10.0 -10.0 0.0], :vertex-1 [-10.0 10.0 10.0], :normal [-1.0 0.0 0.0], :_ ""} 
+               {:vertex-3 [-10.0 10.0 0.0], :vertex-2 [-10.0 10.0 10.0], :vertex-1 [-10.0 -10.0 0.0], :normal [-1.0 0.0 0.0], :_ ""} 
+               {:vertex-3 [-10.0 10.0 0.0], :vertex-2 [10.0 10.0 0.0], :vertex-1 [-10.0 10.0 10.0], :normal [0.0 1.0 0.0], :_ ""} 
+               {:vertex-3 [10.0 10.0 10.0], :vertex-2 [-10.0 10.0 10.0], :vertex-1 [10.0 10.0 0.0], :normal [0.0 1.0 0.0], :_ ""}], 
+   :header "solid Default"}
+)
