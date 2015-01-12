@@ -77,7 +77,7 @@
             [[1.0 0.0 0.0] [3.0 0.0 0.0]]] (gen-planes 0.0 3.0 0.3 :x)))
     ))
 
-;(clojure.pprint/pprint (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))
+(clojure.pprint/pprint (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))
 ;(print "triangles")
 ;(clojure.pprint/pprint  (count (:triangles asc)))
 ;(print "planes")
