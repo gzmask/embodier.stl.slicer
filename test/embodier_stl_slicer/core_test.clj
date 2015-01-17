@@ -77,9 +77,25 @@
             [[1.0 0.0 0.0] [3.0 0.0 0.0]]] (gen-planes 0.0 3.0 0.3 :x)))
     ))
 
-(clojure.pprint/pprint (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))
+(deftest test-min-max-finder
+  (testing "finds the highest and lowest point in axis of a collection of triangles along provided axis"
+    (is (= {:min -10.0 :max 10.0}
+           (find-min-max :x
+             [{:vertex-3 [-10.0 10.0 0.0], 
+               :vertex-2 [-10.0 -10.0 0.0], 
+               :vertex-1 [10.0 10.0 0.0], 
+               :normal [0.0 0.0 -1.0], 
+               :_ ""} 
+              {:vertex-3 [10.0 -10.0 0.0], 
+               :vertex-2 [10.0 10.0 0.0], 
+               :vertex-1 [-10.0 -10.0 0.0], 
+               :normal [0.0 0.0 -1.0], 
+               :_ ""}]))
+        )))
+
+;(clojure.pprint/pprint (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))
 ;(print "triangles")
-;(clojure.pprint/pprint  (count (:triangles asc)))
+;(clojure.pprint/pprint  (:triangles asc))
 ;(print "planes")
 ;(clojure.pprint/pprint  (count (gen-planes 0.0 3.0 0.3 :y)))
 ;(print "lines")
