@@ -145,13 +145,14 @@
   (for [triangle triangles
         plane planes] 
     (let [line (triangle-plane-inc (triangle-map2vector triangle) plane)]
-      (if-not (nil? line)
-        [(cond (= axis :x) (first (second plane))
-               (= axis :y) (second (second plane))
-               (= axis :z) (last (second plane)))
-         plane
-         triangle 
-         line]))))
+      (if-not (nil? line) 
+        {:cut-point [axis 
+                     (cond (= axis :x) (first (second plane)) 
+                           (= axis :y) (second (second plane)) 
+                           (= axis :z) (last (second plane)))]
+         :plane plane
+         :triangle triangle 
+         :line line}))))
 
 (comment
   "parsing result"

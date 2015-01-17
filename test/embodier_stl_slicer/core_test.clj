@@ -85,8 +85,8 @@
 ;(print "lines")
 ;(clojure.pprint/pprint  (count (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y)))
 
-(deftest test-make-triangles-dictionary
-  (testing "make triangles dictionary according to x/y/z axis"
+(deftest test-slice-function
+  (testing "slices triangles with planes according to x/y/z axis"
     (is (= (* 
              (count (:triangles asc)) 
              (count (gen-planes 0.0 3.0 0.3 :y))) 
