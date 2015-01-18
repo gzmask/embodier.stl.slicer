@@ -119,11 +119,20 @@
                :vertex-2 [10.0 10.0 0.0], 
                :vertex-1 [-10.0 -10.0 0.0], 
                :normal [0.0 0.0 -1.0], 
-               :_ ""}])))))
+               :_ ""}])))
+    (is (= {:min -10.0, :max 10.0}
+           (find-min-max :y (:triangles asc))))
+    (is (= {:min -10.0, :max 10.0}
+           (find-min-max :x (:triangles asc))))
+    (is (= {:min 0.0, :max 10.0}
+           (find-min-max :z (:triangles asc))))
+    ))
 
 ;(clojure.pprint/pprint (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))
 ;(print "triangles")
 ;(clojure.pprint/pprint  (:triangles asc))
+;(print "min-max asc triangles")
+;(clojure.pprint/pprint  (find-min-max :y (:triangles asc)))
 ;(print "planes")
 ;(clojure.pprint/pprint  (count (gen-planes 0.0 3.0 0.3 :y)))
 ;(print "lines")
@@ -131,8 +140,8 @@
 
 (deftest test-slice-function
   (testing "slices triangles with planes according to x/y/z axis"
+    (clojure.pprint/pprint (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y))
     (is (= (* 
              (count (:triangles asc)) 
-             (count (gen-planes 0.0 3.0 0.3 :y))) 
-           (count (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y))))
-    ))
+             (count (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y))) 
+           (count (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y))))))
