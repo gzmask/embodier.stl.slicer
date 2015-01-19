@@ -201,12 +201,11 @@
   [triangles planes axis]
   (for [triangle triangles
         plane planes] 
-    (let [result (triangle-plane-inc (triangle-map2vector triangle) plane)]
-      (if-not (nil? result) 
-        {:cut-point [axis 
-                     (cond (= axis :x) (first (second plane)) 
-                           (= axis :y) (second (second plane)) 
-                           (= axis :z) (last (second plane)))]
-         :plane plane
-         :triangle triangle 
-         :result result}))))
+    (let [result (triangle-plane-inc (triangle-map2vector triangle) plane)] 
+      {:axis axis 
+       :cut-point (cond (= axis :x) (first (second plane)) 
+                        (= axis :y) (second (second plane)) 
+                        (= axis :z) (last (second plane))) 
+       :plane plane
+       :triangle triangle 
+       :result result})))
