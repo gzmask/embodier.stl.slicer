@@ -209,3 +209,10 @@
        :plane plane
        :triangle triangle 
        :result result})))
+
+(defn rm-nil
+  "remove nil results"
+  [results]
+  (filter 
+    (fn [result]
+      ((complement nil?) (:result result))) results))
