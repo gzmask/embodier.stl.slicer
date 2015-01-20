@@ -141,7 +141,10 @@
 (deftest test-slice-function
   (testing "slices triangles with planes according to x/y/z axis"
     ;(clojure.pprint/pprint (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y))
-    (clojure.pprint/pprint (rm-nil (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y)))
+    (clojure.pprint/pprint 
+      (-> 
+        (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y) 
+        rm-nil))
     (is (= (* 
              (count (:triangles asc)) 
              (count (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y))) 
