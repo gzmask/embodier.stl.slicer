@@ -136,54 +136,54 @@
 
 (defn find-min-max
   "finds the highest and lowest point in axis of a collection of triangles along provided axis"
-  [axis 
+  [axis
    [{[x1 y1 z1 :as p1] :vertex-1 [x2 y2 z2 :as p2] :vertex-2 [x3 y3 z3 :as p3] :vertex-3} & tris :as triangles]]
   {:pre [(number? x1) (number? x2) (number? x3) (number? y1) (number? y2) (number? y3) (number? z1) (number? z2) (number? z3) (keyword? axis)]}
-  {:min 
-   (reduce (fn [min-num tri] 
-            (cond 
-              (= axis :x) 
+  {:min
+   (reduce (fn [min-num tri]
+            (cond
+              (= axis :x)
               (min
                 min-num
                 (min (first (:vertex-1 tri))
-                     (first (:vertex-2 tri)) 
+                     (first (:vertex-2 tri))
                      (first (:vertex-3 tri))))
-              (= axis :y) 
+              (= axis :y)
               (min
                 min-num
                 (min (second (:vertex-1 tri))
-                     (second (:vertex-2 tri)) 
+                     (second (:vertex-2 tri))
                      (second (:vertex-3 tri))))
-              (= axis :z)  
-              (min 
+              (= axis :z)
+              (min
                 min-num
                 (min (last (:vertex-1 tri))
-                     (last (:vertex-2 tri)) 
+                     (last (:vertex-2 tri))
                      (last (:vertex-3 tri))))))
           (cond (= axis :x) (min x1 x2 x3)
                 (= axis :y) (min y1 y2 y3)
                 (= axis :z) (min z1 z2 z3))
           tris)
    :max
-   (reduce (fn [max-num tri] 
-            (cond 
-              (= axis :x) 
+   (reduce (fn [max-num tri]
+            (cond
+              (= axis :x)
               (max
                 max-num
                 (max (first (:vertex-1 tri))
-                     (first (:vertex-2 tri)) 
+                     (first (:vertex-2 tri))
                      (first (:vertex-3 tri))))
-              (= axis :y) 
+              (= axis :y)
               (max
                 max-num
                 (max (second (:vertex-1 tri))
-                     (second (:vertex-2 tri)) 
+                     (second (:vertex-2 tri))
                      (second (:vertex-3 tri))))
-              (= axis :z)  
-              (max 
+              (= axis :z)
+              (max
                 max-num
                 (max (last (:vertex-1 tri))
-                     (last (:vertex-2 tri)) 
+                     (last (:vertex-2 tri))
                      (last (:vertex-3 tri))))))
           (cond (= axis :x) (max x1 x2 x3)
                 (= axis :y) (max y1 y2 y3)
@@ -199,20 +199,29 @@
 (defn slice
   "slice every triangle of the model with every plane along the axis"
   [triangles planes axis]
+  {:pre [(map? (first triangles))
+         (map? (last triangles))
+         (vector? triangles)
+         (vector? planes)
+         (vector? (first planes))
+         (keyword? axis)
+         ]
+   :post [(seq? %)
+          (map? (first %))]}
   (for [triangle triangles
-        plane planes] 
-    (let [result (triangle-plane-inc (triangle-map2vector triangle) plane)] 
-      {:axis axis 
-       :cut-point (cond (= axis :x) (first (second plane)) 
-                        (= axis :y) (second (second plane)) 
-                        (= axis :z) (last (second plane))) 
+        plane planes]
+    (let [result (triangle-plane-inc (triangle-map2vector triangle) plane)]
+      {:axis axis
+       :cut-point (cond (= axis :x) (first (second plane))
+                        (= axis :y) (second (second plane))
+                        (= axis :z) (last (second plane)))
        :plane plane
-       :triangle triangle 
+       :triangle triangle
        :result result})))
 
 (defn rm-nil
   "remove nil results"
   [results]
-  (filter 
+  (filter
     (fn [result]
       ((complement nil?) (:result result))) results))
