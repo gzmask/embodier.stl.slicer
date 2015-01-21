@@ -204,24 +204,37 @@
          (vector? triangles)
          (vector? planes)
          (vector? (first planes))
-         (keyword? axis)
-         ]
+         (keyword? axis)]
    :post [(seq? %)
           (map? (first %))]}
   (for [triangle triangles
         plane planes]
     (let [result (triangle-plane-inc (triangle-map2vector triangle) plane)]
-      {:axis axis
+      {;:axis axis
        :cut-point (cond (= axis :x) (first (second plane))
                         (= axis :y) (second (second plane))
                         (= axis :z) (last (second plane)))
-       :plane plane
-       :triangle triangle
+       ;:plane plane
+       ;:triangle triangle
        :result result})))
 
 (defn rm-nil
   "remove nil results"
   [results]
+  {:pre [(seq? results)
+         (map? (first results))]
+   :post [(seq? %)
+          (map? (first %))]}
   (filter
     (fn [result]
       ((complement nil?) (:result result))) results))
+
+(defn tri-compressor
+  "transpose triangles to collections of triangles based on their cut-points"
+  [[{;axis :axis
+     cut-point :cut-point
+     ;plane :plane
+     ;triangle :triangle
+     result :result} & more :as results]]
+  (-> (group-by :cut-point (vec results)) sort)
+  )

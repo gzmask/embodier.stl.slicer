@@ -81,44 +81,44 @@
   (testing "finds the highest and lowest point in axis of a collection of triangles along provided axis"
     (is (= {:min -10.0 :max 10.0}
            (find-min-max :x
-             [{:vertex-3 [-10.0 10.0 0.0], 
-               :vertex-2 [-10.0 -10.0 0.0], 
-               :vertex-1 [10.0 10.0 0.0], 
-               :normal [0.0 0.0 -1.0], 
-               :_ ""} 
-              {:vertex-3 [10.0 -10.0 0.0], 
-               :vertex-2 [10.0 10.0 0.0], 
-               :vertex-1 [-10.0 -10.0 0.0], 
-               :normal [0.0 0.0 -1.0], 
+             [{:vertex-3 [-10.0 10.0 0.0],
+               :vertex-2 [-10.0 -10.0 0.0],
+               :vertex-1 [10.0 10.0 0.0],
+               :normal [0.0 0.0 -1.0],
+               :_ ""}
+              {:vertex-3 [10.0 -10.0 0.0],
+               :vertex-2 [10.0 10.0 0.0],
+               :vertex-1 [-10.0 -10.0 0.0],
+               :normal [0.0 0.0 -1.0],
                :_ ""}])))
     (is (= {:min -100.0 :max 100.0}
            (find-min-max :z
-             [{:vertex-3 [-10.0 10.0 0.0], 
-               :vertex-2 [-10.0 -10.0 0.0], 
-               :vertex-1 [10.0 10.0 0.0], 
-               :normal [0.0 0.0 -1.0], 
-               :_ ""} 
-              {:vertex-3 [-10.0 10.0 -100.0], 
-               :vertex-2 [-10.0 -10.0 0.0], 
-               :vertex-1 [10.0 10.0 0.0], 
-               :normal [0.0 0.0 -1.0], 
+             [{:vertex-3 [-10.0 10.0 0.0],
+               :vertex-2 [-10.0 -10.0 0.0],
+               :vertex-1 [10.0 10.0 0.0],
+               :normal [0.0 0.0 -1.0],
                :_ ""}
-              {:vertex-3 [10.0 -10.0 0.0], 
-               :vertex-2 [10.0 10.0 0.0], 
-               :vertex-1 [-10.0 -10.0 100.0], 
-               :normal [0.0 0.0 -1.0], 
+              {:vertex-3 [-10.0 10.0 -100.0],
+               :vertex-2 [-10.0 -10.0 0.0],
+               :vertex-1 [10.0 10.0 0.0],
+               :normal [0.0 0.0 -1.0],
+               :_ ""}
+              {:vertex-3 [10.0 -10.0 0.0],
+               :vertex-2 [10.0 10.0 0.0],
+               :vertex-1 [-10.0 -10.0 100.0],
+               :normal [0.0 0.0 -1.0],
                :_ ""}])))
     (is (= {:min -10.0 :max 10.0}
            (find-min-max :y
-             [{:vertex-3 [-10.0 10.0 0.0], 
-               :vertex-2 [-10.0 -10.0 0.0], 
-               :vertex-1 [10.0 10.0 0.0], 
-               :normal [0.0 0.0 -1.0], 
-               :_ ""} 
-              {:vertex-3 [10.0 -10.0 0.0], 
-               :vertex-2 [10.0 10.0 0.0], 
-               :vertex-1 [-10.0 -10.0 0.0], 
-               :normal [0.0 0.0 -1.0], 
+             [{:vertex-3 [-10.0 10.0 0.0],
+               :vertex-2 [-10.0 -10.0 0.0],
+               :vertex-1 [10.0 10.0 0.0],
+               :normal [0.0 0.0 -1.0],
+               :_ ""}
+              {:vertex-3 [10.0 -10.0 0.0],
+               :vertex-2 [10.0 10.0 0.0],
+               :vertex-1 [-10.0 -10.0 0.0],
+               :normal [0.0 0.0 -1.0],
                :_ ""}])))
     (is (= {:min -10.0, :max 10.0}
            (find-min-max :y (:triangles asc))))
@@ -141,11 +141,14 @@
 (deftest test-slice-function
   (testing "slices triangles with planes according to x/y/z axis"
     ;(clojure.pprint/pprint (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y))
-    (clojure.pprint/pprint 
-      (-> 
-        (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y) 
-        rm-nil))
-    (is (= (* 
-             (count (:triangles asc)) 
-             (count (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y))) 
-           (count (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y))))))
+    (clojure.pprint/pprint
+      (->
+        (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y)
+       rm-nil
+       tri-compressor
+       ))
+    (is (= (*
+             (count (:triangles asc))
+             (count (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y)))
+           (count (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y))))
+    ))
