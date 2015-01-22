@@ -230,11 +230,14 @@
       ((complement nil?) (:result result))) results))
 
 (defn tri-compressor
-  "transpose triangles to collections of triangles based on their cut-points"
+  "transpose results to collections of triangles based on their cut-points"
   [[{;axis :axis
      cut-point :cut-point
      ;plane :plane
      ;triangle :triangle
      result :result} & more :as results]]
-  (-> (group-by :cut-point (vec results)) sort)
-  )
+  (let [cuts (-> (group-by :cut-point (vec results)) sort)]
+    (for [cut cuts]
+      {:cut-point (first cut)
+       :result (for [line (second cut)]
+                 (:result line))})))
