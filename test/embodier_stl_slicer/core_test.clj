@@ -3,6 +3,7 @@
             [clojure.test :refer :all]
             [slicer.slice :refer :all]
             [slicer.file :refer :all]
+            [slicer.gcode :refer :all]
             [slicer.core :refer :all]))
 
 (deftest test-point-plane
@@ -143,12 +144,13 @@
     ;(clojure.pprint/pprint (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y))
     (clojure.pprint/pprint
       (->
-        (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y)
+        (slice (:triangles asc) (gen-planes (:min (find-min-max :z (:triangles asc))) (:max (find-min-max :z (:triangles asc))) 0.3 :z) :z)
        rm-nil
        tri-compressor
+       gcode
        ))
     (is (= (*
              (count (:triangles asc))
-             (count (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y)))
-           (count (slice (:triangles asc) (gen-planes (:min (find-min-max :y (:triangles asc))) (:max (find-min-max :y (:triangles asc))) 0.3 :y) :y))))
+             (count (gen-planes (:min (find-min-max :z (:triangles asc))) (:max (find-min-max :z (:triangles asc))) 0.3 :z)))
+           (count (slice (:triangles asc) (gen-planes (:min (find-min-max :z (:triangles asc))) (:max (find-min-max :z (:triangles asc))) 0.3 :z) :z))))
     ))
