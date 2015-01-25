@@ -9,12 +9,31 @@
   (apply str (doall
     (for [cut cuts]
       (let [z-str (str "G1 Z" (:cut-point cut) \newline)
-            xy-str (for [line (:result cut)]
-                     (if (vector? line)
-                       (str "G1 X" (first line) " Y" (second line) " E1" \newline)
+            xy-str (for [intersec (:result cut)]
+                     (cond 
+                       (and (= 3 (count intersec))
+                            (number? (first intersec))
+                            (number? (second intersec))
+                            (number? (last intersec))) ; a point
                        (str "G1 X" 
-                            (first (first line)) " Y" (second (first line)) " E1" \newline "G1 X" 
-                            (first (second line)) " Y" (second (second line)) " E1" \newline)))]
+                            (first intersec) " Y" (second intersec) " E1" \newline)
+                       (and (vector? (first intersec))
+                            (vector? (second intersec))
+                            (= 2 (count intersec))) ; a line
+                       (str "G1 X" 
+                            (first (first intersec)) " Y" (second (first intersec)) " E1" \newline "G1 X" 
+                            (first (second intersec)) " Y" (second (second intersec)) " E1" \newline)
+
+                       (and (= 3 (count intersec))
+                            (vector? (first intersec))
+                            (vector? (second intersec))
+                            (vector? (last intersec))) ;whole triangle
+                       (str "G1 X" 
+                            (first (first intersec)) " Y" (second (first intersec)) " E1" \newline "G1 X" 
+                            (first (second intersec)) " Y" (second (second intersec)) " E1" \newline "G1 X"
+                            (first (last intersec)) " Y" (second (last intersec)) " E1" \newline)
+                       :else ;no intersection
+                       ""))]
         (str z-str (apply str xy-str)))))))
 
 (defn write-gcode
