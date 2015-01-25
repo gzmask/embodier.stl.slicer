@@ -7,7 +7,9 @@
 ;; Lein marg will generate this html help doc in docs folder.
 (ns slicer.core
   (:require [clojure.tools.cli :refer [parse-opts]]
-            [slicer.file :as f])
+            [slicer.file :as f]
+            [slicer.slice :as s]
+            [slicer.gcode :as g])
   (:gen-class))
 
 ;; ##cli specs
@@ -41,4 +43,10 @@
       (exit 0 summary))
     (when (:stl opts)
       (println (prn-str (f/parse-stl (:stl opts)))))
+    (when (and (:gcode opts) (:stl opts))
+      (g/write-gcode (:gcode opts) 
+                     (-> (s/slice (:triangles (:stl opts)) (s/gen-planes (:min (s/find-min-max :z (:triangles (:stl opts)))) (:max (s/find-min-max :z (:triangles (:stl opts)))) 0.3 :z) :z) 
+                         s/rm-nil 
+                         s/tri-compressor 
+                         g/gcode)))
     ))
