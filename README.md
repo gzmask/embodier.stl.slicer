@@ -22,7 +22,11 @@ Lein test
 
 ## Usage
 
-embodier -s stl-file -g gcode-file
+* most of the time:
+./target/embodier -s stl-file -g gcode-file
+
+* if doesn't work, try:
+java -jar .\target\embodier.jar -h
 
 ## License
 

@@ -8,6 +8,7 @@
                  [gloss "0.2.3"]]
   :main slicer.core
   :aot :all
+  :uberjar-name "embodier.jar"
   :plugins [[lein-bin "0.3.4"]
             [lein-marginalia "0.8.0"]]
   :bin { :name "embodier" }
