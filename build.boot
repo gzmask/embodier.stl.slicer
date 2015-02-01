@@ -21,5 +21,6 @@
     (pom :project 'slicer 
          :version "0.1.0-SNAPSHOT") 
     (uber)
-    (jar :main 'slicer.core) 
+    (jar :main 'slicer.core
+         :file "embodier.jar") 
     ))
