@@ -10,7 +10,11 @@ Features:
 
 ## Compilation
 
+* using leiningen
 Lein bin
+
+* using boot
+boot build
 
 ## Documentation Generating
 

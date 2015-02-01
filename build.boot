@@ -4,13 +4,22 @@
                   [org.clojure/tools.cli "0.3.1"]
                   [gloss "0.2.3"]])
 
-(task-options!
-  pom {:project 'slicer
-       :version "0.1.0-SNAPSHOT"}
-  jar {:manifest {"Foo" "bar"}})
-
+;(task-options!
+;  pom {:project 'embodier
+;       :version "1.0.0"}
+;  jar {:main 'slicer.core}
+;  aot {:all true})
+;
+;(deftask build []
+;  (comp (aot) (pom) (uber) (jar)))
 
 (deftask build
-  "Build my project."
+  "Build embodier slicer."
   []
-  (comp (pom) (jar) (install)))
+  (comp 
+    (aot :all true)
+    (pom :project 'slicer 
+         :version "0.1.0-SNAPSHOT") 
+    (uber)
+    (jar :main 'slicer.core) 
+    ))
