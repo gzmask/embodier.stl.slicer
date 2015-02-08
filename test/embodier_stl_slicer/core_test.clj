@@ -157,8 +157,8 @@
 (deftest test-line-box-intersection
   (testing "segment of line and AABB box intersection"
     (is (line-box-inc [0.5 1] [0.5 -1] [0 0] [1 1]))
-    (is (not (line-box-inc [0 2] [0 -1] [0 0] [1 1])))
-    (is (not (line-box-inc [1 2] [1 -1] [0 0] [1 1])))
+    (is (line-box-inc [0 2] [0 -1] [0 0] [1 1]))
+    (is (line-box-inc [1 2] [1 -1] [0 0] [1 1]))
     (is (line-box-inc [0.0001 2] [0.0001 -1] [0 0] [1 1]))
     (is (line-box-inc [-1 1] [1 -1] [0 0] [1 1]))
     (is (line-box-inc [-1 1.1] [1 -1] [0 0] [1 1]))
