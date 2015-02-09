@@ -164,3 +164,12 @@
     (is (line-box-inc [-1 1.1] [1 -1] [0 0] [1 1]))
     (is (not (line-box-inc [-1 0.9] [1 -1.1] [0 0] [1 1])))
     ))
+
+(deftest test-tri-box-intersection
+  (testing "triangle and AABB box intersection"
+    (is (tri-box-inc [0 0] [10 0] [5 5] [4 1] [6 3]))
+    (is (not (tri-box-inc [0 0] [4 3] [4 4] [3 0] [5 2])))
+    (is (not (tri-box-inc [0 0] [8 6] [7 7] [3 0] [5 2])))
+    (is (tri-box-inc [0 0] [8 5] [7 7] [3 0] [5 2]))
+    (is (tri-box-inc [1 1] [3 1] [2 2] [0 0] [4 3]))
+    ))
