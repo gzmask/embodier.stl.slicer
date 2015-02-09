@@ -68,16 +68,16 @@
 
 (defn slice-box-inc
   "check if a slice is intersecting an AABB"
-  [[min-x min-y max-x max-y :as aabb-box] slice] 
+  [[min-x min-y max-x max-y :as aabb-box] a-slice]
   (or
-    (for [geo slice]
+    (for [geo a-slice]
       (match [geo]
-             [[[x1 y1 _ :as p1][x2 y2 _ :as p2][x3 y3 _ :as p3]]] 
-               (tri-box-inc p1 p2 p3 [min-x min-y] [max-x max-y])
-             [[[x1 y1 _ :as p1][x2 y2 _ :as p2]]] 
-               (line-box-inc p1 p2 [min-x min-y] [max-x max-y])
-             [[x1 y1 _ :as p1]] 
-               (point-box-inc p1 [min-x min-y] [max-x max-y])
+             [[[x1 y1 _][x2 y2 _][x3 y3 _]]]
+               (tri-box-inc [x1 y1] [x2 y2] [x3 y3] [min-x min-y] [max-x max-y])
+             [[[x1 y1 _][x2 y2 _]]]
+               (line-box-inc [x1 y1] [x2 y2] [min-x min-y] [max-x max-y])
+             [[x1 y1 _]]
+               (point-box-inc [x1 y1] [min-x min-y] [max-x max-y])
              :else false))))
 
 (defn aabb-tri
@@ -92,8 +92,8 @@
 
 (defn aabb-slice
   "get aabb box from a list of geometries"
-  [slice]
-  (loop [geos slice
+  [a-slice]
+  (loop [geos a-slice
          min-x 0
          min-y 0
          max-x 0
@@ -102,21 +102,57 @@
       [min-x min-y max-x max-y]
       (match [(first geos)]
              [[[x1 y1 _][x2 y2 _][x3 y3 _]]] ;triangle
-               (let [[mx my maxx mayy] (aabb-tri (first geos))] 
+               (let [[mx my maxx mayy] (aabb-tri (first geos))]
                  (recur (rest geos) (min min-x mx) (min min-y my) (max max-x maxx) (max max-y mayy)))
              [[[x1 y1 _][x2 y2 _]]] ;line
-               (let [[mx my maxx mayy] (aabb-line (first geos))] 
+               (let [[mx my maxx mayy] (aabb-line (first geos))]
                  (recur (rest geos) (min min-x mx) (min min-y my) (max max-x maxx) (max max-y mayy)))
              [[x1 y1 _]] ;point
                (recur (rest geos) (min min-x x1) (min min-y y1) (max max-x x1) (max max-y y1))
-             :else 
+             :else
                [min-x min-y max-x max-y]))))
+
+(defn smaller-than-nozzle?
+  "is the current aabb is smaller than the nozzle"
+  [[min-x min-y max-x max-y :as aabb] nozzle-diameter]
+  (cond
+   (<= (- max-x min-x) nozzle-diameter) true
+   (<= (- max-y min-y) nozzle-diameter) true
+   :else false
+   )
+  )
+
+(defn advance-tree
+  "increase the tree by one level down"
+  [tree]
+
+)
+
+(defn make-square
+  "make an aabb BOX square / width = height"
+  [[min-x min-y max-x max-y :as aabb]]
+  (let [delta-x (- max-x min-x)
+        delta-y (- max-y min-y)]
+    (if (> delta-x delta-y)
+      [min-x max-x min-y (+ delta-x min-y)]
+      [min-x (+ delta-y min-x) min-y max-y])))
 
 (defn make-tree
   "tree construction from a layer of slice"
-  [slice]
-  {:pre [(seq? slice)]
-   }
-  (let [aabb (aabb-slice slice)]
+  [a-slice nozzle-diameter]
+  {:pre [(seq? a-slice)
+         (number? nozzle-diameter)]}
+  (let []
+    (loop [tree [:node
+                 [:floodingleaf] [:floodingleaf] [:floodingleaf] [:floodingleaf]
+                 (aabb-slice a-slice)
+                 (-> (slice-box-inc aabb a-slice)
+                     make-square
+                     )]]
+      (if (smaller-than-nozzle? aabb nozzle-diameter)
+        tree
+        (recur (advance-tree tree))
+       )
+      )
     )
   )
