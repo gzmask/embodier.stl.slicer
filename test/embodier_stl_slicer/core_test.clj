@@ -173,3 +173,10 @@
     (is (tri-box-inc [0 0] [8 5] [7 7] [3 0] [5 2]))
     (is (tri-box-inc [1 1] [3 1] [2 2] [0 0] [4 3]))
     ))
+
+(deftest test-point-box-intersection
+  (testing "point box intersect"
+    (is (point-box-inc [1 1] [0 0] [2 2]))
+    (is (point-box-inc [2 2] [0 0] [2 2]))
+    (is (not (point-box-inc [-1 1] [0 0] [2 2])))
+    ))
