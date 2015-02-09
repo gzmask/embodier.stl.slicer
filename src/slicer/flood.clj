@@ -1,5 +1,6 @@
 ;after sliced the model, we need to check for watertight and discretized the slice shape
-(ns slicer.flood)
+(ns slicer.flood
+  (:require [clojure.core.match :refer [match]]))
 
 
 (defn line-box-inc
@@ -64,3 +65,58 @@
    [min-x min-y :as box-min]
    [max-x max-y :as box-max]]
   (and (>= x1 min-x) (<= x1 max-x) (>= y1 min-y) (<= y1 max-y)))
+
+(defn slice-box-inc
+  "check if a slice is intersecting an AABB"
+  [[min-x min-y max-x max-y :as aabb-box] slice] 
+  (or
+    (for [geo slice]
+      (match [geo]
+             [[[x1 y1 _ :as p1][x2 y2 _ :as p2][x3 y3 _ :as p3]]] 
+               (tri-box-inc p1 p2 p3 [min-x min-y] [max-x max-y])
+             [[[x1 y1 _ :as p1][x2 y2 _ :as p2]]] 
+               (line-box-inc p1 p2 [min-x min-y] [max-x max-y])
+             [[x1 y1 _ :as p1]] 
+               (point-box-inc p1 [min-x min-y] [max-x max-y])
+             :else false))))
+
+(defn aabb-tri
+  "get aabb from triangle"
+  [[[x1 y1 _] [x2 y2 _] [x3 y3 _] :as tri]]
+  [(min x1 x2 x3) (min y1 y2 y3) (max x1 x2 x3) (max y1 y2 y3)])
+
+(defn aabb-line
+  "get aabb from line"
+  [[[x1 y1 _] [x2 y2 _] :as line]]
+  [(min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)])
+
+(defn aabb-slice
+  "get aabb box from a list of geometries"
+  [slice]
+  (loop [geos slice
+         min-x 0
+         min-y 0
+         max-x 0
+         max-y 0]
+    (if (<= (count geos) 0)
+      [min-x min-y max-x max-y]
+      (match [(first geos)]
+             [[[x1 y1 _][x2 y2 _][x3 y3 _]]] ;triangle
+               (let [[mx my maxx mayy] (aabb-tri (first geos))] 
+                 (recur (rest geos) (min min-x mx) (min min-y my) (max max-x maxx) (max max-y mayy)))
+             [[[x1 y1 _][x2 y2 _]]] ;line
+               (let [[mx my maxx mayy] (aabb-line (first geos))] 
+                 (recur (rest geos) (min min-x mx) (min min-y my) (max max-x maxx) (max max-y mayy)))
+             [[x1 y1 _]] ;point
+               (recur (rest geos) (min min-x x1) (min min-y y1) (max max-x x1) (max max-y y1))
+             :else 
+               [min-x min-y max-x max-y]))))
+
+(defn make-tree
+  "tree construction from a layer of slice"
+  [slice]
+  {:pre [(seq? slice)]
+   }
+  (let [aabb (aabb-slice slice)]
+    )
+  )

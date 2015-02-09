@@ -5,6 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/tools.cli "0.3.1"]
+                 [org.clojure/core.match "0.3.0-alpha4"]
                  [gloss "0.2.3"]]
   :main slicer.core
   :aot :all

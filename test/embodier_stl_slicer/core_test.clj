@@ -139,12 +139,12 @@
 ;(clojure.pprint/pprint  (count (gen-planes 0.0 3.0 0.3 :y)))
 ;(print "lines")
 ;(clojure.pprint/pprint  (count (slice (:triangles asc) (gen-planes 0.0 3.0 0.3 :y) :y)))
-;(clojure.pprint/pprint
-;      (->
-;        (slice (:triangles asc) (gen-planes (:min (find-min-max :z (:triangles asc))) (:max (find-min-max :z (:triangles asc))) 0.3 :z) :z)
-;       rm-nil
-;       tri-compressor
-;       ))
+
+(def slicings
+  (-> (slice (:triangles asc) (gen-planes (:min (find-min-max :z (:triangles asc))) (:max (find-min-max :z (:triangles asc))) 0.3 :z) :z)
+      rm-nil
+      tri-compressor))
+(clojure.pprint/pprint slicings)
 
 (deftest test-slice-function
   (testing "slices triangles with planes according to x/y/z axis"
@@ -179,4 +179,10 @@
     (is (point-box-inc [1 1] [0 0] [2 2]))
     (is (point-box-inc [2 2] [0 0] [2 2]))
     (is (not (point-box-inc [-1 1] [0 0] [2 2])))
+    ))
+
+(deftest test-aabb-slice
+  (testing "the aabb of a slice"
+    (is (= (aabb-slice (:result (first slicings))) [-10.0 -10.0 10.0 10.0]))
+    (is (= (aabb-slice (:result (second slicings))) [-10.0 -10.0 10.0 10.0]))
     ))

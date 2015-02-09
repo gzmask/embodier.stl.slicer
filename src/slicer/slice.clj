@@ -92,21 +92,21 @@
       (= 3 (count (filter zero? ds)))
       triangle
       (= 2 (count (filter zero? ds)))
-      (filter #(zero? (point-plane % plane)) triangle)
+      (vec (filter #(zero? (point-plane % plane)) triangle))
       (= 1 (count (filter zero? ds)))
       (if (neg? (apply * (filter (complement zero?) ds)))
         [(first (filter #(zero? (point-plane % plane)) triangle))
          (plane-line-inc
            (vec (filter #(not (zero? (point-plane % plane))) triangle))
            plane)]
-        (first (filter #(zero? (point-plane % plane)) triangle)))
+        (vec (first (filter #(zero? (point-plane % plane)) triangle))))
       :else
       (if (or (empty? (filter neg? ds)) (empty? (filter pos? ds)))
         nil
-        (filter (complement nil?)
+        (vec (filter (complement nil?)
                 [(plane-line-inc [p1 p2] plane)
                  (plane-line-inc [p2 p3] plane)
-                 (plane-line-inc [p3 p1] plane)])
+                 (plane-line-inc [p3 p1] plane)]))
         ))))
 
 (defn slicing-plane
