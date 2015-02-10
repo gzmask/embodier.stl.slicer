@@ -149,7 +149,12 @@
     (cond (and toosmall? intersects?) [:leaf aabb-node intersects?]
           (and toosmall? (not intersects?)) [:emptyleaf aabb-node intersects?]
           (and (not toosmall?) (not intersects?)) [:emptyleaf aabb-node intersects?]
-          (and (not toosmall?) intersects?) #(make-node [:floodingleafA] aabb-node a-slice nozzle-diameter)
+          (and (not toosmall?) intersects?) #(make-node [(case pos
+                                                           :upper-left :floodingleafA
+                                                           :upper-right :floodingleafB
+                                                           :lower-left :floodingleafC
+                                                           :lower-right :floodingleafD)]
+                                                        aabb-node a-slice nozzle-diameter)
           :else [:error aabb-node]
           )))
 
@@ -172,7 +177,7 @@
            [:node
             (m-leaf :lower-left)
             aabb (slice-box-inc aabb a-slice)]
-           [:floodingleafC]
+           [:floodingleafD]
            [:node
             (m-leaf :lower-right)
             aabb (slice-box-inc aabb a-slice)])
@@ -192,6 +197,4 @@
               (make-node [:floodingleafD] aabb a-slice nozzle-diameter)
               aabb
               (slice-box-inc aabb a-slice)]]
-
-       )
-      )
+    tree))
