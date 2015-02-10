@@ -122,12 +122,6 @@
    )
   )
 
-(defn advance-tree
-  "increase the tree by one level down"
-  [tree]
-
-)
-
 (defn make-square
   "make an aabb BOX square / width = height"
   [[min-x min-y max-x max-y :as aabb]]
@@ -137,22 +131,53 @@
       [min-x max-x min-y (+ delta-x min-y)]
       [min-x (+ delta-y min-x) min-y max-y])))
 
+(defn split-aabb
+  ([aabb pos]
+  {:pre [(keyword? pos)]}
+   )
+  ([aabb]
+   )
+)
+
+(defn make-leaf
+  [aabb a-slice pos nozzle-diameter]
+  (let [aabb-node (split-aabb aabb pos)
+        toosmall? (smaller-than-nozzle? aabb-node nozzle-diameter)
+        intersects? (slice-box-inc aabb-node a-slice)]
+    (cond (and toosmall? intersects?) [:leaf aabb-node intersects?]
+          (and toosmall? (not intersects?)) [:emptyleaf aabb-node intersects?]
+          (and (not toosmall?) (not intersects?)) [:emptyleaf aabb-node intersects?]
+          (and (not toosmall?) intersects?) (make-node [:floodingleafA] aabb-node a-slice nozzle-diameter)
+          :else [:error aabb-node]
+          )))
+
+(defn make-node
+  [tree aabb a-slice nozzle-diameter]
+  (match [(first tree)]
+         [:floodingleafA]
+         [:node
+          (make-leaf (split-aabb aabb :upper-left) a-slice :upper-left nozzle-diameter)
+          (make-leaf (split-aabb aabb :upper-left) a-slice :upper-right nozzle-diameter)
+          (make-leaf (split-aabb aabb :upper-left) a-slice :lower-left nozzle-diameter)
+          (make-leaf (split-aabb aabb :upper-left) a-slice :lower-right nozzle-diameter)
+          aabb (slice-box-inc aabb a-slice)]
+         )
+  )
+
 (defn make-tree
   "tree construction from a layer of slice"
   [a-slice nozzle-diameter]
   {:pre [(seq? a-slice)
          (number? nozzle-diameter)]}
-  (let []
-    (loop [tree [:node
-                 [:floodingleaf] [:floodingleaf] [:floodingleaf] [:floodingleaf]
-                 (aabb-slice a-slice)
-                 (-> (slice-box-inc aabb a-slice)
-                     make-square
-                     )]]
-      (if (smaller-than-nozzle? aabb nozzle-diameter)
-        tree
-        (recur (advance-tree tree))
+  (let [aabb (-> (aabb-slice a-slice)
+                 make-square)
+        tree [:node
+              (make-node [:floodingleafA] aabb a-slice nozzle-diameter)
+              (make-node [:floodingleafB] aabb a-slice nozzle-diameter)
+              (make-node [:floodingleafC] aabb a-slice nozzle-diameter)
+              (make-node [:floodingleafD] aabb a-slice nozzle-diameter)
+              aabb
+              (slice-box-inc aabb a-slice)]]
+
        )
       )
-    )
-  )
