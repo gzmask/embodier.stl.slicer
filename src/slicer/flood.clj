@@ -139,6 +139,8 @@
    )
 )
 
+(declare make-node)
+
 (defn make-leaf
   [aabb a-slice pos nozzle-diameter]
   (let [aabb-node (split-aabb aabb pos)
@@ -147,22 +149,34 @@
     (cond (and toosmall? intersects?) [:leaf aabb-node intersects?]
           (and toosmall? (not intersects?)) [:emptyleaf aabb-node intersects?]
           (and (not toosmall?) (not intersects?)) [:emptyleaf aabb-node intersects?]
-          (and (not toosmall?) intersects?) (make-node [:floodingleafA] aabb-node a-slice nozzle-diameter)
+          (and (not toosmall?) intersects?) #(make-node [:floodingleafA] aabb-node a-slice nozzle-diameter)
           :else [:error aabb-node]
           )))
 
 (defn make-node
   [tree aabb a-slice nozzle-diameter]
-  (match [(first tree)]
-         [:floodingleafA]
-         [:node
-          (make-leaf (split-aabb aabb :upper-left) a-slice :upper-left nozzle-diameter)
-          (make-leaf (split-aabb aabb :upper-left) a-slice :upper-right nozzle-diameter)
-          (make-leaf (split-aabb aabb :upper-left) a-slice :lower-left nozzle-diameter)
-          (make-leaf (split-aabb aabb :upper-left) a-slice :lower-right nozzle-diameter)
-          aabb (slice-box-inc aabb a-slice)]
-         )
-  )
+  (let [m-leaf #([(trampoline (make-leaf (split-aabb aabb %) a-slice :upper-left nozzle-diameter))
+                  (trampoline (make-leaf (split-aabb aabb %) a-slice :upper-right nozzle-diameter))
+                  (trampoline (make-leaf (split-aabb aabb %) a-slice :lower-left nozzle-diameter))
+                  (trampoline (make-leaf (split-aabb aabb %) a-slice :lower-right nozzle-diameter))])]
+    (match [(first tree)]
+           [:floodingleafA]
+           [:node
+            (m-leaf :upper-left)
+            aabb (slice-box-inc aabb a-slice)]
+           [:floodingleafB]
+           [:node
+            (m-leaf :upper-right)
+            aabb (slice-box-inc aabb a-slice)]
+           [:floodingleafC]
+           [:node
+            (m-leaf :lower-left)
+            aabb (slice-box-inc aabb a-slice)]
+           [:floodingleafC]
+           [:node
+            (m-leaf :lower-right)
+            aabb (slice-box-inc aabb a-slice)])
+  ))
 
 (defn make-tree
   "tree construction from a layer of slice"

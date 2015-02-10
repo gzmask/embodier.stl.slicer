@@ -187,3 +187,5 @@
     (is (= (aabb-slice (:result (first slicings))) [-10.0 -10.0 10.0 10.0]))
     (is (= (aabb-slice (:result (second slicings))) [-10.0 -10.0 10.0 10.0]))
     ))
+
+;(run-all-tests)
