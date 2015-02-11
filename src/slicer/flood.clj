@@ -69,7 +69,7 @@
 (defn slice-box-inc
   "check if a slice is intersecting an AABB"
   [[min-x min-y max-x max-y :as aabb-box] a-slice]
-  (or
+  (reduce #(or %1 %2) false
     (for [geo a-slice]
       (match [geo]
              [[[x1 y1 _][x2 y2 _][x3 y3 _]]]
@@ -156,21 +156,22 @@
   (let [aabb-node (split-aabb aabb pos)
         toosmall? (smaller-than-nozzle? aabb-node nozzle-diameter)
         intersects? (slice-box-inc aabb-node a-slice)]
-    (cond (and toosmall? intersects?) [:leaf aabb-node intersects?]
-          (and toosmall? (not intersects?)) [:emptyleaf aabb-node intersects?]
-          (and (not toosmall?) (not intersects?)) [:emptyleaf aabb-node intersects?]
+    (cond (and toosmall? intersects?) #(identity [:leaf aabb-node intersects?])
+          (and toosmall? (not intersects?)) #(identity [:emptyleaf aabb-node intersects?])
+          (and (not toosmall?) (not intersects?)) #(identity [:emptyleaf aabb-node intersects?])
           (and (not toosmall?) intersects?) #(make-node [(case pos
                                                            :upper-left :floodingleafA
                                                            :upper-right :floodingleafB
                                                            :lower-left :floodingleafC
                                                            :lower-right :floodingleafD)]
                                                         aabb-node a-slice nozzle-diameter)
-          :else [:error aabb-node]
+          :else #([:error aabb-node])
           )))
 
 (defn make-node
   [tree aabb a-slice nozzle-diameter]
-  (let [m-leaf #([(trampoline (make-leaf (split-aabb aabb %) a-slice :upper-left nozzle-diameter))
+  (let [m-leaf #(identity
+                 [(trampoline (make-leaf (split-aabb aabb %) a-slice :upper-left nozzle-diameter))
                   (trampoline (make-leaf (split-aabb aabb %) a-slice :upper-right nozzle-diameter))
                   (trampoline (make-leaf (split-aabb aabb %) a-slice :lower-left nozzle-diameter))
                   (trampoline (make-leaf (split-aabb aabb %) a-slice :lower-right nozzle-diameter))])]

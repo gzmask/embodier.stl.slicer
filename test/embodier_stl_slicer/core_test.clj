@@ -188,4 +188,9 @@
     (is (= (aabb-slice (:result (second slicings))) [-10.0 -10.0 10.0 10.0]))
     ))
 
+(deftest test-make-tree
+  (testing "making the tree from a slice, given nozzle diameter"
+    (clojure.pprint/pprint (make-tree (:result (first slicings)) 0.3))
+    ))
+
 ;(run-all-tests)
