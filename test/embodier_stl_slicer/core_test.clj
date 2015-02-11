@@ -173,6 +173,7 @@
     (is (not (tri-box-inc [0 0] [8 6] [7 7] [3 0] [5 2])))
     (is (tri-box-inc [0 0] [8 5] [7 7] [3 0] [5 2]))
     (is (tri-box-inc [1 1] [3 1] [2 2] [0 0] [4 3]))
+    (is (tri-box-inc [10 10] [-10 -10] [-10 10] [-9 8] [-8 9]))
     ))
 
 (deftest test-point-box-intersection
@@ -188,9 +189,22 @@
     (is (= (aabb-slice (:result (second slicings))) [-10.0 -10.0 10.0 10.0]))
     ))
 
+(deftest test-slice-box-intersection
+  (testing "slice and box intersection test"
+    (is (slice-box-inc [-10.0 -10.0 10.0 10.0] (:result (first slicings))))
+    (is (slice-box-inc [-9.0 -9.0 -8.0 -8.0] (:result (first slicings))))
+    (is (slice-box-inc [-9.0 8.0 -8.0 9.0] (:result (first slicings))))
+    (is (not (slice-box-inc [-9.0 8.0 -8.0 9.0] (:result (second slicings)))))
+    )
+  )
+
 (deftest test-make-tree
   (testing "making the tree from a slice, given nozzle diameter"
-    (clojure.pprint/pprint (make-tree (:result (first slicings)) 0.3))
+    (is (= (make-square [-10 -10 10 15]) [-10 -10 15 15]))
+    (is (= (make-square [-5 -5 10 5]) [-5 -5 10 10]))
+    (is (= (split-aabb [0 0 10 10]) [[0 5 5 10] [5 5 10 10] [0 0 5 5] [5 0 10 5]]))
+    (is (= (split-aabb [0 0 10 10] :upper-left) [0 5 5 10]))
+    (clojure.pprint/pprint (make-tree (:result (second slicings)) 0.3))
     ))
 
 ;(run-all-tests)

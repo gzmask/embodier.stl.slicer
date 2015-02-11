@@ -66,17 +66,25 @@
    [max-x max-y :as box-max]]
   (and (>= x1 min-x) (<= x1 max-x) (>= y1 min-y) (<= y1 max-y)))
 
+(defmacro debugger [expr & [msg]]
+  `(do
+     (when ~msg (println ~msg))
+     (println ~expr)
+     ~expr
+     )
+  )
+
 (defn slice-box-inc
   "check if a slice is intersecting an AABB"
   [[min-x min-y max-x max-y :as aabb-box] a-slice]
   (reduce #(or %1 %2) false
     (for [geo a-slice]
       (match [geo]
-             [[[x1 y1 _][x2 y2 _][x3 y3 _]]]
+             [[[x1 y1 z1][x2 y2 z2][x3 y3 z3]]]
                (tri-box-inc [x1 y1] [x2 y2] [x3 y3] [min-x min-y] [max-x max-y])
-             [[[x1 y1 _][x2 y2 _]]]
+             [[[x1 y1 z1][x2 y2 z2]]]
                (line-box-inc [x1 y1] [x2 y2] [min-x min-y] [max-x max-y])
-             [[x1 y1 _]]
+             [[x1 y1 z1]]
                (point-box-inc [x1 y1] [min-x min-y] [max-x max-y])
              :else false))))
 
@@ -125,11 +133,11 @@
 (defn make-square
   "make an aabb BOX square / width = height"
   [[min-x min-y max-x max-y :as aabb]]
-  (let [delta-x (- max-x min-x)
-        delta-y (- max-y min-y)]
+  (let [delta-x (Math/abs (- max-x min-x))
+        delta-y (Math/abs (- max-y min-y))]
     (if (> delta-x delta-y)
-      [min-x max-x min-y (+ delta-x min-y)]
-      [min-x (+ delta-y min-x) min-y max-y])))
+      [min-x min-y max-x (+ delta-x min-y)]
+      [min-x min-y (+ delta-y min-x) max-y])))
 
 (defn split-aabb
   ([aabb pos]
@@ -142,8 +150,8 @@
        :lower-right (nth aabbs 3)
        :else nil)))
   ([[min-x min-y max-x max-y :as aabb]]
-   (let [delta-x (/ (- max-x min-x) 2)
-         delta-y (/ (- max-y min-y) 2)]
+   (let [delta-x (/ (Math/abs (- max-x min-x)) 2)
+         delta-y (/ (Math/abs (- max-y min-y)) 2)]
      [[min-x (+ min-y delta-y) (- max-x delta-x) max-y]
       [(+ min-x delta-x) (+ min-y delta-y) max-x  max-y]
       [min-x min-y (- max-x delta-x) (- max-y delta-y)]
@@ -201,11 +209,12 @@
          (number? nozzle-diameter)]}
   (let [aabb (-> (aabb-slice a-slice)
                  make-square)
+        aabbs (split-aabb aabb)
         tree [:node
-              (make-node [:floodingleafA] aabb a-slice nozzle-diameter)
-              (make-node [:floodingleafB] aabb a-slice nozzle-diameter)
-              (make-node [:floodingleafC] aabb a-slice nozzle-diameter)
-              (make-node [:floodingleafD] aabb a-slice nozzle-diameter)
+              (make-node [:floodingleafA] (first aabbs) a-slice nozzle-diameter)
+              (make-node [:floodingleafB] (second aabbs) a-slice nozzle-diameter)
+              (make-node [:floodingleafC] (nth aabbs 2) a-slice nozzle-diameter)
+              (make-node [:floodingleafD] (nth aabbs 3) a-slice nozzle-diameter)
               aabb
               (slice-box-inc aabb a-slice)]]
     tree))
