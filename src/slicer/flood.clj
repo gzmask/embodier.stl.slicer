@@ -134,10 +134,20 @@
 (defn split-aabb
   ([aabb pos]
   {:pre [(keyword? pos)]}
-   )
-  ([aabb]
-   )
-)
+   (let [aabbs (split-aabb aabb)]
+     (case pos
+       :upper-left (first aabbs)
+       :upper-right (second aabbs)
+       :lower-left (nth aabbs 2)
+       :lower-right (nth aabbs 3)
+       :else nil)))
+  ([[min-x min-y max-x max-y :as aabb]]
+   (let [delta-x (/ (- max-x min-x) 2)
+         delta-y (/ (- max-y min-y) 2)]
+     [[min-x (+ min-y delta-y) (- max-x delta-x) max-y]
+      [(+ min-x delta-x) (+ min-y delta-y) max-x  max-y]
+      [min-x min-y (- max-x delta-x) (- max-y delta-y)]
+      [(+ min-x delta-x) min-y max-x (- max-y delta-y)]])))
 
 (declare make-node)
 
