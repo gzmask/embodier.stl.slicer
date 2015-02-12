@@ -164,42 +164,36 @@
   (let [aabb-node (split-aabb aabb pos)
         toosmall? (smaller-than-nozzle? aabb-node nozzle-diameter)
         intersects? (slice-box-inc aabb-node a-slice)]
-    (cond (and toosmall? intersects?) #(identity [:leaf aabb-node intersects?])
-          (and toosmall? (not intersects?)) #(identity [:emptyleaf aabb-node intersects?])
-          (and (not toosmall?) (not intersects?)) #(identity [:emptyleaf aabb-node intersects?])
-          (and (not toosmall?) intersects?) #(make-node [(case pos
-                                                           :upper-left :floodingleafA
-                                                           :upper-right :floodingleafB
-                                                           :lower-left :floodingleafC
-                                                           :lower-right :floodingleafD)]
-                                                        aabb-node a-slice nozzle-diameter)
-          :else #([:error aabb-node])
+    (cond (and toosmall? intersects?) [:leaf aabb-node intersects?]
+          (and toosmall? (not intersects?)) [:emptyleaf aabb-node intersects?]
+          (and (not toosmall?) (not intersects?)) [:emptyleaf aabb-node intersects?]
+          (and (not toosmall?) intersects?) (make-node [(case pos
+                                                          :upper-left :floodingleafA
+                                                          :upper-right :floodingleafB
+                                                          :lower-left :floodingleafC
+                                                          :lower-right :floodingleafD)]
+                                                       aabb-node a-slice nozzle-diameter)
+          :else [:error aabb-node]
           )))
 
+;;this is a non-tail call recusive function. Need core.async optimization later
 (defn make-node
   [tree aabb a-slice nozzle-diameter]
   (let [m-leaf #(identity
-                 [(trampoline (make-leaf (split-aabb aabb %) a-slice :upper-left nozzle-diameter))
-                  (trampoline (make-leaf (split-aabb aabb %) a-slice :upper-right nozzle-diameter))
-                  (trampoline (make-leaf (split-aabb aabb %) a-slice :lower-left nozzle-diameter))
-                  (trampoline (make-leaf (split-aabb aabb %) a-slice :lower-right nozzle-diameter))])]
+                 [:node [(make-leaf (split-aabb aabb %) a-slice :upper-left nozzle-diameter)
+                         (make-leaf (split-aabb aabb %) a-slice :upper-right nozzle-diameter)
+                         (make-leaf (split-aabb aabb %) a-slice :lower-left nozzle-diameter)
+                         (make-leaf (split-aabb aabb %) a-slice :lower-right nozzle-diameter)]
+                  aabb (slice-box-inc aabb a-slice)])]
     (match [(first tree)]
            [:floodingleafA]
-           [:node
             (m-leaf :upper-left)
-            aabb (slice-box-inc aabb a-slice)]
            [:floodingleafB]
-           [:node
             (m-leaf :upper-right)
-            aabb (slice-box-inc aabb a-slice)]
            [:floodingleafC]
-           [:node
             (m-leaf :lower-left)
-            aabb (slice-box-inc aabb a-slice)]
            [:floodingleafD]
-           [:node
-            (m-leaf :lower-right)
-            aabb (slice-box-inc aabb a-slice)])
+            (m-leaf :lower-right))
   ))
 
 (defn make-tree
