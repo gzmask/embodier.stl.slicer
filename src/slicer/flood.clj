@@ -177,6 +177,9 @@
           )))
 
 ;;this is a non-tail call recusive function. Need core.async optimization later
+;;a better way is to use a set of BFS nodes of the whole tree down to the smallest node
+;;then use pmap to check AABB collision and assigned the true/false value
+;;way easier and fasters, no conrecursion too.
 (defn make-node
   [tree aabb a-slice nozzle-diameter]
   (let [m-leaf #(identity
