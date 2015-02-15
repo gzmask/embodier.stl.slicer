@@ -215,3 +215,32 @@
               aabb
               (slice-box-inc aabb a-slice)]]
     tree))
+
+(defn tree-height
+  "the least tree height require for containing certain number of leaf nodes"
+  [leaf-num base]
+  (loop [power 0]
+    (if (>= (Math/pow base power) leaf-num)
+      (inc power)
+      (recur (inc power)))))
+
+(defn tree-nodes-count
+  "the totoal number of nodes from height for N-based tree"
+  [height base]
+  (/ (dec (Math/pow base height)) (dec base)))
+
+(defn generate-BFS
+  "generate an empty tree down to the lowest level in BFS order"
+  [a-slice nozzle-diameter]
+  (let [[min-x min-y max-x max-y:as aabb]  (-> (aabb-slice a-slice)
+                                               make-square)
+        diff-x (- max-x min-x)
+        leaf-num (let [round-up (/ diff-x nozzle-diameter)]
+                   (if (> round-up (int round-up))
+                     (inc (int round-up))
+                     (int round-up)))
+        tree-height (tree-height leaf-num 4)
+        node-count (tree-nodes-count tree-height 4)]
+    (vec (repeat node-count false))
+    )
+  )

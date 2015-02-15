@@ -207,4 +207,12 @@
     (clojure.pprint/pprint (make-tree (:result (second slicings)) 0.3))
     ))
 
+(deftest test-tree-init
+  (testing "testing initializing the tree based on the size of the aabb from a slice"
+    (is (= (tree-height 2 4) 2))
+    (is (= (tree-height 1000 4) 6))
+    (is (= (tree-nodes-count 2 4) 5.0))
+    )
+  )
+
 ;(run-all-tests)
