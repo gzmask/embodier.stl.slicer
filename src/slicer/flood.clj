@@ -2,6 +2,7 @@
 (ns slicer.flood
   (:require [clojure.core.match :refer [match]]))
 
+(def tree-arity 4)
 
 (defn line-box-inc
   "check if a line start and end by two points is intersected with an AABB box. Imprative since performance is important"
@@ -234,7 +235,7 @@
   (/ (dec (Math/pow base height)) (dec base)))
 
 (defn index-to-hrp
-  "given tree arity base and the index to one of its node, return height and level position across the same level"
+  "given tree arity base and the index to one of its node, return height and level position across the same level. OLogN time."
   [ind base]
   {:pre [(pos? base) (not (neg? ind))]
    }
@@ -261,12 +262,12 @@
 ;(index-to-hrp 4 4)
 
 (defn aabb-walk
-  "given base, height and row-index, returns a walk from the root to the node"
+  "given base, height and row-index, returns a walk from the root to the node. OLogN time."
   [b h r]
   {:pre [(< r (Math/pow b h))]}
   (let [div #(quot % b)
         divs #(iterate div %)
-        pos #(mod % 4)
+        pos #(mod % tree-arity)
         aabb-walk (map #(identity {:position
                                    (case (mod %1 4) 0 :upper-left 1 :upper-right 2 :lower-left 3 :lower-right)
                                    :height %2})
@@ -282,7 +283,7 @@
 ;(mod 15 4)
 
 (defn hr-to-aabb
-  "given aabb, base, height and row index, return AABB box"
+  "given aabb, base, height and row index, return AABB box in OLogN time."
   [aabb b h r]
   (if (= 1 h)
     aabb
@@ -308,14 +309,16 @@
 ;(iterate #(quot % 4) 3)
 
 (defn index-to-aabb
-  "given aabb, base and index, returns aabb"
+  "given aabb, base and index, returns aabb. OLogN time."
   [aabb b i]
   (let [hrp (index-to-hrp i b)]
     (hr-to-aabb aabb b (:height hrp) (:row-index hrp))))
 
 (defn generate-BFS
-  "generate an empty tree down to the lowest level in BFS order"
+  "generate an empty tree down to the lowest level in BFS order. O(NLogN) time"
   [a-slice nozzle-diameter]
+  {:pre [(seq? a-slice)
+         (number? nozzle-diameter)]}
   (let [[min-x min-y max-x max-y :as aabb]  (-> (aabb-slice a-slice)
                                                make-square)
         diff-x (- max-x min-x)
@@ -323,12 +326,8 @@
                    (if (> round-up (int round-up))
                      (inc (int round-up))
                      (int round-up)))
-        tree-height (tree-height leaf-num 4)
-        node-count (tree-nodes-count tree-height 4)]
+        tree-height (tree-height leaf-num tree-arity)
+        node-count (tree-nodes-count tree-height tree-arity)]
     (for [ind (range node-count)]
-      (let [node-aabb (index-to-aabb aabb 4 ind)]
-        (slice-box-inc node-aabb a-slice)
-       )
-     )
-    )
-  )
+      (let [node-aabb (index-to-aabb aabb tree-arity ind)]
+        (slice-box-inc node-aabb a-slice)))))
