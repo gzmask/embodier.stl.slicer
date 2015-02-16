@@ -140,6 +140,7 @@
       [min-x min-y (+ delta-y min-x) max-y])))
 
 (defn split-aabb
+  "split aabb box to four smaller boxes"
   ([aabb pos]
   {:pre [(keyword? pos)]}
    (let [aabbs (split-aabb aabb)]
@@ -157,6 +158,8 @@
       [min-x min-y (- max-x delta-x) (- max-y delta-y)]
       [(+ min-x delta-x) min-y max-x (- max-y delta-y)]])))
 
+;;follwing three functions are deprecated due to potential StackOverflowErrors. commented out as referencing matters.
+(comment
 (declare make-node)
 
 (defn make-leaf
@@ -215,6 +218,7 @@
               aabb
               (slice-box-inc aabb a-slice)]]
     tree))
+)
 
 (defn tree-height
   "the least tree height require for containing certain number of leaf nodes"
@@ -225,9 +229,75 @@
       (recur (inc power)))))
 
 (defn tree-nodes-count
-  "the totoal number of nodes from height for N-based tree"
+  "the totoal number of nodes from height for K-arity based tree"
   [height base]
   (/ (dec (Math/pow base height)) (dec base)))
+
+(defn index-to-hrp
+  "given tree arity base and the index to one of its node, return height and level position across the same level"
+  [ind base]
+  (loop [h 1]
+    (if (>= (tree-nodes-count h base) (inc ind))
+      (let [i (int (- ind (tree-nodes-count (dec h) base)))
+            p (case (mod i base) 0 :upper-left 1 :upper-right 2 :lower-left 3 :lower-right)
+            ]
+      {:height h
+       :row-index i
+       :position p})
+      (recur (inc h))
+      )
+    )
+)
+
+;repl tests
+;(clojure.repl/doc case)
+;(case 2
+;  1 :1
+;  2 :2)
+;(mod 4 4)
+;(index-to-hrp 4 4)
+
+(defn aabb-walk
+  "given base, height and row-index, returns a walk from the root to the node"
+  [b h r]
+  (let [div #(quot % b)
+        divs #(iterate div %)
+        pos #(mod % 4)
+        aabb-walk (map #(identity {:position
+                                   (case (mod %1 4) 0 :upper-left 1 :upper-right 2 :lower-left 3 :lower-right)
+                                   :height %2})
+                       (take h (divs r)) ;reverse walking in row indexes
+                       (reverse (range 1 (inc h))))
+        ]
+    aabb-walk
+    ))
+
+(aabb-walk 4 4 16)
+;(mod 15 4)
+
+(defn hr-to-aabb
+  "given aabb, base, height and row index, return AABB box"
+  [aabb b h r]
+  (loop [walkings (reverse (drop-last (aabb-walk b h r)))
+         p (:position (first walkings))
+         current-aabb (split-aabb aabb p)]
+    (let [next-walkings (rest walkings)]
+    (if (empty? next-walkings)
+      current-aabb
+      (recur next-walkings (:position (first next-walkings)) (split-aabb current-aabb (:position (first next-walkings))))))))
+
+;(hr-to-aabb [-10 -10 10 10] 4 2 0)
+;(hr-to-aabb [-10 -10 10 10] 4 3 15)
+
+;(quot (quot 63 4) 4)
+;(def tt1 #(quot % 4))
+;(def tt2 #(iterate tt1 %))
+;(def tt3 #(nth (tt2 %1) (- %2 2)))
+;(tt3 16 4)
+;(take 3 (tt2 30))
+;(iterate #(quot % 4) 63)
+;(iterate #(quot % 4) 15)
+;(iterate #(quot % 4) 3)
 
 (defn generate-BFS
   "generate an empty tree down to the lowest level in BFS order"

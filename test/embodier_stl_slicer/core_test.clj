@@ -198,13 +198,13 @@
     )
   )
 
-(deftest test-make-tree
+(comment deftest test-make-tree
   (testing "making the tree from a slice, given nozzle diameter"
     (is (= (make-square [-10 -10 10 15]) [-10 -10 15 15]))
     (is (= (make-square [-5 -5 10 5]) [-5 -5 10 10]))
     (is (= (split-aabb [0 0 10 10]) [[0 5 5 10] [5 5 10 10] [0 0 5 5] [5 0 10 5]]))
     (is (= (split-aabb [0 0 10 10] :upper-left) [0 5 5 10]))
-    (clojure.pprint/pprint (make-tree (:result (second slicings)) 0.3))
+    ;(clojure.pprint/pprint (make-tree (:result (second slicings)) 0.3))
     ))
 
 (deftest test-tree-init
@@ -212,7 +212,10 @@
     (is (= (tree-height 2 4) 2))
     (is (= (tree-height 1000 4) 6))
     (is (= (tree-nodes-count 2 4) 5.0))
+    ;(clojure.pprint/pprint (generate-BFS (:result (second slicings)) 0.3))
     )
   )
+
+;(clojure.pprint/pprint (generate-BFS (:result (second slicings)) 0.3))
 
 ;(run-all-tests)
