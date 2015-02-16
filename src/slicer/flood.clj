@@ -236,6 +236,8 @@
 (defn index-to-hrp
   "given tree arity base and the index to one of its node, return height and level position across the same level"
   [ind base]
+  {:pre [(pos? base) (not (neg? ind))]
+   }
   (loop [h 1]
     (if (>= (tree-nodes-count h base) (inc ind))
       (let [i (int (- ind (tree-nodes-count (dec h) base)))
@@ -261,6 +263,7 @@
 (defn aabb-walk
   "given base, height and row-index, returns a walk from the root to the node"
   [b h r]
+  {:pre [(< r (Math/pow b h))]}
   (let [div #(quot % b)
         divs #(iterate div %)
         pos #(mod % 4)
@@ -273,19 +276,23 @@
     aabb-walk
     ))
 
+;(aabb-walk 4 1 0)
+;(aabb-walk 4 2 0)
 ;(aabb-walk 4 4 16)
 ;(mod 15 4)
 
 (defn hr-to-aabb
   "given aabb, base, height and row index, return AABB box"
   [aabb b h r]
-  (loop [walkings (reverse (drop-last (aabb-walk b h r)))
-         p (:position (first walkings))
-         current-aabb (split-aabb aabb p)]
-    (let [next-walkings (rest walkings)]
-    (if (empty? next-walkings)
-      current-aabb
-      (recur next-walkings (:position (first next-walkings)) (split-aabb current-aabb (:position (first next-walkings))))))))
+  (if (= 1 h)
+    aabb
+    (loop [walkings (reverse (drop-last (aabb-walk b h r)))
+           p (:position (first walkings))
+           current-aabb (split-aabb aabb p)]
+      (let [next-walkings (rest walkings)]
+      (if (empty? next-walkings)
+        current-aabb
+        (recur next-walkings (:position (first next-walkings)) (split-aabb current-aabb (:position (first next-walkings)))))))))
 
 ;(hr-to-aabb [-10 -10 10 10] 4 2 0)
 ;(hr-to-aabb [-10 -10 10 10] 4 3 15)
@@ -300,10 +307,16 @@
 ;(iterate #(quot % 4) 15)
 ;(iterate #(quot % 4) 3)
 
+(defn index-to-aabb
+  "given aabb, base and index, returns aabb"
+  [aabb b i]
+  (let [hrp (index-to-hrp i b)]
+    (hr-to-aabb aabb b (:height hrp) (:row-index hrp))))
+
 (defn generate-BFS
   "generate an empty tree down to the lowest level in BFS order"
   [a-slice nozzle-diameter]
-  (let [[min-x min-y max-x max-y:as aabb]  (-> (aabb-slice a-slice)
+  (let [[min-x min-y max-x max-y :as aabb]  (-> (aabb-slice a-slice)
                                                make-square)
         diff-x (- max-x min-x)
         leaf-num (let [round-up (/ diff-x nozzle-diameter)]
@@ -312,10 +325,8 @@
                      (int round-up)))
         tree-height (tree-height leaf-num 4)
         node-count (tree-nodes-count tree-height 4)]
-    ;(vec (repeat node-count false))
     (for [ind (range node-count)]
-      (let [hrp (index-to-hrp 4 ind)
-            node-aabb (hr-to-aabb aabb 4 (:height hrp) (:row-index hrp))]
+      (let [node-aabb (index-to-aabb aabb 4 ind)]
         (slice-box-inc node-aabb a-slice)
        )
      )

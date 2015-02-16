@@ -198,8 +198,8 @@
     )
   )
 
-(comment deftest test-make-tree
-  (testing "making the tree from a slice, given nozzle diameter"
+(deftest test-aabb-handling
+  (testing "aabb spliting and made square"
     (is (= (make-square [-10 -10 10 15]) [-10 -10 15 15]))
     (is (= (make-square [-5 -5 10 5]) [-5 -5 10 10]))
     (is (= (split-aabb [0 0 10 10]) [[0 5 5 10] [5 5 10 10] [0 0 5 5] [5 0 10 5]]))
