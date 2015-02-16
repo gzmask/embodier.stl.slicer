@@ -239,11 +239,12 @@
   (loop [h 1]
     (if (>= (tree-nodes-count h base) (inc ind))
       (let [i (int (- ind (tree-nodes-count (dec h) base)))
-            p (case (mod i base) 0 :upper-left 1 :upper-right 2 :lower-left 3 :lower-right)
+            ;p (case (mod i base) 0 :upper-left 1 :upper-right 2 :lower-left 3 :lower-right)
             ]
       {:height h
        :row-index i
-       :position p})
+       ;:position p
+       })
       (recur (inc h))
       )
     )
@@ -272,7 +273,7 @@
     aabb-walk
     ))
 
-(aabb-walk 4 4 16)
+;(aabb-walk 4 4 16)
 ;(mod 15 4)
 
 (defn hr-to-aabb
@@ -311,6 +312,12 @@
                      (int round-up)))
         tree-height (tree-height leaf-num 4)
         node-count (tree-nodes-count tree-height 4)]
-    (vec (repeat node-count false))
+    ;(vec (repeat node-count false))
+    (for [ind (range node-count)]
+      (let [hrp (index-to-hrp 4 ind)
+            node-aabb (hr-to-aabb aabb 4 (:height hrp) (:row-index hrp))]
+        (slice-box-inc node-aabb a-slice)
+       )
+     )
     )
   )
