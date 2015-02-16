@@ -2,7 +2,7 @@
 (ns slicer.flood
   (:require [clojure.core.match :refer [match]]))
 
-(def tree-arity 4)
+(def tree-arity 4);some functions (split-aabb ...) are not arity changable
 
 (defn line-box-inc
   "check if a line start and end by two points is intersected with an AABB box. Imprative since performance is important"
@@ -66,14 +66,6 @@
    [min-x min-y :as box-min]
    [max-x max-y :as box-max]]
   (and (>= x1 min-x) (<= x1 max-x) (>= y1 min-y) (<= y1 max-y)))
-
-(defmacro debugger [expr & [msg]]
-  `(do
-     (when ~msg (println ~msg))
-     (println ~expr)
-     ~expr
-     )
-  )
 
 (defn slice-box-inc
   "check if a slice is intersecting an AABB"
@@ -221,18 +213,34 @@
     tree))
 )
 
-(defn tree-height
-  "the least tree height require for containing certain number of leaf nodes"
-  [leaf-num base]
-  (loop [power 0]
-    (if (>= (Math/pow base power) leaf-num)
-      (inc power)
-      (recur (inc power)))))
-
 (defn tree-nodes-count
   "the totoal number of nodes from height for K-arity based tree"
   [height base]
   (/ (dec (Math/pow base height)) (dec base)))
+
+(defn height
+  "given tree or its leafs count, return its height"
+  [t b]
+  (cond
+   (or (seq? t) (vector? t)); if given a tree, return its height
+   (let [d (dec b)
+         c (count t)
+         a (Math/log (inc (* c d)))]
+     (int (Math/ceil (/ a (Math/log b)))))
+   (number? t); if given a leaf count, return its height
+   (let [d (Math/log 4)
+        c (Math/log t)]
+    (int (inc (Math/ceil (/ c d)))))
+   :else nil))
+
+;(height [1] 4)
+;(height (vec (range 5)) 4)
+;(height (vec (range 21)) 4)
+;(height (vec (range 85)) 4)
+;(height 4 4)
+;(height 16 4)
+;(height 65 4)
+;(Math/log 4)
 
 (defn index-to-hrp
   "given tree arity base and the index to one of its node, return height and level position across the same level. OLogN time."
@@ -241,13 +249,9 @@
    }
   (loop [h 1]
     (if (>= (tree-nodes-count h base) (inc ind))
-      (let [i (int (- ind (tree-nodes-count (dec h) base)))
-            ;p (case (mod i base) 0 :upper-left 1 :upper-right 2 :lower-left 3 :lower-right)
-            ]
+      (let [i (int (- ind (tree-nodes-count (dec h) base)))]
       {:height h
-       :row-index i
-       ;:position p
-       })
+       :row-index i})
       (recur (inc h))
       )
     )
@@ -269,7 +273,7 @@
         divs #(iterate div %)
         pos #(mod % tree-arity)
         aabb-walk (map #(identity {:position
-                                   (case (mod %1 4) 0 :upper-left 1 :upper-right 2 :lower-left 3 :lower-right)
+                                   (case (mod %1 tree-arity) 0 :upper-left 1 :upper-right 2 :lower-left 3 :lower-right)
                                    :height %2})
                        (take h (divs r)) ;reverse walking in row indexes
                        (reverse (range 1 (inc h))))
@@ -326,8 +330,9 @@
                    (if (> round-up (int round-up))
                      (inc (int round-up))
                      (int round-up)))
-        tree-height (tree-height leaf-num tree-arity)
+        tree-height (height leaf-num tree-arity)
         node-count (tree-nodes-count tree-height tree-arity)]
     (for [ind (range node-count)]
       (let [node-aabb (index-to-aabb aabb tree-arity ind)]
         (slice-box-inc node-aabb a-slice)))))
+
