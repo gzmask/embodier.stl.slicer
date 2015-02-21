@@ -334,6 +334,27 @@
 ;(parent 0)
 ;(parent 75)
 
+(defn children
+  "given a node index, returns [child-upper-left child upper-right child-lower-left child-lower-right]"
+  [i]
+  {:pre [(integer? i)]}
+  (let [hr (index-to-hrp i tree-arity)
+        a (-> (->> hr
+                   :height)
+              (tree-nodes-count tree-arity))
+        e (-> hr
+              :row-index
+              inc
+              (* 4)
+              (+ a)
+              dec
+              int)]
+    [(- e 3) (- e 2) (dec e) e]))
+
+;(children 0)
+;(children 1)
+;(children 2)
+
 (defn generate-tree
   "generate tree down to the lowest level in BFS order. O(NLogN) time"
   [a-slice nozzle-diameter]
