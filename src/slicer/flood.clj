@@ -318,8 +318,24 @@
   (let [hrp (index-to-hrp i b)]
     (hr-to-aabb aabb b (:height hrp) (:row-index hrp))))
 
-(defn generate-BFS
-  "generate an empty tree down to the lowest level in BFS order. O(NLogN) time"
+(defn parent
+  "given a node index, returns parent index"
+  [i]
+  {:pre [(integer? i)]}
+  (cond
+   (= i 0) nil
+   (< i 5) 0
+   :else (let [hr (index-to-hrp i tree-arity)
+               grandparent-row-count (Math/pow tree-arity (- (:height hr) 3))
+               parent-row-count (Math/pow tree-arity (- (:height hr) 2))
+               parent-row-index (Math/floor (/ (:row-index hr) tree-arity))]
+           (int (+ grandparent-row-count parent-row-index)))))
+
+;(parent 0)
+;(parent 75)
+
+(defn generate-tree
+  "generate tree down to the lowest level in BFS order. O(NLogN) time"
   [a-slice nozzle-diameter]
   {:pre [(seq? a-slice)
          (number? nozzle-diameter)]}
@@ -331,8 +347,17 @@
                      (inc (int round-up))
                      (int round-up)))
         tree-height (height leaf-num tree-arity)
-        node-count (tree-nodes-count tree-height tree-arity)]
-    (for [ind (range node-count)]
-      (let [node-aabb (index-to-aabb aabb tree-arity ind)]
-        (slice-box-inc node-aabb a-slice)))))
-
+        node-count (tree-nodes-count tree-height tree-arity)
+        result (atom (vec (repeat node-count nil)))]
+    (doseq [ind (range node-count)]
+      (cond
+       (= ind 0);get collsion test for root node
+       (swap! result assoc ind
+              (-> (index-to-aabb aabb tree-arity ind)
+                  (slice-box-inc a-slice)))
+       (true? (nth @result (parent ind)));only get collision test for nodes which parent is collided
+       (swap! result assoc ind
+              (-> (index-to-aabb aabb tree-arity ind)
+                  (slice-box-inc a-slice)))))
+    @result
+    ))
