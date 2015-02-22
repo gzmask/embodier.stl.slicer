@@ -205,7 +205,7 @@
     ;(clojure.pprint/pprint (make-tree (:result (second slicings)) 0.3))
     ))
 
-(def tree (generate-tree (:result (second slicings)) 0.3))
+(def tree (generate-tree (:result (second slicings)) 1.7))
 
 (deftest test-tree-init
   (testing "testing initializing the tree based on the size of the aabb from a slice"
@@ -219,7 +219,7 @@
     (is (adjacent 8 17 (-> (:result (second slicings)) aabb-slice make-square)))
     (is (not (adjacent 5 9 (-> (:result (second slicings)) aabb-slice make-square))))
     (is (not (adjacent 5 20 (-> (:result (second slicings)) aabb-slice make-square))))
-    (is (node-inc 1 2 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (node-inc 1 2 (-> (:result (second slicings)) (aabb-slice 1.7) make-square)))
     (is (node-inc 5 6 (-> (:result (second slicings)) aabb-slice make-square)))
     (is (node-inc 1 5 (-> (:result (second slicings)) aabb-slice make-square)))
     (is (node-inc 6 9 (-> (:result (second slicings)) aabb-slice make-square)))

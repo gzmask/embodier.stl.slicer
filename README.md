@@ -24,6 +24,10 @@ lein marg
 
 Lein test
 
+or hotrunning:
+
+Lein test-refresh
+
 ## Usage
 
 * most of the time:

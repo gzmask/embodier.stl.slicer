@@ -1,9 +1,9 @@
-;after sliced the model, we need to check for watertight and discretized the slice shape
+;this is tree generation according to the sliced data
 (ns slicer.tree
   (:require [clojure.core.match :refer [match]])
   (:use slicer.util))
 
-(def tree-arity 4);some functions (split-aabb ...) are not arity changable
+(def tree-arity 4);changing this will affect the performance of this algorithm. aware that some functions (split-aabb ...) are not arity changable
 
 (defn line-box-inc
   "check if a line start and end by two points is intersected with an AABB box. Imprative since performance is important"
@@ -94,7 +94,7 @@
 
 (defn aabb-slice
   "get aabb box from a list of geometries"
-  [a-slice]
+  [a-slice & [border]]
   (loop [geos a-slice
          min-x 0
          min-y 0
@@ -112,7 +112,9 @@
              [[x1 y1 _]] ;point
                (recur (rest geos) (min min-x x1) (min min-y y1) (max max-x x1) (max max-y y1))
              :else
-               [min-x min-y max-x max-y]))))
+               (if (nil? border)
+                 [min-x min-y max-x max-y]
+                 [(+ min-x border) (+ min-y border) (+ max-x border) (+ max-y border)])))))
 
 (defn smaller-than-nozzle?
   "is the current aabb is smaller than the nozzle"
@@ -393,8 +395,7 @@
   [n1 n2 aabb]
   {:pre [(integer? n1) (integer? n2)]}
   (let [[min-x1 min-y1 max-x1 max-y1 :as n1-aabb] (index-to-aabb aabb tree-arity n1)
-        [min-x2 min-y2 max-x2 max-y2 :as n2-aabb] (index-to-aabb aabb tree-arity n2)
-        ]
+        [min-x2 min-y2 max-x2 max-y2 :as n2-aabb] (index-to-aabb aabb tree-arity n2)]
     (cond
      (= min-x1 max-x2) true
      (= min-x2 max-x1) true
@@ -409,11 +410,11 @@
   (let [[min-x1 min-y1 max-x1 max-y1 :as n1-aabb] (index-to-aabb aabb tree-arity n1)
         [min-x2 min-y2 max-x2 max-y2 :as n2-aabb] (index-to-aabb aabb tree-arity n2)]
     (cond
-     (and
-      (or (and (>= min-x2 min-x1) (<= min-x2 max-x1))
-          (and (>= max-x2 min-x1) (<= max-x2 max-x1)))
-      (or (and (>= min-y2 min-y1) (<= min-y2 max-y1))
-          (and (>= max-y2 min-y1) (<= max-y2 max-y1)))) true
+       (and
+        (or (and (>= min-x2 min-x1) (<= min-x2 max-x1))
+            (and (>= max-x2 min-x1) (<= max-x2 max-x1)))
+        (or (and (>= min-y2 min-y1) (<= min-y2 max-y1))
+            (and (>= max-y2 min-y1) (<= max-y2 max-y1)))) true
      :else false)))
 
 ;(min 1 2 3)
