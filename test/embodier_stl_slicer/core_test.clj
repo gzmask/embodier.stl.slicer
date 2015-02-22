@@ -5,6 +5,7 @@
             [slicer.util :refer :all]
             [slicer.file :refer :all]
             [slicer.tree :refer :all]
+            [slicer.flood :refer :all]
             [slicer.gcode :refer :all]
             [slicer.core :refer :all]))
 

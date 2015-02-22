@@ -417,4 +417,19 @@
             (and (>= max-y2 min-y1) (<= max-y2 max-y1)))) true
      :else false)))
 
-;(min 1 2 3)
+(defn leafs
+  "given a tree, returns its leafs"
+  [t]
+  (let [last-index (-> t count dec)
+        hr (index-to-hrp last-index tree-arity)
+        last-row-start-index (-> hr :height dec (tree-nodes-count tree-arity) int)]
+    (->
+     (for [i (range last-row-start-index (inc last-index))]
+       (nth t i))
+     vec)))
+
+;(leafs (range 1))
+;(leafs (range 5))
+;(leafs (range 21))
+;(leafs (range 85))
+
