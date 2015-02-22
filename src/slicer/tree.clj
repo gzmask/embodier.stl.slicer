@@ -407,10 +407,7 @@
   [n1 n2 aabb]
   {:pre [(integer? n1) (integer? n2)]}
   (let [[min-x1 min-y1 max-x1 max-y1 :as n1-aabb] (index-to-aabb aabb tree-arity n1)
-        [min-x2 min-y2 max-x2 max-y2 :as n2-aabb] (index-to-aabb aabb tree-arity n2)
-        _ (debugger n1-aabb "n1-aabb")
-        _ (debugger n2-aabb "n2-aabb")
-        ]
+        [min-x2 min-y2 max-x2 max-y2 :as n2-aabb] (index-to-aabb aabb tree-arity n2)]
     (cond
      (and
       (or (and (>= min-x2 min-x1) (<= min-x2 max-x1))
