@@ -4,7 +4,7 @@
             [slicer.slice :refer :all]
             [slicer.util :refer :all]
             [slicer.file :refer :all]
-            [slicer.flood :refer :all]
+            [slicer.tree :refer :all]
             [slicer.gcode :refer :all]
             [slicer.core :refer :all]))
 
@@ -205,12 +205,35 @@
     ;(clojure.pprint/pprint (make-tree (:result (second slicings)) 0.3))
     ))
 
+(def tree (generate-tree (:result (second slicings)) 0.3))
+
 (deftest test-tree-init
   (testing "testing initializing the tree based on the size of the aabb from a slice"
     (is (= (height 2 4) 2))
     (is (= (height 1000 4) 6))
     (is (= (tree-nodes-count 2 4) 5.0))
-    (clojure.pprint/pprint (generate-tree (:result (second slicings)) 0.3))
+    (clojure.pprint/pprint tree)
+    (is (adjacent 1 2 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (adjacent 5 6 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (adjacent 1 17 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (adjacent 8 17 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (not (adjacent 5 9 (-> (:result (second slicings)) aabb-slice make-square))))
+    (is (not (adjacent 5 20 (-> (:result (second slicings)) aabb-slice make-square))))
+    (is (node-inc 1 2 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (node-inc 5 6 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (node-inc 1 5 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (node-inc 6 9 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (node-inc 8 9 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (node-inc 1 9 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (node-inc 1 17 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (node-inc 8 17 (-> (:result (second slicings)) aabb-slice make-square)))
+    (is (not (node-inc 1 10 (-> (:result (second slicings)) aabb-slice make-square))))
+    (is (not (node-inc 1 18 (-> (:result (second slicings)) aabb-slice make-square))))
+    (is (not (node-inc 3 18 (-> (:result (second slicings)) aabb-slice make-square))))
+    (is (not (node-inc 4 7 (-> (:result (second slicings)) aabb-slice make-square))))
+    (is (not (node-inc 5 20 (-> (:result (second slicings)) aabb-slice make-square))))
+    (is (not (node-inc 3 20 (-> (:result (second slicings)) aabb-slice make-square))))
+    (is (not (node-inc 2 19 (-> (:result (second slicings)) aabb-slice make-square))))
     )
   )
 

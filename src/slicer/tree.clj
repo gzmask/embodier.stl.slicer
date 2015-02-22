@@ -1,6 +1,7 @@
 ;after sliced the model, we need to check for watertight and discretized the slice shape
-(ns slicer.flood
-  (:require [clojure.core.match :refer [match]]))
+(ns slicer.tree
+  (:require [clojure.core.match :refer [match]])
+  (:use slicer.util))
 
 (def tree-arity 4);some functions (split-aabb ...) are not arity changable
 
@@ -335,7 +336,8 @@
 ;(parent 75)
 
 (defn children
-  "given a node index, returns [child-upper-left child upper-right child-lower-left child-lower-right]"
+  "given a node index, returns children indexes:
+  [child-upper-left child upper-right child-lower-left child-lower-right]"
   [i]
   {:pre [(integer? i)]}
   (let [hr (index-to-hrp i tree-arity)
@@ -354,6 +356,9 @@
 ;(children 0)
 ;(children 1)
 ;(children 2)
+;(children 3)
+;(children 4)
+;(children 5)
 
 (defn generate-tree
   "generate tree down to the lowest level in BFS order. O(NLogN) time"
@@ -382,3 +387,36 @@
                   (slice-box-inc a-slice)))))
     @result
     ))
+
+(defn adjacent
+  "given indexes of two nodes, returns if their AABB boxes are adjacent to each other"
+  [n1 n2 aabb]
+  {:pre [(integer? n1) (integer? n2)]}
+  (let [[min-x1 min-y1 max-x1 max-y1 :as n1-aabb] (index-to-aabb aabb tree-arity n1)
+        [min-x2 min-y2 max-x2 max-y2 :as n2-aabb] (index-to-aabb aabb tree-arity n2)
+        ]
+    (cond
+     (= min-x1 max-x2) true
+     (= min-x2 max-x1) true
+     (= min-y1 max-y2) true
+     (= min-y2 max-y1) true
+     :else false)))
+
+(defn node-inc
+  "given indexes of two nodes, returns if their AABB boxes are intersecting with each other"
+  [n1 n2 aabb]
+  {:pre [(integer? n1) (integer? n2)]}
+  (let [[min-x1 min-y1 max-x1 max-y1 :as n1-aabb] (index-to-aabb aabb tree-arity n1)
+        [min-x2 min-y2 max-x2 max-y2 :as n2-aabb] (index-to-aabb aabb tree-arity n2)
+        _ (debugger n1-aabb "n1-aabb")
+        _ (debugger n2-aabb "n2-aabb")
+        ]
+    (cond
+     (and
+      (or (and (>= min-x2 min-x1) (<= min-x2 max-x1))
+          (and (>= max-x2 min-x1) (<= max-x2 max-x1)))
+      (or (and (>= min-y2 min-y1) (<= min-y2 max-y1))
+          (and (>= max-y2 min-y1) (<= max-y2 max-y1)))) true
+     :else false)))
+
+;(min 1 2 3)
