@@ -329,13 +329,15 @@
    (= i 0) nil
    (< i 5) 0
    :else (let [hr (index-to-hrp i tree-arity)
-               grandparent-row-count (Math/pow tree-arity (- (:height hr) 3))
-               parent-row-count (Math/pow tree-arity (- (:height hr) 2))
+               grandparent-node-count (tree-nodes-count (- (:height hr) 2) tree-arity)
                parent-row-index (Math/floor (/ (:row-index hr) tree-arity))]
-           (int (+ grandparent-row-count parent-row-index)))))
+           (int (+ grandparent-node-count parent-row-index)))))
 
-;(parent 0)
-;(parent 75)
+;(parent 1)
+;(parent 5)
+;(parent 21)
+;(parent 85)
+;(parent 341)
 
 (defn children
   "given a node index, returns children indexes:
@@ -403,19 +405,38 @@
      (= min-y2 max-y1) true
      :else false)))
 
-(defn node-inc
-  "given indexes of two nodes, returns if their AABB boxes are intersecting with each other"
-  [n1 n2 aabb]
-  {:pre [(integer? n1) (integer? n2)]}
-  (let [[min-x1 min-y1 max-x1 max-y1 :as n1-aabb] (index-to-aabb aabb tree-arity n1)
-        [min-x2 min-y2 max-x2 max-y2 :as n2-aabb] (index-to-aabb aabb tree-arity n2)]
-    (cond
+(defn aabb-inc
+  "given two aabb returns if they are intersecting with each other"
+  [[min-x1 min-y1 max-x1 max-y1 :as aabb1] [min-x2 min-y2 max-x2 max-y2 :as aabb2]]
+  (cond
        (and
         (or (and (>= min-x2 min-x1) (<= min-x2 max-x1))
             (and (>= max-x2 min-x1) (<= max-x2 max-x1)))
         (or (and (>= min-y2 min-y1) (<= min-y2 max-y1))
             (and (>= max-y2 min-y1) (<= max-y2 max-y1)))) true
-     :else false)))
+     :else false))
+
+(defn node-inc
+  "given indexes of two nodes, returns if their AABB boxes are intersecting with each other"
+  [n1 n2 aabb]
+  {:pre [(integer? n1) (integer? n2)]}
+  (let [n1-aabb (index-to-aabb aabb tree-arity n1)
+        n2-aabb (index-to-aabb aabb tree-arity n2)]
+    (aabb-inc n1-aabb n2-aabb)))
+
+(defn false-ancestor
+  "given a tree and an index of an nil node. returns its ancestor which is a false node"
+  [t i]
+  {:pre [(-> t (nth i) nil?)]}
+  (loop [parent-node (parent i)]
+    (cond
+      (false? (nth t parent-node)) parent-node
+      :else (recur (parent parent-node))
+      )
+    )
+  )
+
+;(false-ancestor [false nil nil nil false nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil] 17)
 
 (defn leafs
   "given a tree, returns its leafs"
@@ -425,11 +446,13 @@
         last-row-start-index (-> hr :height dec (tree-nodes-count tree-arity) int)]
     (->
      (for [i (range last-row-start-index (inc last-index))]
-       (nth t i))
+       (if (nil? (nth t i))
+         (let [anc (false-ancestor t i)] [anc (nth t anc)])
+         [i (nth t i)]))
+     set
      vec)))
 
-;(leafs (range 1))
+;(leafs [true false false false true nil nil nil nil nil nil nil nil nil nil nil nil true false false false])
 ;(leafs (range 5))
 ;(leafs (range 21))
 ;(leafs (range 85))
-
