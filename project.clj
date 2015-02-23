@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/tools.cli "0.3.1"]
                  [org.clojure/core.match "0.3.0-alpha4"]
+                 [quil "2.2.5"]
                  [com.jakemccrary/lein-test-refresh "0.7.0"]
                  [gloss "0.2.3"]]
   :main slicer.core
