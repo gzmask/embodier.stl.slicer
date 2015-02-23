@@ -15,22 +15,26 @@
    [min-x (- min-y h) max-x min-y]]))
 
 (defn flood
-  "given a tree and aabb generated from the slice. with optional flooded nodes, flood the tree from outside and return the nodes that are flooded"
-  [t aabb & nodes]
-  (let [flooding-aabbs (if (empty? nodes)
-                         (flooding-aabb-gen aabb)
-                         (map #(tree/index-to-aabb aabb tree/tree-arity %) nodes))
+  "given a tree and aabb generated from the slice, flood the tree from outside and return the nodes that are flooded"
+  [t aabb]
+  (let [flooding-aabbs (atom (flooding-aabb-gen aabb))
         leafs (tree/leafs t)
-        flooded-nodes (atom (set nodes))]
+        flooded-nodes (atom #{})]
     (loop [flooded-count (count @flooded-nodes)]
       (doseq [[leaf collided] leafs
-              flooding-aabb flooding-aabbs]
+              flooding-aabb @flooding-aabbs]
         (let [leaf-aabb (tree/index-to-aabb aabb tree/tree-arity leaf)]
           (match [(tree/aabb-inc leaf-aabb flooding-aabb)
                   (contains? @flooded-nodes leaf)
                   collided]
-                 [true false false] (swap! flooded-nodes conj leaf);when the leaf is intersecting with the flooding nodes; and not flooded before; and is not part of the slice matters; flood it now
+                 [true false false] ;when the leaf is intersecting with the flooding nodes; and not flooded before; and is not part of the slice matters; flood it now
+                 (swap! flooded-nodes conj leaf)
                  :else :do-not-care)))
+      (reset! flooding-aabbs
+              (->> @flooded-nodes
+                   vec
+                   (map #(tree/index-to-aabb aabb tree/tree-arity %))
+                   vec))
       (if (<= (count @flooded-nodes) flooded-count) ;when flooded nodes are not increasing. water has reach all parts
         (vec @flooded-nodes)
         (recur (count @flooded-nodes))))))
