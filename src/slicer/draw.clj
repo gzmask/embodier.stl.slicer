@@ -16,24 +16,29 @@
 
 (defn gui-main
   "the gui engine"
-  [t aabb nodes]
+  [t [min-x min-y max-x max-y :as aabb] nodes]
   (let [[[x1 y1] [x2 y2] [x3 y3] [x4 y4]] (aabb-points aabb)
-        setup #((q/smooth)                          ;; Turn on anti-aliasing
+        h (- max-y min-y)
+        hpx (/ 480 h)
+        w (- max-x min-x)
+        wpx (/ 640 w)
+        setup (fn []
+                (q/smooth)                          ;; Turn on anti-aliasing
                 (q/frame-rate 1)                    ;; Set framerate to 1 FPS
                 (q/background 200))
         draw #(q/with-translation [(/ (q/width) 2) (/ (q/height) 2)]
-                                   (q/line x1 y1 x2 y2)
-                                   (q/line x2 y2 x3 y3)
-                                   (q/line x3 y3 x4 y4)
-                                   (q/line x4 y4 x1 y1))
+                                  (->> [x1 y1 x2 y2] (map + [1 1 1 -1]) (map * [wpx hpx wpx hpx]) (apply q/line))
+                                  (->> [x2 y2 x3 y3] (map + [1 -1 -1 -1]) (map * [wpx hpx wpx hpx]) (apply q/line))
+                                  (->> [x3 y3 x4 y4] (map + [-1 -1 -1 1]) (map * [wpx hpx wpx hpx]) (apply q/line))
+                                  (->> [x4 y4 x1 y1] (map + [-1 1 1 1]) (map * [wpx hpx wpx hpx]) (apply q/line)))
         ]
     (q/sketch  :title "Oh so many grey circles"    ;; Set the title of the sketch
                :setup setup                        ;; Specify the setup fn
                :draw draw                          ;; Specify the draw fn
-               :size [323 200])
+               :size [640 480])
     )
   )
 
-;(gui-main [true false false false true nil nil nil nil nil nil nil nil nil nil nil nil false false false nil]
-;          [-10 -10 10 10]
-;          [0 4 20])
+(gui-main [true false false false true nil nil nil nil nil nil nil nil nil nil nil nil false false false nil]
+          [-10 -10 10 10]
+          [0 4 20])
