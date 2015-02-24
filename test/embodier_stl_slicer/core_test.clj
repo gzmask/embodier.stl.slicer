@@ -6,6 +6,7 @@
             [slicer.file :refer :all]
             [slicer.tree :refer :all]
             [slicer.flood :refer :all]
+            [slicer.draw :refer :all]
             [slicer.gcode :refer :all]
             [slicer.core :refer :all]))
 
@@ -246,6 +247,7 @@
     (debugger (flood tree aabb))
     (debugger aabb "root aabb:")
     (debugger (leafs tree) "leafs: ")
+    (gui-main tree aabb [0])
     )
   )
 

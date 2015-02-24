@@ -6,31 +6,34 @@
 ;(q/show-cats)
 ;(q/show-fns "sketch")
 
-(defn draw-node
-  "given node index and root AABB, draws it one the screen"
-  [node [min-x min-y max-x max-y :as aabb]]
-  )
+(defn aabb-points
+  "given AABB, returns the four points"
+  [[min-x min-y max-x max-y :as aabb]]
+  [[min-x min-y]
+   [min-x max-y]
+   [max-x max-y]
+   [max-x min-y]])
 
 (defn gui-main
   "the gui engine"
   [t aabb nodes]
-  (let [setup #((q/smooth)                          ;; Turn on anti-aliasing
+  (let [[[x1 y1] [x2 y2] [x3 y3] [x4 y4]] (aabb-points aabb)
+        setup #((q/smooth)                          ;; Turn on anti-aliasing
                 (q/frame-rate 1)                    ;; Set framerate to 1 FPS
                 (q/background 200))
-        draw #((q/stroke (q/random 255))             ;; Set the stroke colour to a random grey
-               (q/stroke-weight (q/random 10))       ;; Set the stroke thickness randomly
-               (q/fill (q/random 0))               ;; Set the fill colour to a random grey
-                 (let [diam (q/random 100)             ;; Set the diameter to a value between 0 and 100
-                       x    (q/random (q/width))       ;; Set the x coord randomly within the sketch
-                       y    (q/random (q/height))]     ;; Set the y coord randomly within the sketch
-                   (q/ellipse x y diam diam)))
-        _ (q/defsketch example                  ;; Define a new sketch named example
-                       :title "Oh so many grey circles"    ;; Set the title of the sketch
-                       :setup setup                        ;; Specify the setup fn
-                       :draw draw                          ;; Specify the draw fn
-                       :size [323 200])
+        draw #(q/with-translation [(/ (q/width) 2) (/ (q/height) 2)]
+                                   (q/line x1 y1 x2 y2)
+                                   (q/line x2 y2 x3 y3)
+                                   (q/line x3 y3 x4 y4)
+                                   (q/line x4 y4 x1 y1))
         ]
+    (q/sketch  :title "Oh so many grey circles"    ;; Set the title of the sketch
+               :setup setup                        ;; Specify the setup fn
+               :draw draw                          ;; Specify the draw fn
+               :size [323 200])
     )
   )
 
-;(gui-main nil nil nil)
+;(gui-main [true false false false true nil nil nil nil nil nil nil nil nil nil nil nil false false false nil]
+;          [-10 -10 10 10]
+;          [0 4 20])
