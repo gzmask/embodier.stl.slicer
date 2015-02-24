@@ -207,8 +207,9 @@
     ;(clojure.pprint/pprint (make-tree (:result (second slicings)) 0.3))
     ))
 
-(def tree (generate-tree (:result (second slicings)) 0.3))
-(def aabb (-> (:result (second slicings)) aabb-slice make-square))
+(def tree (generate-tree (:result (second slicings)) 0.01 1.6))
+(def aabb (-> (:result (second slicings)) (aabb-slice 1.6) make-square))
+
 
 (deftest test-tree-init
   (testing "testing initializing the tree based on the size of the aabb from a slice"
@@ -242,16 +243,33 @@
 
 ;(clojure.pprint/pprint (generate-BFS (:result (second slicings)) 0.3))
 
-(deftest test-flooding
-  (testing "testing flooding on the slice"
-    (debugger (flood tree aabb))
-    (debugger aabb "root aabb:")
-    (debugger (leafs tree) "leafs: ")
-    ;(gui-main tree aabb [8])
-    )
-  )
+;(deftest test-flooding
+;  (testing "testing flooding on the slice"
+;    (debugger (flood tree aabb))
+;    (debugger aabb "root aabb:")
+;    (debugger (leafs tree) "leafs: ")
+;    )
+;  )
 
-(gui-main tree aabb [8])
-(index-to-aabb aabb tree-arity 8)
+;(->> (flood tree aabb)
+;     (gui-main tree aabb))
+;
+;(let [f (parse-stl "bin.stl")
+;      ts (:triangles f)
+;      planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
+;      slices (-> (slice ts planes :z) rm-nil tri-compressor)
+;      slice (:result (nth slices 3))
+;      _ (debugger slice "slice:")
+;      tree (generate-tree slice 0.01 1.6)
+;      aabb (-> slice (aabb-slice 1.6) make-square center-aabb)
+;      _ (debugger aabb "aabb:")
+;      ]
+;  (->> (leafs tree)
+;       ;(filter (fn [n] (true? (second n))))
+;       (map (fn [n] (first n)))
+;       (gui-main tree aabb))
+;)
+;(gui-main tree aabb [8])
+;(index-to-aabb aabb tree-arity 8)
 
-(run-all-tests)
+;(run-all-tests)

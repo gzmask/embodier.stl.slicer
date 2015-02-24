@@ -101,12 +101,14 @@
          max-x 0
          max-y 0]
     (if (<= (count geos) 0)
-      [min-x min-y max-x max-y]
+      (if (nil? border)
+                 [min-x min-y max-x max-y]
+                 [(- min-x border) (- min-y border) (+ max-x border) (+ max-y border)])
       (match [(first geos)]
-             [[[x1 y1 _][x2 y2 _][x3 y3 _]]] ;triangle
+             [[[x1 y1 _] [x2 y2 _] [x3 y3 _]]] ;triangle
                (let [[mx my maxx mayy] (aabb-tri (first geos))]
                  (recur (rest geos) (min min-x mx) (min min-y my) (max max-x maxx) (max max-y mayy)))
-             [[[x1 y1 _][x2 y2 _]]] ;line
+             [[[x1 y1 _] [x2 y2 _]]] ;line
                (let [[mx my maxx mayy] (aabb-line (first geos))]
                  (recur (rest geos) (min min-x mx) (min min-y my) (max max-x maxx) (max max-y mayy)))
              [[x1 y1 _]] ;point
@@ -114,7 +116,8 @@
              :else
                (if (nil? border)
                  [min-x min-y max-x max-y]
-                 [(+ min-x border) (+ min-y border) (+ max-x border) (+ max-y border)])))))
+                 [(- min-x border) (- min-y border) (+ max-x border) (+ max-y border)])
+                     ))))
 
 (defn smaller-than-nozzle?
   "is the current aabb is smaller than the nozzle"
@@ -366,11 +369,12 @@
 
 (defn generate-tree
   "generate tree down to the lowest level in BFS order. O(NLogN) time"
-  [a-slice nozzle-diameter]
+  [a-slice nozzle-diameter & [border]]
   {:pre [(seq? a-slice)
          (number? nozzle-diameter)]}
-  (let [[min-x min-y max-x max-y :as aabb]  (-> (aabb-slice a-slice)
-                                               make-square)
+  (let [[min-x min-y max-x max-y :as aabb] (if (nil? border)
+                                             (-> a-slice aabb-slice make-square)
+                                             (-> a-slice (aabb-slice border) make-square))
         diff-x (- max-x min-x)
         leaf-num (let [round-up (/ diff-x nozzle-diameter)]
                    (if (> round-up (int round-up))
@@ -456,3 +460,14 @@
 ;(leafs (range 5))
 ;(leafs (range 21))
 ;(leafs (range 85))
+
+(defn center-aabb
+  "give aabb, put it to the center so that [0 0 20 20] becomes [-10 -10 10 10]"
+  [[min-x min-y max-x max-y :as aabb]]
+  (let [delta-x (-> (- max-x min-x) (/ 2) (+ min-x))
+        delta-y (-> (- max-y min-y) (/ 2) (+ min-y))]
+    [(- min-x delta-x)  (- min-y delta-y)  (- max-x delta-x)  (- max-y delta-y)]))
+
+;(center-aabb [-1 -1 5 5])
+;(center-aabb [-11 -11 -5 -5])
+;(center-aabb [11 11 15 15])
