@@ -3,11 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="77c20a2b-44fb-462e-825b-e4f85f7196d9" name="Default" comment="add quil as GUI engine. starting GUI aabb node code.">
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/slicer/draw.clj" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slicer.iml" afterPath="$PROJECT_DIR$/slicer.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/replstate.xml" afterPath="$PROJECT_DIR$/.idea/replstate.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/project.clj" afterPath="$PROJECT_DIR$/project.clj" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/replstate.xml" afterPath="$PROJECT_DIR$/.idea/replstate.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/slicer.iml" afterPath="$PROJECT_DIR$/slicer.iml" />
     </list>
     <ignored path="slicer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -28,20 +28,6 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
     <favorites_list name="slicer" />
-  </component>
-  <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="draw.clj" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/slicer/draw.clj">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7124519" vertical-offset="0" max-vertical-offset="779">
-              <caret line="37" column="15" selection-start-line="37" selection-start-column="15" selection-end-line="37" selection-end-column="15" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -89,7 +75,7 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -128,7 +114,7 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -179,13 +165,12 @@
       <setting name="repl" value="false" />
       <method />
     </configuration>
-    <configuration default="true" type="LeiningenRunConfiguration" factoryName="Leiningen">
-      <LeiningenRunnerParameters>
-        <option name="goals">
-          <list />
-        </option>
-        <option name="workingDirectory" value="" />
-      </LeiningenRunnerParameters>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
       <method />
     </configuration>
     <configuration default="true" type="ClojureREPL" factoryName="Local">
@@ -199,12 +184,13 @@
         <option name="Synchronize Leiningen" enabled="false" />
       </method>
     </configuration>
-    <configuration default="true" type="Remote" factoryName="Remote">
-      <option name="USE_SOCKET_TRANSPORT" value="true" />
-      <option name="SERVER_MODE" value="false" />
-      <option name="SHMEM_ADDRESS" value="javadebug" />
-      <option name="HOST" value="localhost" />
-      <option name="PORT" value="5005" />
+    <configuration default="true" type="LeiningenRunConfiguration" factoryName="Leiningen">
+      <LeiningenRunnerParameters>
+        <option name="goals">
+          <list />
+        </option>
+        <option name="workingDirectory" value="" />
+      </LeiningenRunnerParameters>
       <method />
     </configuration>
     <configuration default="true" type="JarApplication" factoryName="JAR Application">
@@ -285,13 +271,13 @@
     <option name="totallyTimeSpent" value="421000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1280" height="800" extended-state="6" />
-    <editor active="true" />
+    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3297561" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Leiningen" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296875" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Leiningen" active="true" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3296875" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3992298" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32941177" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -300,22 +286,22 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2453125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="REPL" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3296875" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2453125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="REPL" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296875" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.31707317" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32941177" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -338,7 +324,9 @@
     <option name="LAST_COMMIT_MESSAGE" value="add quil as GUI engine. starting GUI aabb node code." />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="antWorkspaceConfiguration">
@@ -348,9 +336,21 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/slicer/draw.clj">
       <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="555" max-vertical-offset="750">
+          <caret line="37" column="15" selection-start-line="37" selection-start-column="15" selection-end-line="37" selection-end-column="15" />
+          <folding>
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(gui-main ...)" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/slicer/draw.clj">
+      <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="120" max-vertical-offset="630">
           <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding />
+          <folding>
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(gui-main ...)" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -358,7 +358,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="270" max-vertical-offset="360">
           <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -366,11 +365,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="510" max-vertical-offset="900">
           <caret line="34" column="21" selection-start-line="34" selection-start-column="21" selection-end-line="34" selection-end-column="21" />
-          <folding>
-            <marker date="1424670870000" expanded="true" signature="-1:-1" placeholder="(ns slicer.flood ...)" />
-            <marker date="1424670870000" expanded="true" signature="-1:-1" placeholder="(defn flooding-aabb-gen ...)" />
-            <marker date="1424670870000" expanded="true" signature="-1:-1" placeholder="(defn flood ...)" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -378,34 +373,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="5880" max-vertical-offset="6645">
           <caret line="392" column="6" selection-start-line="392" selection-start-column="6" selection-end-line="392" selection-end-column="6" />
-          <folding>
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(ns slicer.tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn line-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tri-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn point-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn slice-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-tri ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-line ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-slice ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn smaller-than-nozzle? ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn make-square ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn split-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(comment ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tree-nodes-count ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn height ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-hrp ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-walk ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn hr-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn parent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn children ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn generate-tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn adjacent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn node-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn false-ancestor ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn leafs ...)" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -413,34 +381,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="5880" max-vertical-offset="6645">
           <caret line="392" column="6" selection-start-line="392" selection-start-column="6" selection-end-line="392" selection-end-column="6" />
-          <folding>
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(ns slicer.tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn line-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tri-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn point-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn slice-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-tri ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-line ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-slice ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn smaller-than-nozzle? ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn make-square ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn split-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(comment ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tree-nodes-count ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn height ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-hrp ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-walk ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn hr-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn parent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn children ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn generate-tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn adjacent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn node-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn false-ancestor ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn leafs ...)" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -448,34 +389,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="6450" max-vertical-offset="6645">
           <caret line="430" column="6" selection-start-line="430" selection-start-column="6" selection-end-line="430" selection-end-column="6" />
-          <folding>
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(ns slicer.tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn line-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tri-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn point-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn slice-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-tri ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-line ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-slice ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn smaller-than-nozzle? ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn make-square ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn split-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(comment ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tree-nodes-count ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn height ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-hrp ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-walk ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn hr-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn parent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn children ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn generate-tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn adjacent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn node-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn false-ancestor ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn leafs ...)" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -483,34 +397,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="6450" max-vertical-offset="6645">
           <caret line="430" column="6" selection-start-line="430" selection-start-column="6" selection-end-line="430" selection-end-column="6" />
-          <folding>
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(ns slicer.tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn line-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tri-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn point-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn slice-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-tri ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-line ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-slice ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn smaller-than-nozzle? ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn make-square ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn split-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(comment ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tree-nodes-count ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn height ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-hrp ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-walk ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn hr-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn parent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn children ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn generate-tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn adjacent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn node-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn false-ancestor ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn leafs ...)" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -525,34 +412,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="100">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(ns slicer.tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn line-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tri-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn point-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn slice-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-tri ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-line ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-slice ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn smaller-than-nozzle? ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn make-square ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn split-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(comment ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tree-nodes-count ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn height ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-hrp ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-walk ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn hr-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn parent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn children ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn generate-tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn adjacent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn node-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn false-ancestor ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn leafs ...)" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -567,34 +427,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="100">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(ns slicer.tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn line-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tri-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn point-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn slice-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-tri ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-line ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-slice ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn smaller-than-nozzle? ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn make-square ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn split-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(comment ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tree-nodes-count ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn height ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-hrp ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-walk ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn hr-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn parent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn children ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn generate-tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn adjacent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn node-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn false-ancestor ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn leafs ...)" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -609,34 +442,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="100">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(ns slicer.tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn line-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tri-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn point-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn slice-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-tri ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-line ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-slice ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn smaller-than-nozzle? ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn make-square ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn split-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(comment ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tree-nodes-count ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn height ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-hrp ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-walk ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn hr-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn parent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn children ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn generate-tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn adjacent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn node-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn false-ancestor ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn leafs ...)" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -644,7 +450,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="425">
           <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -652,38 +457,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.42647058" vertical-offset="220" max-vertical-offset="900">
           <caret line="34" column="21" selection-start-line="34" selection-start-column="21" selection-end-line="34" selection-end-column="21" />
-          <folding>
-            <marker date="1424670870000" expanded="true" signature="-1:-1" placeholder="(ns slicer.flood ...)" />
-            <marker date="1424670870000" expanded="true" signature="-1:-1" placeholder="(defn flooding-aabb-gen ...)" />
-            <marker date="1424670870000" expanded="true" signature="-1:-1" placeholder="(defn flood ...)" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/embodier_stl_slicer/core_test.clj">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.9050064" vertical-offset="3030" max-vertical-offset="3900">
-          <caret line="249" column="25" selection-start-line="249" selection-start-column="25" selection-end-line="249" selection-end-column="25" />
-          <folding>
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(ns embodier-stl-slicer.core-test ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-point-plane ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-plane-line-inc ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-triangle-plane-inc ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-slicing-plane ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-parse-stl ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-planes-generator ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-min-max-finder ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(def slicings ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-slice-function ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-line-box-intersection ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-tri-box-intersection ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-point-box-intersection ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-aabb-slice ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-slice-box-intersection ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-aabb-handling ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-tree-init ...)" />
-            <marker date="1424742386000" expanded="true" signature="-1:-1" placeholder="(deftest test-flooding ...)" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -691,42 +465,57 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5006418" vertical-offset="1050" max-vertical-offset="6960">
           <caret line="96" column="14" selection-start-line="96" selection-start-column="14" selection-end-line="96" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/embodier_stl_slicer/core_test.clj">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6475196" vertical-offset="3547" max-vertical-offset="3945">
+          <caret line="253" column="23" selection-start-line="253" selection-start-column="23" selection-end-line="253" selection-end-column="23" />
           <folding>
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(ns slicer.tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn line-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tri-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn point-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn slice-box-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-tri ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-line ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-slice ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn smaller-than-nozzle? ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn make-square ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn split-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(comment ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn tree-nodes-count ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn height ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-hrp ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-walk ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn hr-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn index-to-aabb ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn parent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn children ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn generate-tree ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn adjacent ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn aabb-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn node-inc ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn false-ancestor ...)" />
-            <marker date="1424664469000" expanded="true" signature="-1:-1" placeholder="(defn leafs ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(ns embodier-stl-slicer.core-test ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-point-plane ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-plane-line-inc ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-triangle-plane-inc ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-slicing-plane ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-parse-stl ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-planes-generator ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-min-max-finder ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(def slicings ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-slice-function ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-line-box-intersection ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-tri-box-intersection ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-point-box-intersection ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-aabb-slice ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-slice-box-intersection ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-aabb-handling ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-tree-init ...)" />
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(deftest test-flooding ...)" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/debug.png">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/slicer/gcode.clj">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.45553145" vertical-offset="0" max-vertical-offset="735">
+          <caret line="14" column="39" selection-start-line="14" selection-start-column="39" selection-end-line="14" selection-end-column="39" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/slicer/draw.clj">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7124519" vertical-offset="0" max-vertical-offset="779">
-          <caret line="37" column="15" selection-start-line="37" selection-start-column="15" selection-end-line="37" selection-end-column="15" />
-          <folding />
+        <state vertical-scroll-proportion="0.5119306" vertical-offset="454" max-vertical-offset="915">
+          <caret line="46" column="37" selection-start-line="46" selection-start-column="37" selection-end-line="46" selection-end-column="37" />
+          <folding>
+            <marker date="1424758253000" expanded="true" signature="-1:-1" placeholder="(gui-main ...)" />
+          </folding>
         </state>
       </provider>
     </entry>

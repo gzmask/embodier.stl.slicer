@@ -247,8 +247,11 @@
     (debugger (flood tree aabb))
     (debugger aabb "root aabb:")
     (debugger (leafs tree) "leafs: ")
-    (gui-main tree aabb [0])
+    ;(gui-main tree aabb [8])
     )
   )
 
-;(run-all-tests)
+(gui-main tree aabb [8])
+(index-to-aabb aabb tree-arity 8)
+
+(run-all-tests)
