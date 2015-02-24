@@ -26,7 +26,8 @@
     (->> [x3 y3 x4 y4] (map * [wpx hpx wpx hpx]) (apply q/line))
     (->> [x4 y4 x1 y1] (map * [wpx hpx wpx hpx]) (apply q/line))
     (when collided
-      (->> [x3 y3 x1 y1] (map * [wpx hpx wpx hpx]) (apply q/line)))
+      (->> [x3 y3 x1 y1] (map * [wpx hpx wpx hpx]) (apply q/line))
+      (->> [x4 y4 x2 y2] (map * [wpx hpx wpx hpx]) (apply q/line)))
     ))
 
 
