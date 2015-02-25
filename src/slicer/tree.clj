@@ -67,8 +67,7 @@
     [min-x min-y :as box-min]
     [max-x max-y :as box-max]]
    (and (>= x1 min-x) (<= x1 max-x) (>= y1 min-y) (<= y1 max-y)))
-  ([[x1 y1 :as point]
-    [min-x min-y max-x max-y :as aabb]]
+  ([point [min-x min-y max-x max-y :as aabb]]
    (point-box-inc point [min-x min-y] [max-x max-y])))
 
 
@@ -479,43 +478,46 @@
 (defn point-leaf
   "given a point, returns the leaf node where it sits on"
   [p t aabb]
-  (let [child-nodes (children 0)
-        child-aabbs (map (fn [i] (index-to-aabb aabb tree-arity i)) child-nodes)
-        sits-in-node (match [(point-box-inc p (first child-aabbs))
-                             (point-box-inc p (nth child-aabbs 1))
-                             (point-box-inc p (nth child-aabbs 2))
-                             (point-box-inc p (nth child-aabbs 3))]
-                            [true _ _ _] (first child-nodes)
-                            [_ true _ _] (nth child-nodes 1)
-                            [_ _ true _] (nth child-nodes 2)
-                            [_ _ _ true] (nth child-nodes 3))]
-    (loop [node sits-in-node]
-      (cond
-        ;out of bounce
-        (-> (children node)
-            last
-            (>= (count t)))
-        node
-        ;false node is a leaf node
-        (false? (nth t node))
-        node
-        ;true node is needs check deeper level
-        (nth t node)
-        (let [c-nodes (children node)
-              c-aabbs (map (fn [i] (index-to-aabb aabb tree-arity i)) c-nodes)]
-          (recur (match [(point-box-inc p (first c-aabbs))
-                         (point-box-inc p (nth c-aabbs 1))
-                         (point-box-inc p (nth c-aabbs 2))
-                         (point-box-inc p (nth c-aabbs 3))]
-                        [true _ _ _] (first c-nodes)
-                        [_ true _ _] (nth c-nodes 1)
-                        [_ _ true _] (nth c-nodes 2)
-                        [_ _ _ true] (nth c-nodes 3))))
-        ;you shouldn't be here
-        :else :warning-intruder-alert! ))))
+  {:pre [(do (debugger p "P:") true) (number? (first p)) (number? (second p)) (vector? t) (number? (first aabb))]}
+  (if (point-box-inc p aabb)
+    (let [child-nodes (children 0)
+          child-aabbs (map (fn [i] (index-to-aabb aabb tree-arity i)) child-nodes)
+          sits-in-node (match [(point-box-inc p (first child-aabbs))
+                               (point-box-inc p (nth child-aabbs 1))
+                               (point-box-inc p (nth child-aabbs 2))
+                               (point-box-inc p (nth child-aabbs 3))]
+                              [true _ _ _] (first child-nodes)
+                              [_ true _ _] (nth child-nodes 1)
+                              [_ _ true _] (nth child-nodes 2)
+                              [_ _ _ true] (nth child-nodes 3))]
+      (loop [node sits-in-node]
+        (cond
+          ;out of bounce
+          (-> (children node)
+              last
+              (>= (count t)))
+          node
+          ;false node is a leaf node
+          (false? (nth t node))
+          node
+          ;true node is needs check deeper level
+          (nth t node)
+          (let [c-nodes (children node)
+                c-aabbs (map (fn [i] (index-to-aabb aabb tree-arity i)) c-nodes)]
+            (recur (match [(point-box-inc p (first c-aabbs))
+                           (point-box-inc p (nth c-aabbs 1))
+                           (point-box-inc p (nth c-aabbs 2))
+                           (point-box-inc p (nth c-aabbs 3))]
+                          [true _ _ _] (first c-nodes)
+                          [_ true _ _] (nth c-nodes 1)
+                          [_ _ true _] (nth c-nodes 2)
+                          [_ _ _ true] (nth c-nodes 3))))
+          ;you shouldn't be here
+          :else :warning-intruder-alert! )))
+    nil)
+)
 
 ;(point-leaf [1 1] [true false true false false nil nil nil nil false true false false nil nil nil nil nil nil nil nil] [-10 -10 10 10])
 ;(point-leaf [-1 1] [true false true false false nil nil nil nil false true false false nil nil nil nil nil nil nil nil] [-10 -10 10 10])
 ;(point-leaf [-1 -1] [true false true false false nil nil nil nil false true false false nil nil nil nil nil nil nil nil] [-10 -10 10 10])
 ;(point-leaf [1 -1] [true false true false false nil nil nil nil false true false false nil nil nil nil nil nil nil nil] [-10 -10 10 10])
-

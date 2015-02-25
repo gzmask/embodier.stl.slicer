@@ -52,12 +52,15 @@
          [false]
          (let [x-points (range (+ min-x (/ nozzle-diameter 2)) max-x nozzle-diameter)
                y-points (range (+ min-y (/ nozzle-diameter 2)) max-y nozzle-diameter)]
-           (vec (reduce into #{}
-                   [(map (fn [p] [(first y-points) p]) y-points)
-                    (map (fn [p] [(last y-points) p]) y-points)
-                    (map (fn [p] [p (first y-points)]) x-points)
-                    (map (fn [p] [p (last y-points)]) x-points)]))
-             )
+           (if (or (< (count x-points) 2) (< (count y-points) 2))
+             (let [mx (first x-points)
+                   my (first y-points)]
+               [mx my])
+             (-> (into #{} (map (fn [p] [(first x-points) p]) y-points))
+                 (into (map (fn [p] [(last x-points) p]) y-points))
+                 (into (map (fn [p] [p (first y-points)]) x-points))
+                 (into (map (fn [p] [p (last y-points)]) x-points))
+                 vec)))
          :else :Schrodinger-cat))
 
 ;(aabb-flood-points [-10 -10 10 10] 0.1)
@@ -66,27 +69,47 @@
 ;(into #{} [1 2 3])
 
 (defn flood-node
-  "geometrically flood the nodes that are intersecting with the given aabb
+  "geometrically flood the nodes that are intersecting with the given aabbs, given collision of either true or false.
+  the second aabb is the root aabb box for the tree t.
   returns:
-  {:node-index [adjacent nodes] ...}"
-  [aabb t nozzle-diameter]
-  (let [flood-points (aabb-flood-points aabb nozzle-diameter)
-        flooded-leafs (map (fn [p] (tree/point-leaf p t aabb)) flood-points)
-        result-set (zipmap (map (comp keyword str) flooded-leafs) (repeat nil))]
-    )
-  )
+  #{leaf-index ...}"
+  [aabbs aabb t nozzle-diameter collision]
+  (let [init-flood-points (->> aabbs
+                              (map (fn [ab] (aabb-flood-points ab nozzle-diameter)))
+                              (reduce into #{})
+                              vec)
+        init-flooded-leafs (->> init-flood-points
+                                (map (fn [p] (tree/point-leaf p t aabb)))
+                                (filter (complement nil?)))
+        flooded-set (atom (set init-flooded-leafs))]
+    (loop [flood-count (count @flooded-set)]
+      (let [flood-points (->> @flooded-set
+                              (map (fn [i] (tree/index-to-aabb aabb tree/tree-arity i)))
+                              (map (fn [ab] (aabb-flood-points ab nozzle-diameter)))
+                              (filter (complement nil?))
+                              vec)
+            flooded-leafs (->> flood-points
+                               (map (fn [p] (tree/point-leaf p t aabb))) ;;get leafs for the points
+                               (filter (fn [i] (= collision (nth t i)))) ;;filtered according to collision boolean
+                               )]
+      (doseq [leaf flooded-leafs]
+        (swap! flooded-set conj leaf))
+      (if (<= (count @flooded-set) flood-count) ;; if the new flooded set is not grew, flooding is done
+        @flooded-set
+        (recur (count @flooded-set)))))))
 
-;(zipmap (map (comp keyword str) [1 2 3]) (repeat nil))
+;(keys (zipmap (map (comp keyword str) [1 2 3]) (repeat nil)))
+;(vec (reduce into #{} '([1 2 3] [4 5 6])))
+;(map inc #{1 2 3})
 
 (defn better-flood
   "above flood is so slow, why not a new one"
   [t aabb nozzle-diameter]
   (let [flooding-aabbs (flooding-aabb-gen aabb)
-        ;leafs (tree/leafs t)
-        flooded-nodes (map (fn [faabb] (flood-node faabb t nozzle-diameter)) flooding-aabbs)
+        flooded-nodes (flood-node flooding-aabbs aabb t nozzle-diameter false)
         ]
-    )
-  )
+    flooded-nodes
+    ))
 
 ;(contains? #{1 2 3} 4)
 ;(conj #{} 1)
