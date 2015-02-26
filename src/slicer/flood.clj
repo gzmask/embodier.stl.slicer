@@ -42,22 +42,20 @@
 (defn aabb-flood-points
   "generate flooding points for interseciton check from aabb"
   [[min-x min-y max-x max-y :as aabb] nozzle-diameter]
-  (match [(< (- max-x min-x) (* 2 nozzle-diameter))]
-         [true]
-         (let [[mx my :as mid-point] [(-> (- max-x min-x) (/ 2) (+ min-x)) (-> (- max-y min-y) (/ 2) (+ min-y))]]
-           [[(- mx nozzle-diameter) my]
-            [(+ mx nozzle-diameter) my]
-            [mx (- my nozzle-diameter)]
-            [mx (+ my nozzle-diameter)]])
-         [false]
-         (let [x-points (range (+ min-x (/ nozzle-diameter 2)) max-x nozzle-diameter)
-               y-points (range (+ min-y (/ nozzle-diameter 2)) max-y nozzle-diameter)]
-           (-> (into [] (map (fn [p] [(double (- (first x-points) (/ nozzle-diameter 2))) (double p)]) y-points)) ;left column
-               (into (map (fn [p] [(double (+ (last x-points) (/ nozzle-diameter 2))) (double p)]) y-points)) ;right column
-               (into (map (fn [p] [(double p) (double (- (first y-points) (/ nozzle-diameter 2)))]) x-points)) ;lower row
-               (into (map (fn [p] [(double p) (double (+ (last y-points) (/ nozzle-diameter)))]) x-points)) ;upper row
-               ))
-         :else :Schrodinger-cat))
+  (let [[mx my :as mid-point] [(-> (- max-x min-x) (/ 2) (+ min-x)) (-> (- max-y min-y) (/ 2) (+ min-y))]
+        half-nozzle (/ nozzle-diameter 2)]
+    [;left column
+     [(- min-x half-nozzle) (- my half-nozzle)]
+     [(- min-x half-nozzle) (+ my half-nozzle)]
+     ;right column
+     [(+ max-x half-nozzle) (- my half-nozzle)]
+     [(+ max-x half-nozzle) (+ my half-nozzle)]
+     ;upper row
+     [(- mx half-nozzle) (+ max-y half-nozzle)]
+     [(+ mx half-nozzle) (+ max-y half-nozzle)]
+     ;lower row
+     [(- mx half-nozzle) (- min-y half-nozzle)]
+     [(+ mx half-nozzle) (- min-y half-nozzle)]]))
 
 ;(count (range -10 10 0.1))
 ;(count (aabb-flood-points [-10 -10 10 10] 0.1))
@@ -99,7 +97,7 @@
 ;(vec (reduce into #{} '([1 2 3] [4 5 6])))
 ;(map inc #{1 2 3})
 
-(defn better-flood
+(defn fast-flood
   "above flood is so slow, why not a new one"
   [t aabb nozzle-diameter]
   (let [flooding-aabbs (flooding-aabb-gen aabb)
