@@ -102,7 +102,8 @@
 (defn fast-flood
   "above flood is so slow, why not a new one.
   faster, but sacrificed some accuracy.
-  This will not flood a slice correctly if tree is not generated with a border."
+  This will not flood a slice correctly if tree is not generated with a border.
+  border needs to be at least two times of the nozzle size"
   [t aabb nozzle-diameter]
   (let [flooding-aabbs (flooding-aabb-gen aabb)
         flooded-nodes (flood-node flooding-aabbs aabb t nozzle-diameter false)]

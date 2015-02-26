@@ -380,9 +380,7 @@
                                              (-> a-slice (aabb-slice border) make-square))
         diff-x (- max-x min-x)
         leaf-num (let [round-up (/ diff-x nozzle-diameter)]
-                   (if (> round-up (int round-up))
-                     (inc (int round-up))
-                     (int round-up)))
+                   (int (Math/pow round-up 2)))
         tree-height (height leaf-num tree-arity)
         node-count (tree-nodes-count tree-height tree-arity)
         result (atom (vec (repeat node-count nil)))]

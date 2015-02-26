@@ -33,7 +33,7 @@
 
 (defn gui-main
   "the gui engine"
-  [t [min-x min-y max-x max-y :as aabb] nodes]
+  [nodes t [min-x min-y max-x max-y :as aabb] & [filename]]
   (let [h (- max-y min-y)
         hpx (/ screen-height h)
         w (- max-x min-x)
@@ -48,7 +48,10 @@
                ;(q/translate 178 470)
                (doseq [node nodes]
                  (draw-node node (nth t node) aabb wpx hpx))
-               (q/save "debug.png")
+               (q/save (if (nil? filename)
+                         "debug.png"
+                         filename))
+               (q/exit)
                )]
     (q/sketch  :title "Oh so many grey squares"    ;; Set the title of the sketch
                :setup setup                        ;; Specify the setup fn
