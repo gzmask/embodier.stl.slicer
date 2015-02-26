@@ -77,8 +77,9 @@
                                 (map (fn [p] (tree/point-leaf p t aabb)))
                                 (filter (complement nil?)))
         flooded-set (atom (set init-flooded-leafs))]
-    (loop [flood-count (count @flooded-set)]
-      (let [flood-points (->> @flooded-set
+    (loop [flood-count (count @flooded-set)
+           flooding-leafs init-flooded-leafs]
+      (let [flood-points (->> flooding-leafs
                               (map (fn [i] (tree/index-to-aabb aabb tree/tree-arity i)))
                               (map (fn [ab] (aabb-flood-points ab nozzle-diameter)))
                               (reduce into #{})
@@ -87,13 +88,14 @@
             flooded-leafs (->> flood-points
                                (map (fn [p] (tree/point-leaf p t aabb))) ;;get leafs for the points
                                (filter (complement nil?))
+                               (filter (fn [node] (not (contains? @flooded-set node)))) ;; remove the flooded ones
                                (filter (fn [i] (= collision (nth t i)))) ;;filtered according to collision boolean
                                )]
       (doseq [leaf flooded-leafs]
         (swap! flooded-set conj leaf))
       (if (<= (count @flooded-set) flood-count) ;; if the new flooded set is not grew, flooding is done
         @flooded-set
-        (recur (count @flooded-set)))))))
+        (recur (count @flooded-set) flooded-leafs))))))
 
 ;(keys (zipmap (map (comp keyword str) [1 2 3]) (repeat nil)))
 ;(vec (reduce into #{} '([1 2 3] [4 5 6])))
