@@ -42,7 +42,7 @@
 (defn aabb-flood-points
   "generate flooding points for interseciton check from aabb"
   [[min-x min-y max-x max-y :as aabb] nozzle-diameter]
-  (match [(< (- max-x min-x) (* 1.2 nozzle-diameter))]
+  (match [(< (- max-x min-x) (* 2 nozzle-diameter))]
          [true]
          (let [[mx my :as mid-point] [(-> (- max-x min-x) (/ 2) (+ min-x)) (-> (- max-y min-y) (/ 2) (+ min-y))]]
            [[(- mx nozzle-diameter) my]
@@ -52,18 +52,13 @@
          [false]
          (let [x-points (range (+ min-x (/ nozzle-diameter 2)) max-x nozzle-diameter)
                y-points (range (+ min-y (/ nozzle-diameter 2)) max-y nozzle-diameter)]
-           (if (or (< (count x-points) 2) (< (count y-points) 2))
-             (let [mx (first x-points)
-                   my (first y-points)]
-               [mx my])
-             (-> (into #{} (map (fn [p] [(first x-points) p]) y-points))
-                 (into (map (fn [p] [(last x-points) p]) y-points))
-                 (into (map (fn [p] [p (first y-points)]) x-points))
-                 (into (map (fn [p] [p (last y-points)]) x-points))
-                 vec)))
+           (-> (into [] (map (fn [p] [(double (- (first x-points) (/ nozzle-diameter 2))) (double p)]) y-points)) ;left column
+               (into (map (fn [p] [(double (+ (last x-points) (/ nozzle-diameter 2))) (double p)]) y-points)) ;right column
+               (into (map (fn [p] [(double p) (double (- (first y-points) (/ nozzle-diameter 2)))]) x-points)) ;lower row
+               (into (map (fn [p] [(double p) (double (+ (last y-points) (/ nozzle-diameter)))]) x-points)) ;upper row
+               ))
          :else :Schrodinger-cat))
 
-;(aabb-flood-points [-10 -10 10 10] 0.1)
 ;(count (range -10 10 0.1))
 ;(count (aabb-flood-points [-10 -10 10 10] 0.1))
 ;(into #{} [1 2 3])
@@ -86,10 +81,12 @@
       (let [flood-points (->> @flooded-set
                               (map (fn [i] (tree/index-to-aabb aabb tree/tree-arity i)))
                               (map (fn [ab] (aabb-flood-points ab nozzle-diameter)))
+                              (reduce into #{})
                               (filter (complement nil?))
                               vec)
             flooded-leafs (->> flood-points
                                (map (fn [p] (tree/point-leaf p t aabb))) ;;get leafs for the points
+                               (filter (complement nil?))
                                (filter (fn [i] (= collision (nth t i)))) ;;filtered according to collision boolean
                                )]
       (doseq [leaf flooded-leafs]
@@ -106,8 +103,7 @@
   "above flood is so slow, why not a new one"
   [t aabb nozzle-diameter]
   (let [flooding-aabbs (flooding-aabb-gen aabb)
-        flooded-nodes (flood-node flooding-aabbs aabb t nozzle-diameter false)
-        ]
+        flooded-nodes (flood-node flooding-aabbs aabb t nozzle-diameter false)]
     flooded-nodes
     ))
 

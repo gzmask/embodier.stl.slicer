@@ -478,7 +478,10 @@
 (defn point-leaf
   "given a point, returns the leaf node where it sits on"
   [p t aabb]
-  {:pre [(do (debugger p "P:") true) (number? (first p)) (number? (second p)) (vector? t) (number? (first aabb))]}
+  {:pre [
+         ;(do (debugger p "P:") true)
+         (number? (first p)) (number? (second p)) (vector? t) (number? (first aabb))
+         ]}
   (if (point-box-inc p aabb)
     (let [child-nodes (children 0)
           child-aabbs (map (fn [i] (index-to-aabb aabb tree-arity i)) child-nodes)
