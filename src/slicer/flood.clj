@@ -14,8 +14,10 @@
    [max-x min-y (+ max-x w) max-y]
    [min-x (- min-y h) max-x min-y]]))
 
-(defn flood
-  "given a tree and aabb generated from the slice, flood the tree from outside and return the nodes that are flooded"
+(defn slow-flood
+  "given a tree and aabb generated from the slice,
+  flood the tree from outside and return the nodes that are flooded.
+  Perfect flood compare to fast-flood, and no border is required."
   [t aabb]
   (let [flooding-aabbs (atom (flooding-aabb-gen aabb))
         leafs (tree/leafs t)
@@ -98,7 +100,9 @@
 ;(map inc #{1 2 3})
 
 (defn fast-flood
-  "above flood is so slow, why not a new one"
+  "above flood is so slow, why not a new one.
+  faster, but sacrificed some accuracy.
+  This will not flood a slice correctly if tree is not generated with a border."
   [t aabb nozzle-diameter]
   (let [flooding-aabbs (flooding-aabb-gen aabb)
         flooded-nodes (flood-node flooding-aabbs aabb t nozzle-diameter false)]
