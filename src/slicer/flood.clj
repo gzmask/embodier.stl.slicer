@@ -125,3 +125,25 @@
 ;      _ (swap! b rest)]
 ;  [a @b]
 ;  )
+
+; Now to look for contained space, I use line-slice intersection.
+; Shoot a list of parallel lines along the longer axis where the slice sits.
+; If the distance between first and second intersection points is larger than the smallest node (nozzle diameter)
+; then we have a flooding point to start.
+;
+; But what if the the model has no contained spaced after made as quad-tree,
+; then a simple out most flood with all the collided nodes will left nothing.
+;
+; Out most flood should be done first to see if there is contained space.
+; then line intersection checks
+; then the inner flooding.
+;
+; In case of line intersection checks finds no flooding point,
+; while out most flood + collided nodes = all leafs,
+; the lines are not generated good enough.
+
+(defn lines-gen
+  "generate a list of parallel lines along the longer axis where the slice sits"
+  [a-slice nozzel-diameter]
+  (let [aabb (tree/aabb-slice)])
+  )
