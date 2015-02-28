@@ -122,13 +122,14 @@
            [nil p3] true
            :else false)))
 
-(reduce into (sorted-set-by (distant-point [0 0]))
-        [[[3 4] [4 4] nil nil [1 1] nil [2 2]]
-         nil
-         [[4 3] [3 3]]])
+;(reduce into (sorted-set-by (distant-point [0 0]))
+;        [[[3 4] [4 4] nil nil [1 1] nil [2 2]]
+;         nil
+;         [[4 3] [3 3]]])
 
 (defn line-slice-inc
-  "check segment of line and slice intersection. only returns first two intersection in case of intersection"
+  "check segment of line and slice intersection.
+  returns first intersections in order of their distance to start point"
   [[[sx1 sy1 :as start] [ex2 ey2 :as end] :as line] a-slice]
   (reduce into (sorted-set-by (distant-closer-to-point start))
     (for [geo a-slice]
