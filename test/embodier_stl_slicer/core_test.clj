@@ -145,6 +145,7 @@
       rm-nil
       tri-compressor))
 
+slicings
 ;(clojure.pprint/pprint slicings)
 
 (deftest test-slice-function
@@ -207,7 +208,7 @@
     ;(clojure.pprint/pprint (make-tree (:result (second slicings)) 0.3))
     ))
 
-(def tree (generate-tree (:result (second slicings)) 0.01 1.6))
+(def tree (generate-tree (:result (second slicings)) 1 1.6))
 (def aabb (-> (:result (second slicings)) (aabb-slice 1.6) make-square))
 
 
@@ -266,8 +267,7 @@
       ]
   (-> (->> (leafs tree)
        (map (fn [n] (first n))))
-       (gui-main tree aabb "resources/pic/d1.png"))
-)
+       (gui-main tree aabb "resources/pic/d1.png")))
 
 (let [f
       ;(parse-stl "resources/stl/bin.stl")
@@ -282,23 +282,22 @@
       _ (debugger aabb "aabb:")
       ]
   (-> (fast-flood tree aabb 1)
-      (gui-main tree aabb "resources/pic/d2.png"))
-)
-(let [f
-      ;(parse-stl "resources/stl/asc.stl")
-      (parse-stl "resources/stl/hotend_v2.stl")
-      ts (:triangles f)
-      planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
-      slices (-> (slice ts planes :z) rm-nil tri-compressor)
-      slice (:result (nth slices 0))
-      _ (debugger slice "slice:")
-      tree (generate-tree slice 1 2)
-      aabb (-> slice (aabb-slice 2) make-square center-aabb)
-      _ (debugger aabb "aabb:")
-      ]
-  (-> (slow-flood tree aabb)
-      (gui-main tree aabb "resources/pic/d3.png"))
-)
+      (gui-main tree aabb "resources/pic/d2.png")))
+
+;(let [f
+;      ;(parse-stl "resources/stl/asc.stl")
+;      (parse-stl "resources/stl/hotend_v2.stl")
+;      ts (:triangles f)
+;      planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
+;      slices (-> (slice ts planes :z) rm-nil tri-compressor)
+;      slice (:result (nth slices 0))
+;      _ (debugger slice "slice:")
+;      tree (generate-tree slice 1 2)
+;      aabb (-> slice (aabb-slice 2) make-square center-aabb)
+;      _ (debugger aabb "aabb:")
+;      ]
+;  (-> (slow-flood tree aabb)
+;      (gui-main tree aabb "resources/pic/d3.png")))
 ;(gui-main tree aabb [8])
 ;(index-to-aabb aabb tree-arity 8)
 

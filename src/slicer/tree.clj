@@ -80,14 +80,14 @@
 
 (defn line-line-inc
   "check if two lines intersects"
-  [[x1 y1] [x2 y2] [x3 y3] [x4 y4]]
+  [[x1 y1 :as start-1] [x2 y2 :as end-1] [x3 y3 :as start-2] [x4 y4 :as end-2]]
   (let [aabb1 [(min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)]
         aabb2 [(min x3 x4) (min y3 y4) (max x3 x4) (max y3 y4)]
         a1 (- y2 y1)
-        b1 (- x2 x1)
+        b1 (- x1 x2)
         c1 (+ (* a1 x1) (* b1 y1))
         a2 (- y4 y3)
-        b2 (- x4 x3)
+        b2 (- x3 x4)
         c2 (+ (* a2 x3) (* b2 y3))
         det (- (* a1 b2) (* a2 b1))]
     (if (zero? det)
@@ -105,6 +105,50 @@
 ;(line-line-inc [-1 0] [1 0] [2 -1] [2 1])
 ;(line-line-inc [-1 0] [2 0] [2 -1] [2 1])
 ;(line-line-inc [-1 0] [2 0] [2 3] [2 1])
+
+
+(defn distant-closer-to-point [[x1 y1 :as p1]]
+  "give a point, returns a function taht takes two points,
+  and returns if the distance between two points are closer to the first point"
+  (fn [[x2 y2 :as p2] [x3 y3 :as p3]]
+    (match [p2 p3]
+           [[x2 y2 ] [x3 y3]]
+           (let [delta-x1 (Math/abs (- x2 x1))
+                 delta-y1 (Math/abs (- y2 y1))
+                 delta-x2 (Math/abs (- x3 x1))
+                 delta-y2 (Math/abs (- y3 y1))]
+             (< (+ delta-x1 delta-y1) (+ delta-x2 delta-y2)))
+           [p2 nil] false
+           [nil p3] true
+           :else false)))
+
+(reduce into (sorted-set-by (distant-point [0 0]))
+        [[[3 4] [4 4] nil nil [1 1] nil [2 2]]
+         nil
+         [[4 3] [3 3]]])
+
+(defn line-slice-inc
+  "check segment of line and slice intersection. only returns first two intersection in case of intersection"
+  [[[sx1 sy1 :as start] [ex2 ey2 :as end] :as line] a-slice]
+  (reduce into (sorted-set-by (distant-closer-to-point start))
+    (for [geo a-slice]
+      (match [geo]
+             [[[x1 y1 z1][x2 y2 z2][x3 y3 z3]]] ;triangle
+             [(line-line-inc start end [x1 y1] [x2 y2])
+              (line-line-inc start end [x2 y2] [x3 y3])
+              (line-line-inc start end [x3 y3] [x1 y1])]
+             [[[x1 y1 z1][x2 y2 z2]]] ;line
+             [(line-line-inc start end [x1 y1] [x2 y2])]
+             :else nil ))))
+
+;(line-slice-inc [[0 0] [10 0]]
+;                [[[1 1 1] [1 -1 1]]
+;                 [[-1 -1 1] [1 1 1] [1 -1 1]]
+;                 [[1 1]]])
+
+;(line-line-inc [0 0] [10 0] [1 1] [1 -1])
+;(line-line-inc [-1 0] [10 0] [-1 1] [1 -1])
+;(line-line-inc [-1 0] [10 0] [-1 -1] [1 1])
 
 
 (defn slice-box-inc
