@@ -81,8 +81,12 @@
 (defn line-line-inc
   "check if two lines intersects"
   [[x1 y1 :as start-1] [x2 y2 :as end-1] [x3 y3 :as start-2] [x4 y4 :as end-2]]
-  (let [aabb1 [(min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)]
-        aabb2 [(min x3 x4) (min y3 y4) (max x3 x4) (max y3 y4)]
+  (let [aabb1
+        [(- (min x1 x2) 0.0001) (- (min y1 y2) 0.0001)  ;some ugly hack to make up missing intersections
+         (+ (max x1 x2) 0.0001) (+ (max y1 y2) 0.0001)]
+        aabb2
+        [(- (min x3 x4) 0.0001) (- (min y3 y4) 0.0001)
+         (+ (max x3 x4) 0.0001) (+ (max y3 y4) 0.0001)]
         a1 (- y2 y1)
         b1 (- x1 x2)
         c1 (+ (* a1 x1) (* b1 y1))
@@ -100,6 +104,7 @@
           [(double x) (double y)]
           nil)))))
 
+(line-line-inc [0 10] [0 -10] [0 0] [1 0])
 ;(line-line-inc [-1 0] [1 0] [0 -1] [0 1])
 ;(line-line-inc [-1 0] [1 0] [-1 1] [1 1])
 ;(line-line-inc [-1 0] [1 0] [2 -1] [2 1])
@@ -135,13 +140,19 @@
   (vec (filter (complement nil?) (reduce into (sorted-set-by (distant-closer-to-point start))
     (for [geo a-slice]
       (match [geo]
-             [[[x1 y1 z1][x2 y2 z2][x3 y3 z3]]] ;triangle
+             [[[x1 y1 & [z1]][x2 y2 & [z2]][x3 y3 & [z3]]]] ;triangle
              [(line-line-inc start end [x1 y1] [x2 y2])
               (line-line-inc start end [x2 y2] [x3 y3])
               (line-line-inc start end [x3 y3] [x1 y1])]
-             [[[x1 y1 z1][x2 y2 z2]]] ;line
+             [[[x1 y1 & [z1]][x2 y2 & [z2]]]] ;line
              [(line-line-inc start end [x1 y1] [x2 y2])]
              :else nil ))))))
+
+;(line-slice-inc [[32 4.5] [-32 4.5]]
+;                [[[28 10] [28 0]]
+;                 [[29 10] [29 0]]])
+;
+(;line-line-inc [32 4.5] [-32 4.5] [28 3.5] [28 4.5])
 
 ;(line-slice-inc [[0 0] [10 0]]
 ;                [[[1 1 1] [1 -1 1]]

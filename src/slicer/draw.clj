@@ -1,6 +1,7 @@
 ; draw slices and boxes onto screen
 (ns slicer.draw
   (:require [quil.core :as q]
+            [clojure.core.match :refer [match]]
             [slicer.tree :as tree]))
 
 ;(q/show-cats)
@@ -30,10 +31,24 @@
       (->> [x4 y4 x2 y2] (map * [wpx hpx wpx hpx]) (apply q/line)))
     ))
 
+(defn draw-geo
+  "draw a geo from a slice, can be a triangle, a line or a point"
+  [geo wpx hpx]
+  (match [geo]
+         [[[x1 y1 & z1][x2 y2 & z2][x3 y3 & z3]]] ;triangle
+         (do (q/line (* x1 wpx) (* y1 hpx) (* x2 wpx) (* y2 hpx))
+             (q/line (* x2 wpx) (* y2 hpx) (* x3 wpx) (* y3 hpx))
+             (q/line (* x3 wpx) (* y3 hpx) (* x1 wpx) (* y1 hpx)))
+         [[[x1 y1 & z1][x2 y2 & z2]]] ;line
+         (q/line (* x1 wpx) (* y1 hpx) (* x2 wpx) (* y2 hpx))
+         [[x1 y1 & z1]] ;point
+         (do (q/line (- (* x1 wpx) (/ wpx 10)) (- (* y1 hpx) (/ hpx 10)) (+ (* x1 wpx) (/ wpx 10)) (+ (* y1 hpx) (/ hpx 10)))
+             (q/line (- (* x1 wpx) (/ wpx 10)) (+ (* y1 hpx) (/ hpx 10)) (+ (* x1 wpx) (/ wpx 10)) (- (* y1 hpx) (/ hpx 10))))))
+
 
 (defn gui-main
   "the gui engine"
-  [nodes t [min-x min-y max-x max-y :as aabb] & [filename]]
+  [nodes-or-geos t [min-x min-y max-x max-y :as aabb] & [filename]]
   (let [h (- max-y min-y)
         hpx (/ screen-height h)
         w (- max-x min-x)
@@ -46,8 +61,10 @@
                (q/translate (/ screen-width 2) (/ screen-height 2))
                (q/scale 1 -1) ;; matching the 3D printer coordinate
                ;(q/translate 178 470)
-               (doseq [node nodes]
-                 (draw-node node (nth t node) aabb wpx hpx))
+               (doseq [node-or-geo nodes-or-geos]
+                 (match [(number? node-or-geo)]
+                        [true] (draw-node node-or-geo (nth t node-or-geo) aabb wpx hpx)
+                        [false] (draw-geo node-or-geo wpx hpx)))
                (q/save (if (nil? filename)
                          "debug.png"
                          filename))

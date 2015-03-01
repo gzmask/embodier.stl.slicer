@@ -142,21 +142,23 @@
 ;(into [1 2 3] [4 5 6])
 
 (defn move-point-towards-point
-  "giveing two points, return the point distant d away from p2
+  "giveing two points, return the point distant d away from p1
   ---*-------------x-d-*----"
   [[x1 y1 :as p1] [x2 y2 :as p2] d]
   (let [dx (- x2 x1)
         dy (- y2 y1)]
     (match [(pos? dx) (pos? dy) (neg? dx) (neg? dy) (zero? dx) (zero? dy)]
-           [true true _ _ _ _] [(- x2 d) (- y2 d)]
-           [true _ _ true _ _] [(- x2 d) (+ y2 d)]
-           [_ true true _ _ _] [(+ x2 d) (- y2 d)]
-           [_ _ true true _ _] [(+ x2 d) (+ y2 d)]
-           [_ true _ _ true _] [x2 (- y2 d)]
-           [true _ _ _ _ true] [(- x2 d) y2]
-           [_ _ true _ _ true] [(+ x2 d) y2]
-           [_ _ _ true true _] [x2 (+ y2 d)]
+           [true true _ _ _ _] [(+ x1 d) (+ y1 d)]
+           [true _ _ true _ _] [(+ x1 d) (- y1 d)]
+           [_ true true _ _ _] [(- x1 d) (+ y1 d)]
+           [_ _ true true _ _] [(- x1 d) (- y1 d)]
+           [_ true _ _ true _] [x1 (+ y1 d)]
+           [true _ _ _ _ true] [(+ x1 d) y1]
+           [_ _ true _ _ true] [(- x1 d) y1]
+           [_ _ _ true true _] [x1 (- y1 d)]
            )))
+
+;(move-point-towards-point [0 0] [0 1] 0.1)
 
 (defn mid-point
   "given two points, return middle point"
@@ -177,14 +179,15 @@
     (cond
       (empty? intersections)
       nil
-      (>= (count intersections) 2)
+      (even? (count intersections)) ;there are some missing intersecitons, even? will filter those out.
       (let [[x1 y1 :as p1] (first intersections)
             [x2 y2 :as p2] (second intersections)]
+        (debugger intersections "intersections: ")
         (cond
           (or ;if a min-node aabb can fit in first two points
             (> (Math/abs (- x2 x1)) nozzle-diameter)
             (> (Math/abs (- y2 y1)) nozzle-diameter))
-          (mid-point p1 p2) ;return the middle point
+          (move-point-towards-point p1 p2 (* 1.1 nozzle-diameter)) ;return the middle point
           :else nil ))
       :else
       nil)))
@@ -194,11 +197,11 @@
   find the point that is contained in the slice"
   [a-slice nozzle-diameter [min-x min-y max-x max-y :as aabb]]
   (let [;[min-x min-y max-x max-y :as aabb] (tree/aabb-slice a-slice (* 2 nozzle-diameter))
-        x-points (range (+ min-x (* nozzle-diameter 2)) (- max-x (* nozzle-diameter 2)) nozzle-diameter)
+        x-points (range (+ min-x (* nozzle-diameter 1.5)) (- max-x (* nozzle-diameter 1.5)) nozzle-diameter)
         x-start-points (map vector x-points (repeat max-y))
         x-end-points (map vector x-points (repeat min-y))
         x-lines (map vector x-start-points x-end-points)
-        y-points (range (+ min-y (* nozzle-diameter 2)) (- max-y (* nozzle-diameter 2)) nozzle-diameter)
+        y-points (range (+ min-y (* nozzle-diameter 1.5)) (- max-y (* nozzle-diameter 1.5)) nozzle-diameter)
         y-start-points (map vector (repeat max-x) y-points)
         y-end-points (map vector (repeat min-x) y-points)
         y-lines (map vector y-start-points y-end-points)
@@ -210,6 +213,8 @@
       (if (>= ind (count lines))
         results
         (let [flood-point (line-slice-flood-point (nth lines ind) a-slice nozzle-diameter)]
+          (debugger (nth lines ind) "line: ")
+          (debugger flood-point "intersection mid-point: ")
           (if (not (nil? flood-point))
             (recur (inc ind) (conj results flood-point))
             (recur (inc ind) results)
@@ -245,7 +250,7 @@
                           (flood-node contained-points aabb t nozzle-diameter false))
         ]
     ;outer-nodes
-    ;contained-nodes
-    debug-nodes
+    contained-nodes
+    ;debug-nodes
     ))
 

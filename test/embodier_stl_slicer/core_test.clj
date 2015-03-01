@@ -8,7 +8,8 @@
             [slicer.flood :refer :all]
             [slicer.draw :refer :all]
             [slicer.gcode :refer :all]
-            [slicer.core :refer :all]))
+            [slicer.core :refer :all]
+            [slicer.tree :as tree]))
 
 (deftest test-point-plane
   (testing "the point-plane distance."
@@ -270,19 +271,48 @@
        (gui-main tree aabb "resources/pic/d1.png")))
 
 (let [f
-      ;(parse-stl "resources/stl/asc.stl")
-      (parse-stl "resources/stl/hotend_v2.stl")
+      (parse-stl "resources/stl/asc.stl")
+      ;(parse-stl "resources/stl/hotend_v2.stl")
       ts (:triangles f)
       planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
       slices (-> (slice ts planes :z) rm-nil tri-compressor)
       slice (:result (nth slices 1))
       ;_ (debugger slice "slice:")
       tree (generate-tree slice 1 2)
-      aabb (-> slice (aabb-slice 2) make-square) ;center-aabb)
+      aabb (-> slice (aabb-slice 2) make-square)
       _ (debugger aabb "aabb:")
       ]
-  (-> (fast-flood tree aabb 1 slice)
-      (gui-main tree aabb "resources/pic/d2.png")))
+  (-> (fast-flood tree aabb 1 slice) (gui-main tree aabb "resources/pic/d2.png"))
+  )
+
+(let [f
+      (parse-stl "resources/stl/asc.stl")
+      ;(parse-stl "resources/stl/hotend_v2.stl")
+      nozzle-diameter 1
+      ts (:triangles f)
+      planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
+      slices (-> (slice ts planes :z) rm-nil tri-compressor)
+      slice (:result (nth slices 1))
+      ;_ (debugger slice "slice:")
+      tree (generate-tree slice nozzle-diameter 2)
+      [min-x min-y max-x max-y :as aabb] (-> slice (aabb-slice 2) make-square)
+      x-points (range (+ min-x (* nozzle-diameter 1.5)) (- max-x (* nozzle-diameter 1.5)) nozzle-diameter)
+      x-start-points (map vector x-points (repeat max-y))
+      x-end-points (map vector x-points (repeat min-y))
+      x-lines (map vector x-start-points x-end-points)
+      y-points (range (+ min-y (* nozzle-diameter 1.5)) (- max-y (* nozzle-diameter 1.5)) nozzle-diameter)
+      ;y-start-points (map vector (repeat max-x) y-points)
+      ;y-end-points (map vector (repeat min-x) y-points)
+      ;y-lines (map vector y-start-points y-end-points)
+      ;lines (into x-lines y-lines)
+      intersections (filter (complement nil?) (reduce into [] (map #(line-slice-inc % slice) x-lines)))
+      lines-incs (into x-lines intersections)
+      ;_ (debugger aabb "aabb:")
+      ;_ (debugger lines "lines:")
+      ;_ (debugger intersections "intersections:")
+      ]
+  (gui-main lines-incs tree aabb "resources/pic/d3.png")
+  )
 
 ;(let [f
 ;      ;(parse-stl "resources/stl/asc.stl")
