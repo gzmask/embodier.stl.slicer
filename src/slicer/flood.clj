@@ -206,7 +206,6 @@
       (even? (count intersections)) ;there are some missing intersecitons, even? will filter those out.
       (let [[x1 y1 :as p1] (first intersections)
             [x2 y2 :as p2] (second intersections)]
-        (debugger intersections "intersections: ")
         (cond
           (or ;if a min-node aabb can fit in first two points
             (> (Math/abs (- x2 x1)) nozzle-diameter)
@@ -230,15 +229,12 @@
         y-end-points (map vector (repeat min-x) y-points)
         y-lines (map vector y-start-points y-end-points)
         lines (into x-lines y-lines)
-        ;_ (debugger lines "lines:")
         ]
     (loop [ind 0
            results []]
       (if (>= ind (count lines))
         results
         (let [flood-point (line-slice-flood-point (nth lines ind) a-slice nozzle-diameter)]
-          (debugger (nth lines ind) "line: ")
-          (debugger flood-point "intersection mid-point: ")
           (if (not (nil? flood-point))
             (recur (inc ind) (conj results flood-point))
             (recur (inc ind) results)
