@@ -26,16 +26,16 @@
        (do
          (reset! m (/ (- y2 y1) (- x2 x1)))
          (reset! y (+ (* @m (- min-x x1)) y1))
-         (and (>= @y min-y) (<= @y max-y))) true
+         (and (s>= @y min-y 0.000001) (s<= @y max-y 0.000001))) true
        (do
          (reset! y (+ (* @m (- max-x x1)) y1))
-         (and (>= @y min-y) (<= @y max-y))) true
+         (and (s>= @y min-y 0.000001) (s<= @y max-y 0.000001))) true
        (do
          (reset! x (+ (/ (- min-y y1) @m) x1))
-         (and (>= @x min-x) (<= @x max-x))) true
+         (and (s>= @x min-x 0.000001) (s<= @x max-x 0.000001))) true
        (do
          (reset! x (+ (/ (- max-y y1) @m) x1))
-         (and (>= @x min-x) (<= @x max-x))) true
+         (and (s>= @x min-x 0.000001) (s<= @x max-x 0.000001))) true
        :else false
        ))))
 
@@ -74,7 +74,8 @@
   ([[x1 y1 :as point]
     [min-x min-y :as box-min]
     [max-x max-y :as box-max]]
-   (and (>= x1 min-x) (<= x1 max-x) (>= y1 min-y) (<= y1 max-y)))
+   (and (s>= x1 min-x 0.000001) (s<= x1 max-x 0.000001)
+        (s>= y1 min-y 0.000001) (s<= y1 max-y 0.000001)))
   ([point [min-x min-y max-x max-y :as aabb]]
    (point-box-inc point [min-x min-y] [max-x max-y])))
 
@@ -82,11 +83,11 @@
   "check if two lines intersects"
   [[x1 y1 :as start-1] [x2 y2 :as end-1] [x3 y3 :as start-2] [x4 y4 :as end-2]]
   (let [aabb1
-        [(- (min x1 x2) 0.0001) (- (min y1 y2) 0.0001)  ;some ugly hack to make up missing intersections
-         (+ (max x1 x2) 0.0001) (+ (max y1 y2) 0.0001)]
+        [(min x1 x2) (min y1 y2)
+         (max x1 x2) (max y1 y2)]
         aabb2
-        [(- (min x3 x4) 0.0001) (- (min y3 y4) 0.0001)
-         (+ (max x3 x4) 0.0001) (+ (max y3 y4) 0.0001)]
+        [(min x3 x4) (min y3 y4)
+         (max x3 x4) (max y3 y4)]
         a1 (- y2 y1)
         b1 (- x1 x2)
         c1 (+ (* a1 x1) (* b1 y1))
@@ -104,7 +105,7 @@
           [(double x) (double y)]
           nil)))))
 
-(line-line-inc [0 10] [0 -10] [0 0] [1 0])
+;(line-line-inc [0 10] [0 -10] [0 0] [1 0])
 ;(line-line-inc [-1 0] [1 0] [0 -1] [0 1])
 ;(line-line-inc [-1 0] [1 0] [-1 1] [1 1])
 ;(line-line-inc [-1 0] [1 0] [2 -1] [2 1])
@@ -152,7 +153,7 @@
 ;                [[[28 10] [28 0]]
 ;                 [[29 10] [29 0]]])
 ;
-(;line-line-inc [32 4.5] [-32 4.5] [28 3.5] [28 4.5])
+;(line-line-inc [32 4.5] [-32 4.5] [28 3.5] [28 4.5])
 
 ;(line-slice-inc [[0 0] [10 0]]
 ;                [[[1 1 1] [1 -1 1]]
