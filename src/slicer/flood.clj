@@ -9,10 +9,10 @@
   [[min-x min-y max-x max-y :as aabb]]
   (let [w (- max-x min-x)
         h (- max-y min-y)]
-  [[(- min-x w) min-y max-x max-y]
-   [max-x max-y max-x (+ max-y h)]
-   [max-x min-y (+ max-x w) max-y]
-   [min-x (- min-y h) max-x min-y]]))
+  [[(- min-x w) min-y min-x max-y] ;left box
+   [min-x max-y max-x (+ max-y h)] ;upper box
+   [max-x min-y (+ max-x w) max-y] ;right box
+   [min-x (- min-y h) max-x min-y]])) ;lower box
 
 (defn slow-flood
   "given a tree and aabb generated from the slice,
@@ -165,20 +165,19 @@
         dy (/ (- y2 y1) 2)]
     [(double (+ x1 dx)) (double (+ y1 dy))]))
 
-(mid-point [0 0] [2 2])
-(mid-point [0 0] [-2 -2])
-(mid-point [1 0] [-2 -2])
+;(mid-point [0 0] [2 2])
+;(mid-point [0 0] [-2 -2])
+;(mid-point [1 0] [-2 -2])
 
 (defn line-slice-flood-point
   "give a line segment, a slice, returns the flood point or nil if none exist.
   --*x*------------*--x*---"
   [line a-slice nozzle-diameter]
   (let [intersections (tree/line-slice-inc line a-slice)]
-    (debugger intersections "intersections:")
     (cond
       (empty? intersections)
       nil
-      (> (count intersections) 2)
+      (>= (count intersections) 2)
       (let [[x1 y1 :as p1] (first intersections)
             [x2 y2 :as p2] (second intersections)]
         (cond
@@ -193,8 +192,8 @@
 (defn find-contained-flooding-point
   "generate a list of parallel lines from AABB of a slice,
   find the point that is contained in the slice"
-  [a-slice nozzle-diameter]
-  (let [[min-x min-y max-x max-y :as aabb] (tree/aabb-slice a-slice (* 2 nozzle-diameter))
+  [a-slice nozzle-diameter [min-x min-y max-x max-y :as aabb]]
+  (let [;[min-x min-y max-x max-y :as aabb] (tree/aabb-slice a-slice (* 2 nozzle-diameter))
         x-points (range (+ min-x (* nozzle-diameter 2)) (- max-x (* nozzle-diameter 2)) nozzle-diameter)
         x-start-points (map vector x-points (repeat max-y))
         x-end-points (map vector x-points (repeat min-y))
@@ -204,7 +203,8 @@
         y-end-points (map vector (repeat min-x) y-points)
         y-lines (map vector y-start-points y-end-points)
         lines (into x-lines y-lines)
-        _ (debugger lines "lines:")]
+        ;_ (debugger lines "lines:")
+        ]
     (loop [ind 0
            results []]
       (if (>= ind (count lines))
@@ -232,16 +232,19 @@
   border needs to be at least two times of the nozzle size"
   [t aabb nozzle-diameter a-slice]
   (let [
-        ;outer-aabbs (flooding-aabb-gen aabb)
-        ;outer-nodes (flood-node outer-aabbs aabb t nozzle-diameter false)
-        contained-points (find-contained-flooding-point a-slice nozzle-diameter)
-        _ (debugger contained-points "contained points:")
+        outer-aabbs (flooding-aabb-gen aabb)
+        _ (debugger outer-aabbs "outer aabbs:")
+        outer-nodes (flood-node outer-aabbs aabb t nozzle-diameter false)
+        contained-points (find-contained-flooding-point a-slice nozzle-diameter aabb)
         debug-nodes (->> contained-points
                          (map (fn [p] (tree/point-leaf p t aabb)))
                          (filter (complement nil?))
                          )
-        contained-nodes (flood-node contained-points aabb t nozzle-diameter false)
+        contained-nodes (if (empty? contained-points)
+                          nil
+                          (flood-node contained-points aabb t nozzle-diameter false))
         ]
+    ;outer-nodes
     ;contained-nodes
     debug-nodes
     ))
