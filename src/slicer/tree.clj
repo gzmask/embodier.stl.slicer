@@ -105,6 +105,7 @@
 ;(line-line-inc [-1 0] [1 0] [2 -1] [2 1])
 ;(line-line-inc [-1 0] [2 0] [2 -1] [2 1])
 ;(line-line-inc [-1 0] [2 0] [2 3] [2 1])
+;(line-line-inc [0 0] [2 0] [0 1] [2 1])
 
 
 (defn distant-closer-to-point [[x1 y1 :as p1]]
@@ -582,7 +583,7 @@
           ;false node is a leaf node
           (false? (nth t node))
           node
-          ;true node is needs check deeper level
+          ;true node needs check deeper level
           (nth t node)
           (let [c-nodes (children node)
                 c-aabbs (map (fn [i] (index-to-aabb aabb tree-arity i)) c-nodes)]

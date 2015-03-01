@@ -68,14 +68,17 @@
   the second aabb is the root aabb box for the tree t.
   returns:
   #{leaf-index ...}"
-  [aabbs aabb t nozzle-diameter collision]
-  (let [init-flood-points (->> aabbs
-                              (map (fn [ab] (aabb-flood-points ab nozzle-diameter)))
-                              (reduce into #{})
-                              vec)
+  [aabbs-or-points aabb t nozzle-diameter collision]
+  (let [init-flood-points (match [(count (first aabbs-or-points))]
+                                 [2] aabbs-or-points
+                                 [4] (->> aabbs-or-points
+                                          (map (fn [ab] (aabb-flood-points ab nozzle-diameter)))
+                                          (reduce into #{})
+                                          vec))
         init-flooded-leafs (->> init-flood-points
                                 (map (fn [p] (tree/point-leaf p t aabb)))
-                                (filter (complement nil?)))
+                                (filter (complement nil?))
+                                (filter (fn [i] (= collision (nth t i)))))
         flooded-set (atom (set init-flooded-leafs))]
     (loop [flood-count (count @flooded-set)
            flooding-leafs init-flooded-leafs]
@@ -101,16 +104,6 @@
 ;(vec (reduce into #{} '([1 2 3] [4 5 6])))
 ;(map inc #{1 2 3})
 
-(defn fast-flood
-  "above flood is so slow, why not a new one.
-  faster, but sacrificed some accuracy.
-  This will not flood a slice correctly if tree is not generated with a border.
-  border needs to be at least two times of the nozzle size"
-  [t aabb nozzle-diameter]
-  (let [flooding-aabbs (flooding-aabb-gen aabb)
-        flooded-nodes (flood-node flooding-aabbs aabb t nozzle-diameter false)]
-    flooded-nodes
-    ))
 
 ;(contains? #{1 2 3} 4)
 ;(conj #{} 1)
@@ -154,35 +147,45 @@
   [[x1 y1 :as p1] [x2 y2 :as p2] d]
   (let [dx (- x2 x1)
         dy (- y2 y1)]
-    (match [(pos? dx) (pos? dy)]
-           [true true] [(- x2 d) (- y2 d)]
-           [true false] [(- x2 d) (+ y2 d)]
-           [false true] [(+ x2 d) (- y2 d)]
-           [false false] [(+ x2 d) (+ y2 d)]
+    (match [(pos? dx) (pos? dy) (neg? dx) (neg? dy) (zero? dx) (zero? dy)]
+           [true true _ _ _ _] [(- x2 d) (- y2 d)]
+           [true _ _ true _ _] [(- x2 d) (+ y2 d)]
+           [_ true true _ _ _] [(+ x2 d) (- y2 d)]
+           [_ _ true true _ _] [(+ x2 d) (+ y2 d)]
+           [_ true _ _ true _] [x2 (- y2 d)]
+           [true _ _ _ _ true] [(- x2 d) y2]
+           [_ _ true _ _ true] [(+ x2 d) y2]
+           [_ _ _ true true _] [x2 (+ y2 d)]
            )))
+
+(defn mid-point
+  "given two points, return middle point"
+  [[x1 y1 :as p1] [x2 y2 :as p2]]
+  (let [dx (/ (- x2 x1) 2)
+        dy (/ (- y2 y1) 2)]
+    [(double (+ x1 dx)) (double (+ y1 dy))]))
+
+(mid-point [0 0] [2 2])
+(mid-point [0 0] [-2 -2])
+(mid-point [1 0] [-2 -2])
 
 (defn line-slice-flood-point
   "give a line segment, a slice, returns the flood point or nil if none exist.
   --*x*------------*--x*---"
   [line a-slice nozzle-diameter]
   (let [intersections (tree/line-slice-inc line a-slice)]
+    (debugger intersections "intersections:")
     (cond
       (empty? intersections)
       nil
-      (even? (count intersections))
+      (> (count intersections) 2)
       (let [[x1 y1 :as p1] (first intersections)
-            [x2 y2 :as p2] (second intersections)
-            [x3 y3 :as p3] (last (drop-last intersections))
-            [x4 y4 :as p4] (last intersections)]
+            [x2 y2 :as p2] (second intersections)]
         (cond
           (or ;if a min-node aabb can fit in first two points
             (> (Math/abs (- x2 x1)) nozzle-diameter)
             (> (Math/abs (- y2 y1)) nozzle-diameter))
-          (move-point-towards-point p1 p2 (/ nozzle-diameter 10)) ;return the point almost touching p2
-          (or ;if a min-node aabb can fit in last two points
-            (> (Math/abs (- x4 x3)) nozzle-diameter)
-            (> (Math/abs (- y4 y3)) nozzle-diameter))
-          (move-point-towards-point p1 p2 (/ nozzle-diameter 10)) ;return the point almost touching p3
+          (mid-point p1 p2) ;return the middle point
           :else nil ))
       :else
       nil)))
@@ -192,27 +195,54 @@
   find the point that is contained in the slice"
   [a-slice nozzle-diameter]
   (let [[min-x min-y max-x max-y :as aabb] (tree/aabb-slice a-slice (* 2 nozzle-diameter))
-        x-points (range min-x max-x nozzle-diameter)
+        x-points (range (+ min-x (* nozzle-diameter 2)) (- max-x (* nozzle-diameter 2)) nozzle-diameter)
         x-start-points (map vector x-points (repeat max-y))
         x-end-points (map vector x-points (repeat min-y))
         x-lines (map vector x-start-points x-end-points)
-        y-points (range min-y max-y nozzle-diameter)
+        y-points (range (+ min-y (* nozzle-diameter 2)) (- max-y (* nozzle-diameter 2)) nozzle-diameter)
         y-start-points (map vector (repeat max-x) y-points)
         y-end-points (map vector (repeat min-x) y-points)
         y-lines (map vector y-start-points y-end-points)
         lines (into x-lines y-lines)
-        ]
-    (loop [ind 0]
+        _ (debugger lines "lines:")]
+    (loop [ind 0
+           results []]
       (if (>= ind (count lines))
-        nil
+        results
         (let [flood-point (line-slice-flood-point (nth lines ind) a-slice nozzle-diameter)]
           (if (not (nil? flood-point))
-            flood-point
-            (recur (inc ind))
+            (recur (inc ind) (conj results flood-point))
+            (recur (inc ind) results)
             ))))))
 
+;(find-contained-flooding-point [[[10 10 1] [10 -10 1]]
+;                                [[-10 -10 1] [10 10 1] [10 -10 1]]
+;                                [[1 1]]]
+;                                1)
+;
 ;(find-contained-flooding-point [[[1 1 1] [1 -1 1]]
 ;                                [[-1 -1 1] [1 1 1] [1 -1 1]]
 ;                                [[1 1]]]
-;                                1)
+;                               1)
+
+(defn fast-flood
+  "above flood is so slow, why not a new one.
+  faster, but sacrificed some accuracy.
+  This will not flood a slice correctly if tree is not generated with a border.
+  border needs to be at least two times of the nozzle size"
+  [t aabb nozzle-diameter a-slice]
+  (let [
+        ;outer-aabbs (flooding-aabb-gen aabb)
+        ;outer-nodes (flood-node outer-aabbs aabb t nozzle-diameter false)
+        contained-points (find-contained-flooding-point a-slice nozzle-diameter)
+        _ (debugger contained-points "contained points:")
+        debug-nodes (->> contained-points
+                         (map (fn [p] (tree/point-leaf p t aabb)))
+                         (filter (complement nil?))
+                         )
+        contained-nodes (flood-node contained-points aabb t nozzle-diameter false)
+        ]
+    ;contained-nodes
+    debug-nodes
+    ))
 

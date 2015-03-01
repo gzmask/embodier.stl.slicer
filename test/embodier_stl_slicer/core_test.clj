@@ -253,35 +253,35 @@ slicings
 ;  )
 ;
 (let [f
-      ;(parse-stl "resources/stl/bin.stl")
+      (parse-stl "resources/stl/asc.stl")
       ;(parse-stl "resources/stl/20130520_PLA_LM8UU_8p2pi.stl")
-      (parse-stl "resources/stl/hotend_v2.stl")
+      ;(parse-stl "resources/stl/hotend_v2.stl")
       ts (:triangles f)
       planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
       slices (-> (slice ts planes :z) rm-nil tri-compressor)
       slice (:result (nth slices 1))
-      _ (debugger slice "slice:")
+      ;_ (debugger slice "slice:")
       tree (generate-tree slice 1 2)
       aabb (-> slice (aabb-slice 2) make-square center-aabb)
-      _ (debugger aabb "aabb:")
+      ;_ (debugger aabb "aabb:")
       ]
   (-> (->> (leafs tree)
        (map (fn [n] (first n))))
        (gui-main tree aabb "resources/pic/d1.png")))
 
 (let [f
-      ;(parse-stl "resources/stl/bin.stl")
+      ;(parse-stl "resources/stl/asc.stl")
       (parse-stl "resources/stl/hotend_v2.stl")
       ts (:triangles f)
       planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
       slices (-> (slice ts planes :z) rm-nil tri-compressor)
-      slice (:result (nth slices 0))
-      _ (debugger slice "slice:")
+      slice (:result (nth slices 1))
+      ;_ (debugger slice "slice:")
       tree (generate-tree slice 1 2)
       aabb (-> slice (aabb-slice 2) make-square center-aabb)
       _ (debugger aabb "aabb:")
       ]
-  (-> (fast-flood tree aabb 1)
+  (-> (fast-flood tree aabb 1 slice)
       (gui-main tree aabb "resources/pic/d2.png")))
 
 ;(let [f
