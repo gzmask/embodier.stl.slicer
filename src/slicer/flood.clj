@@ -142,8 +142,77 @@
 ; while out most flood + collided nodes = all leafs,
 ; the lines are not generated good enough.
 
-(defn lines-gen
-  "generate a list of parallel lines along the longer axis where the slice sits"
-  [a-slice nozzel-diameter]
-  (let [aabb (tree/aabb-slice)])
-  )
+;(map vector
+;  (map vector [1 2 3] [3 4 5])
+;  (map vector [1 2 3] [3 4 5]))
+;
+;(into [1 2 3] [4 5 6])
+
+(defn move-point-towards-point
+  "giveing two points, return the point distant d away from p2
+  ---*-------------x-d-*----"
+  [[x1 y1 :as p1] [x2 y2 :as p2] d]
+  (let [dx (- x2 x1)
+        dy (- y2 y1)]
+    (match [(pos? dx) (pos? dy)]
+           [true true] [(- x2 d) (- y2 d)]
+           [true false] [(- x2 d) (+ y2 d)]
+           [false true] [(+ x2 d) (- y2 d)]
+           [false false] [(+ x2 d) (+ y2 d)]
+           )))
+
+(defn line-slice-flood-point
+  "give a line segment, a slice, returns the flood point or nil if none exist.
+  --*x*------------*--x*---"
+  [line a-slice nozzle-diameter]
+  (let [intersections (tree/line-slice-inc line a-slice)]
+    (cond
+      (empty? intersections)
+      nil
+      (even? (count intersections))
+      (let [[x1 y1 :as p1] (first intersections)
+            [x2 y2 :as p2] (second intersections)
+            [x3 y3 :as p3] (last (drop-last intersections))
+            [x4 y4 :as p4] (last intersections)]
+        (cond
+          (or ;if a min-node aabb can fit in first two points
+            (> (Math/abs (- x2 x1)) nozzle-diameter)
+            (> (Math/abs (- y2 y1)) nozzle-diameter))
+          (move-point-towards-point p1 p2 (/ nozzle-diameter 10)) ;return the point almost touching p2
+          (or ;if a min-node aabb can fit in last two points
+            (> (Math/abs (- x4 x3)) nozzle-diameter)
+            (> (Math/abs (- y4 y3)) nozzle-diameter))
+          (move-point-towards-point p1 p2 (/ nozzle-diameter 10)) ;return the point almost touching p3
+          :else nil ))
+      :else
+      nil)))
+
+(defn find-contained-flooding-point
+  "generate a list of parallel lines from AABB of a slice,
+  find the point that is contained in the slice"
+  [a-slice nozzle-diameter]
+  (let [[min-x min-y max-x max-y :as aabb] (tree/aabb-slice a-slice (* 2 nozzle-diameter))
+        x-points (range min-x max-x nozzle-diameter)
+        x-start-points (map vector x-points (repeat max-y))
+        x-end-points (map vector x-points (repeat min-y))
+        x-lines (map vector x-start-points x-end-points)
+        y-points (range min-y max-y nozzle-diameter)
+        y-start-points (map vector (repeat max-x) y-points)
+        y-end-points (map vector (repeat min-x) y-points)
+        y-lines (map vector y-start-points y-end-points)
+        lines (into x-lines y-lines)
+        ]
+    (loop [ind 0]
+      (if (>= ind (count lines))
+        nil
+        (let [flood-point (line-slice-flood-point (nth lines ind) a-slice nozzle-diameter)]
+          (if (not (nil? flood-point))
+            flood-point
+            (recur (inc ind))
+            ))))))
+
+;(find-contained-flooding-point [[[1 1 1] [1 -1 1]]
+;                                [[-1 -1 1] [1 1 1] [1 -1 1]]
+;                                [[1 1]]]
+;                                1)
+

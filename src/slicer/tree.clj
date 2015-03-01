@@ -131,7 +131,7 @@
   "check segment of line and slice intersection.
   returns first intersections in order of their distance to start point"
   [[[sx1 sy1 :as start] [ex2 ey2 :as end] :as line] a-slice]
-  (vec (reduce into (sorted-set-by (distant-closer-to-point start))
+  (vec (filter (complement nil?) (reduce into (sorted-set-by (distant-closer-to-point start))
     (for [geo a-slice]
       (match [geo]
              [[[x1 y1 z1][x2 y2 z2][x3 y3 z3]]] ;triangle
@@ -140,7 +140,7 @@
               (line-line-inc start end [x3 y3] [x1 y1])]
              [[[x1 y1 z1][x2 y2 z2]]] ;line
              [(line-line-inc start end [x1 y1] [x2 y2])]
-             :else nil )))))
+             :else nil ))))))
 
 ;(line-slice-inc [[0 0] [10 0]]
 ;                [[[1 1 1] [1 -1 1]]
