@@ -286,8 +286,8 @@
   )
 
 (let [f
-      ;(parse-stl "resources/stl/asc.stl")
-      (parse-stl "resources/stl/hotend_v2.stl")
+      (parse-stl "resources/stl/asc.stl")
+      ;(parse-stl "resources/stl/hotend_v2.stl")
       nozzle-diameter 1
       ts (:triangles f)
       planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
