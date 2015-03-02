@@ -257,20 +257,15 @@
   border needs to be at least two times of the nozzle size"
   [t aabb nozzle-diameter a-slice]
   (let [
-        outer-aabbs (flooding-aabb-gen aabb)
-        _ (debugger outer-aabbs "outer aabbs:")
-        outer-nodes (flood-node outer-aabbs aabb t nozzle-diameter false)
+        ;outer-aabbs (flooding-aabb-gen aabb)
+        ;_ (debugger outer-aabbs "outer aabbs:")
+        ;outer-nodes (flood-node outer-aabbs aabb t nozzle-diameter false)
+        ;debug-nodes (->> contained-points (map (fn [p] (tree/point-leaf p t aabb))) (filter (complement nil?)))
+        edges (filter (fn [i] (nth t i)) (map first (tree/leafs t)))
         contained-points (find-contained-flooding-point a-slice nozzle-diameter aabb)
-        debug-nodes (->> contained-points
-                         (map (fn [p] (tree/point-leaf p t aabb)))
-                         (filter (complement nil?))
-                         )
         contained-nodes (if (empty? contained-points)
                           nil
-                          (flood-node contained-points aabb t nozzle-diameter false))
-        ]
-    ;outer-nodes
-    contained-nodes
-    ;debug-nodes
+                          (flood-node contained-points aabb t nozzle-diameter false))]
+    (into edges contained-nodes)
     ))
 
