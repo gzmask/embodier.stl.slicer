@@ -41,39 +41,34 @@
         (vec @flooded-nodes)
         (recur (count @flooded-nodes))))))
 
+;since aabb can be smaller than nozzle-diameter, this functin needs extra care
 
 (defn aabb-flood-points
   "generate flooding points for interseciton check from aabb"
   [[min-x min-y max-x max-y :as aabb] nozzle-diameter]
-  (let [[mx my :as mid-point] [(-> (- max-x min-x) (/ 2) (+ min-x)) (-> (- max-y min-y) (/ 2) (+ min-y))]
+  (let [[mx my :as mid-point] [(-> (- max-x min-x)
+                                   (/ 2)
+                                   (+ min-x))
+                               (-> (- max-y min-y)
+                                   (/ 2)
+                                   (+ min-y))]
+        dx (min nozzle-diameter (- max-x min-x))
+        dy (min nozzle-diameter (- max-y min-y))
         half-nozzle (/ nozzle-diameter 2)
-        third-nozzle (/ nozzle-diameter 3)
-        ]
-    (match [(s<= (- max-x min-y) nozzle-diameter 0.000001)]
-           [true] [
-                   [(- min-x half-nozzle) my] ;left point
-                   [(+ max-x half-nozzle) my] ;right point
-                   [mx (+ max-y half-nozzle)] ;upper point
-                   [mx (- min-y half-nozzle)] ;lower point
-                   ;[(- min-x third-nozzle) my] ;left point
-                   ;[(+ max-x third-nozzle) my] ;right point
-                   ;[mx (+ max-y third-nozzle)] ;upper point
-                   ;[mx (- min-y third-nozzle)] ;lower point
-                   ]
-           [false]
-           [;left column
-             [(- min-x third-nozzle) (- my third-nozzle)]
-             [(- min-x third-nozzle) (+ my third-nozzle)]
-             ;right column
-             [(+ max-x third-nozzle) (- my third-nozzle)]
-             [(+ max-x third-nozzle) (+ my third-nozzle)]
-             ;upper row
-             [(- mx third-nozzle) (+ max-y third-nozzle)]
-             [(+ mx third-nozzle) (+ max-y third-nozzle)]
-             ;lower row
-             [(- mx third-nozzle) (- min-y third-nozzle)]
-             [(+ mx third-nozzle) (- min-y third-nozzle)]]
-           :else nil)))
+        third-nozzle (/ nozzle-diameter 3)]
+         [;left column
+           [(- min-x (/ dx 2)) (- my (/ dy 2))]
+           [(- min-x (/ dx 2)) (+ my (/ dy 2))]
+           ;right column
+           [(+ max-x (/ dx 2)) (- my (/ dy 2))]
+           [(+ max-x (/ dx 2)) (+ my (/ dy 2))]
+           ;upper row
+           [(- mx (/ dx 2)) (+ max-y (/ dy 2))]
+           [(+ mx (/ dx 2)) (+ max-y (/ dy 2))]
+           ;lower row
+           [(- mx (/ dx 2)) (- min-y (/ dy 2))]
+           [(+ mx (/ dx 2)) (- min-y (/ dy 2))]]
+           ))
 
 
 ;(count (range -10 10 0.1))
@@ -88,7 +83,6 @@
 ;(nth @debugging 1)
 ;(doseq [ind (range (count @debugging))]
 ;  (slicer.draw/gui-main (nth @debugging ind) @tree-debug @aabb-debug (str "resources/pic/flood-debug-" ind ".png")))
-
 
 (defn flood-node
   "geometrically flood the nodes that are intersecting with the given aabbs, given collision of either true or false.
