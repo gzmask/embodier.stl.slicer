@@ -214,11 +214,11 @@
   find the point that is contained in the slice"
   [a-slice nozzle-diameter [min-x min-y max-x max-y :as aabb]]
   (let [;[min-x min-y max-x max-y :as aabb] (tree/aabb-slice a-slice (* 2 nozzle-diameter))
-        x-points (range (+ min-x (* nozzle-diameter 1.5)) (- max-x (* nozzle-diameter 1.5)) nozzle-diameter)
+        x-points (range (+ min-x (* nozzle-diameter 1.5)) (- max-x (* nozzle-diameter 1.5)) (/ nozzle-diameter 2))
         x-start-points (map vector x-points (repeat max-y))
         x-end-points (map vector x-points (repeat min-y))
         x-lines (map vector x-start-points x-end-points)
-        y-points (range (+ min-y (* nozzle-diameter 1.5)) (- max-y (* nozzle-diameter 1.5)) nozzle-diameter)
+        y-points (range (+ min-y (* nozzle-diameter 1.5)) (- max-y (* nozzle-diameter 1.5)) (/ nozzle-diameter 2))
         y-start-points (map vector (repeat max-x) y-points)
         y-end-points (map vector (repeat min-x) y-points)
         y-lines (map vector y-start-points y-end-points)
