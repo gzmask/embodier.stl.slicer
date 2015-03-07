@@ -282,7 +282,7 @@
       aabb (-> slice (aabb-slice 2) make-square)
       _ (debugger aabb "aabb:")
       ]
-  (-> (fast-flood tree aabb 1 slice) (gui-main tree aabb "resources/pic/d1.png"))
+  (-> (fast-flood tree aabb slice) (gui-main tree aabb "resources/pic/d1.png"))
   )
 
 ;(let [f

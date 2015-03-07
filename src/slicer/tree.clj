@@ -321,6 +321,7 @@
   [height base]
   (/ (dec (Math/pow base height)) (dec base)))
 
+
 (defn height
   "given tree or its leafs count, return its height"
   [t b]
@@ -344,6 +345,7 @@
 ;(height 16 4)
 ;(height 65 4)
 ;(Math/log 4)
+
 
 (defn index-to-hrp
   "given tree arity base and the index to one of its node, return height and level position across the same level. OLogN time."
@@ -420,6 +422,15 @@
   [aabb b i]
   (let [hrp (index-to-hrp i b)]
     (hr-to-aabb aabb b (:height hrp) (:row-index hrp))))
+
+(defn tree-leaf-size
+  "given tree or its leafs count and root AABB box, return its minimum AABB width"
+  [t aabb]
+  (let [last-index (if (number? t)
+                     (dec t)
+                     (dec (count t)))
+        [minx miny maxx maxy] (index-to-aabb aabb tree-arity last-index)]
+    (min (- maxx minx) (- maxy miny))))
 
 (defn parent
   "given a node index, returns parent index"

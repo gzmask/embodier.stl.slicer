@@ -45,17 +45,15 @@
 
 (defn aabb-flood-points
   "generate flooding points for interseciton check from aabb"
-  [[min-x min-y max-x max-y :as aabb] nozzle-diameter]
+  [[min-x min-y max-x max-y :as aabb] leaf-size]
   (let [[mx my :as mid-point] [(-> (- max-x min-x)
                                    (/ 2)
                                    (+ min-x))
                                (-> (- max-y min-y)
                                    (/ 2)
                                    (+ min-y))]
-        dx (min nozzle-diameter (- max-x min-x))
-        dy (min nozzle-diameter (- max-y min-y))
-        half-nozzle (/ nozzle-diameter 2)
-        third-nozzle (/ nozzle-diameter 3)]
+        dx (min leaf-size (- max-x min-x))
+        dy (min leaf-size (- max-y min-y))]
          [;left column
            [(- min-x (/ dx 2)) (- my (/ dy 2))]
            [(- min-x (/ dx 2)) (+ my (/ dy 2))]
@@ -85,15 +83,16 @@
 ;  (slicer.draw/gui-main (nth @debugging ind) @tree-debug @aabb-debug (str "resources/pic/flood-debug-" ind ".png")))
 
 (defn flood-node
-  "geometrically flood the nodes that are intersecting with the given aabbs, given collision of either true or false.
+  "geometrically flood the nodes that are intersecting with the given aabbs,
+  given collision of either true or false.
   the second aabb is the root aabb box for the tree t.
   returns:
   #{leaf-index ...}"
-  [aabbs-or-points aabb t nozzle-diameter collision]
+  [aabbs-or-points aabb t leaf-size collision]
   (let [init-flood-points (match [(count (first aabbs-or-points))]
                                  [2] aabbs-or-points
                                  [4] (->> aabbs-or-points
-                                          (map (fn [ab] (aabb-flood-points ab nozzle-diameter)))
+                                          (map (fn [ab] (aabb-flood-points ab leaf-size)))
                                           (reduce into #{})
                                           vec))
         init-flooded-leafs (->> init-flood-points
@@ -104,7 +103,7 @@
     (loop [flooding-leafs init-flooded-leafs]
       (let [flood-points (->> flooding-leafs
                               (map (fn [i] (tree/index-to-aabb aabb tree/tree-arity i)))
-                              (map (fn [ab] (aabb-flood-points ab nozzle-diameter)))
+                              (map (fn [ab] (aabb-flood-points ab leaf-size)))
                               (reduce into #{})
                               (filter (complement nil?)))
             flooded-leafs (->> flood-points
@@ -192,7 +191,7 @@
 (defn line-slice-flood-point
   "give a line segment, a slice, returns the flood point or nil if none exist.
   --*x*------------*--x*---"
-  [line a-slice nozzle-diameter]
+  [line a-slice leaf-size]
   (let [intersections (tree/line-slice-inc line a-slice)]
     (cond
       (empty? intersections)
@@ -202,9 +201,9 @@
             [x2 y2 :as p2] (second intersections)]
         (cond
           (or ;if a min-node aabb can fit in first two points
-            (> (Math/abs (- x2 x1)) nozzle-diameter)
-            (> (Math/abs (- y2 y1)) nozzle-diameter))
-          (move-point-towards-point p1 p2 (* 1.1 nozzle-diameter)) ;return the middle point
+            (> (Math/abs (- x2 x1)) leaf-size)
+            (> (Math/abs (- y2 y1)) leaf-size))
+          (move-point-towards-point p1 p2 (* 1.1 leaf-size)) ;return the middle point
           :else nil ))
       :else
       nil)))
@@ -212,23 +211,21 @@
 (defn find-contained-flooding-point
   "generate a list of parallel lines from AABB of a slice,
   find the point that is contained in the slice"
-  [a-slice nozzle-diameter [min-x min-y max-x max-y :as aabb]]
-  (let [;[min-x min-y max-x max-y :as aabb] (tree/aabb-slice a-slice (* 2 nozzle-diameter))
-        x-points (range (+ min-x (* nozzle-diameter 1.5)) (- max-x (* nozzle-diameter 1.5)) (/ nozzle-diameter 2))
+  [a-slice leaf-size [min-x min-y max-x max-y :as aabb]]
+  (let [x-points (range (+ min-x (* leaf-size 1.5)) (- max-x (* leaf-size 1.5)) (/ leaf-size 2))
         x-start-points (map vector x-points (repeat max-y))
         x-end-points (map vector x-points (repeat min-y))
         x-lines (map vector x-start-points x-end-points)
-        y-points (range (+ min-y (* nozzle-diameter 1.5)) (- max-y (* nozzle-diameter 1.5)) (/ nozzle-diameter 2))
+        y-points (range (+ min-y (* leaf-size 1.5)) (- max-y (* leaf-size 1.5)) (/ leaf-size 2))
         y-start-points (map vector (repeat max-x) y-points)
         y-end-points (map vector (repeat min-x) y-points)
         y-lines (map vector y-start-points y-end-points)
-        lines (into x-lines y-lines)
-        ]
+        lines (into x-lines y-lines)]
     (loop [ind 0
            results []]
       (if (>= ind (count lines))
         results
-        (let [flood-point (line-slice-flood-point (nth lines ind) a-slice nozzle-diameter)]
+        (let [flood-point (line-slice-flood-point (nth lines ind) a-slice leaf-size)]
           (if (not (nil? flood-point))
             (recur (inc ind) (conj results flood-point))
             (recur (inc ind) results)
@@ -249,17 +246,18 @@
   faster, but sacrificed some accuracy.
   This will not flood a slice correctly if tree is not generated with a border.
   border needs to be at least two times of the nozzle size"
-  [t aabb nozzle-diameter a-slice]
+  [t aabb a-slice]
   (let [
         ;outer-aabbs (flooding-aabb-gen aabb)
         ;_ (debugger outer-aabbs "outer aabbs:")
-        ;outer-nodes (flood-node outer-aabbs aabb t nozzle-diameter false)
+        ;outer-nodes (flood-node outer-aabbs aabb t leaf-size false)
         ;debug-nodes (->> contained-points (map (fn [p] (tree/point-leaf p t aabb))) (filter (complement nil?)))
+        leaf-size (tree/tree-leaf-size t aabb)
         edges (filter (fn [i] (nth t i)) (map first (tree/leafs t)))
-        contained-points (find-contained-flooding-point a-slice nozzle-diameter aabb)
+        contained-points (find-contained-flooding-point a-slice leaf-size aabb)
         contained-nodes (if (empty? contained-points)
                           nil
-                          (flood-node contained-points aabb t nozzle-diameter false))]
+                          (flood-node contained-points aabb t leaf-size false))]
     (into edges contained-nodes)
     ))
 
