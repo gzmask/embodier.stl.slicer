@@ -43,30 +43,49 @@
 
 ;since aabb can be smaller than nozzle-diameter, this functin needs extra care
 
+;(range 0.5 1 0.5)
 (defn aabb-flood-points
   "generate flooding points for interseciton check from aabb"
   [[min-x min-y max-x max-y :as aabb] leaf-size]
-  (let [[mx my :as mid-point] [(-> (- max-x min-x)
-                                   (/ 2)
-                                   (+ min-x))
-                               (-> (- max-y min-y)
-                                   (/ 2)
-                                   (+ min-y))]
-        dx (min leaf-size (- max-x min-x))
-        dy (min leaf-size (- max-y min-y))]
-         [;left column
-           [(- min-x (/ dx 2)) (- my (/ dy 2))]
-           [(- min-x (/ dx 2)) (+ my (/ dy 2))]
-           ;right column
-           [(+ max-x (/ dx 2)) (- my (/ dy 2))]
-           [(+ max-x (/ dx 2)) (+ my (/ dy 2))]
-           ;upper row
-           [(- mx (/ dx 2)) (+ max-y (/ dy 2))]
-           [(+ mx (/ dx 2)) (+ max-y (/ dy 2))]
-           ;lower row
-           [(- mx (/ dx 2)) (- min-y (/ dy 2))]
-           [(+ mx (/ dx 2)) (- min-y (/ dy 2))]]
-           ))
+  (let [hl (/ leaf-size 2)
+        x-points (range (+ min-x hl)  max-x hl)
+        y-points (range (+ min-y hl)  max-y hl)
+        left-points (map #(identity [(- min-x hl) %]) y-points)
+        right-points (map #(identity [(+ max-x hl) %]) y-points)
+        up-points (map #(identity [% (+ max-y hl)]) x-points)
+        low-points (map #(identity [% (- min-y hl)]) x-points)]
+    (-> left-points
+        (into right-points)
+        (into up-points)
+        (into low-points))))
+
+;(aabb-flood-points [0 0 1 1] 1) => ([1/2 -1/2] [1/2 3/2] [3/2 1/2] [-1/2 1/2])
+;(aabb-flood-points [0 0 2 2] 1)
+
+;(defn aabb-flood-points
+;  "generate flooding points for interseciton check from aabb"
+;  [[min-x min-y max-x max-y :as aabb] leaf-size]
+;  (let [[mx my :as mid-point] [(-> (- max-x min-x)
+;                                   (/ 2)
+;                                   (+ min-x))
+;                               (-> (- max-y min-y)
+;                                   (/ 2)
+;                                   (+ min-y))]
+;        dx (min leaf-size (- max-x min-x))
+;        dy (min leaf-size (- max-y min-y))]
+;         [;left column
+;           [(- min-x (/ dx 2)) (- my (/ dy 2))]
+;           [(- min-x (/ dx 2)) (+ my (/ dy 2))]
+;           ;right column
+;           [(+ max-x (/ dx 2)) (- my (/ dy 2))]
+;           [(+ max-x (/ dx 2)) (+ my (/ dy 2))]
+;           ;upper row
+;           [(- mx (/ dx 2)) (+ max-y (/ dy 2))]
+;           [(+ mx (/ dx 2)) (+ max-y (/ dy 2))]
+;           ;lower row
+;           [(- mx (/ dx 2)) (- min-y (/ dy 2))]
+;           [(+ mx (/ dx 2)) (- min-y (/ dy 2))]]
+;           ))
 
 
 ;(count (range -10 10 0.1))
