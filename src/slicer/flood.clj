@@ -79,8 +79,7 @@
 ;(def aabb-debug (atom nil))
 ;(count @debugging)
 ;(nth @debugging 1)
-;(doseq [ind (range (count @debugging))]
-;  (slicer.draw/gui-main (nth @debugging ind) @tree-debug @aabb-debug (str "resources/pic/flood-debug-" ind ".png")))
+;(slicer.draw/gui-main @debugging @tree-debug @aabb-debug (str "resources/pic/fdd-1.png"))
 
 (defn flood-node
   "geometrically flood the nodes that are intersecting with the given aabbs,
@@ -158,22 +157,22 @@
 ;
 ;(into [1 2 3] [4 5 6])
 
-(defn move-point-towards-point
-  "giveing two points, return the point distant d away from p1
-  ---*-------------x-d-*----"
-  [[x1 y1 :as p1] [x2 y2 :as p2] d]
-  (let [dx (- x2 x1)
-        dy (- y2 y1)]
-    (match [(pos? dx) (pos? dy) (neg? dx) (neg? dy) (zero? dx) (zero? dy)]
-           [true true _ _ _ _] [(+ x1 d) (+ y1 d)]
-           [true _ _ true _ _] [(+ x1 d) (- y1 d)]
-           [_ true true _ _ _] [(- x1 d) (+ y1 d)]
-           [_ _ true true _ _] [(- x1 d) (- y1 d)]
-           [_ true _ _ true _] [x1 (+ y1 d)]
-           [true _ _ _ _ true] [(+ x1 d) y1]
-           [_ _ true _ _ true] [(- x1 d) y1]
-           [_ _ _ true true _] [x1 (- y1 d)]
-           )))
+;(defn move-point-towards-point
+;  "giveing two points, return the point distant d away from p1
+;  ---*-----d-------x---*----"
+;  [[x1 y1 :as p1] [x2 y2 :as p2] d]
+;  (let [dx (- x2 x1)
+;        dy (- y2 y1)]
+;    (match [(pos? dx) (pos? dy) (neg? dx) (neg? dy) (zero? dx) (zero? dy)]
+;           [true true _ _ _ _] [(+ x1 d) (+ y1 d)]
+;           [true _ _ true _ _] [(+ x1 d) (- y1 d)]
+;           [_ true true _ _ _] [(- x1 d) (+ y1 d)]
+;           [_ _ true true _ _] [(- x1 d) (- y1 d)]
+;           [_ true _ _ true _] [x1 (+ y1 d)]
+;           [true _ _ _ _ true] [(+ x1 d) y1]
+;           [_ _ true _ _ true] [(- x1 d) y1]
+;           [_ _ _ true true _] [x1 (- y1 d)]
+;           )))
 
 ;(move-point-towards-point [0 0] [0 1] 0.1)
 
@@ -203,7 +202,7 @@
           (or ;if a min-node aabb can fit in first two points
             (> (Math/abs (- x2 x1)) leaf-size)
             (> (Math/abs (- y2 y1)) leaf-size))
-          (move-point-towards-point p1 p2 (* 1.1 leaf-size)) ;return the middle point
+          (mid-point p1 p2) ;(move-point-towards-point p1 p2 (* 1.1 leaf-size)) ;return the middle point
           :else nil ))
       :else
       nil)))
