@@ -9,7 +9,8 @@
             [slicer.draw :refer :all]
             [slicer.gcode :refer :all]
             [slicer.core :refer :all]
-            [slicer.tree :as tree]))
+            [slicer.eulerian :refer :all]
+            ))
 
 (deftest test-point-plane
   (testing "the point-plane distance."
@@ -271,8 +272,8 @@
 ;       (gui-main tree aabb "resources/pic/d1.png")))
 
 (let [f
-      (parse-stl "resources/stl/asc.stl")
-      ;(parse-stl "resources/stl/hotend_v2.stl")
+      ;(parse-stl "resources/stl/asc.stl")
+      (parse-stl "resources/stl/hotend_v2.stl")
       ts (:triangles f)
       planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
       slices (-> (slice ts planes :z) rm-nil tri-compressor)
@@ -314,20 +315,22 @@
 ;  (gui-main lines-incs tree aabb "resources/pic/d3.png")
 ;  )
 
-;(let [f
-;      ;(parse-stl "resources/stl/asc.stl")
-;      (parse-stl "resources/stl/hotend_v2.stl")
-;      ts (:triangles f)
-;      planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
-;      slices (-> (slice ts planes :z) rm-nil tri-compressor)
-;      slice (:result (nth slices 0))
-;      _ (debugger slice "slice:")
-;      tree (generate-tree slice 1 2)
-;      aabb (-> slice (aabb-slice 2) make-square center-aabb)
-;      _ (debugger aabb "aabb:")
-;      ]
-;  (-> (slow-flood tree aabb)
-;      (gui-main tree aabb "resources/pic/d3.png")))
+;;eulerian path
+(let [f
+      ;(parse-stl "resources/stl/asc.stl")
+      (parse-stl "resources/stl/hotend_v2.stl")
+      ts (:triangles f)
+      planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
+      slices (-> (slice ts planes :z) rm-nil tri-compressor)
+      slice (:result (nth slices 1))
+      tree (generate-tree slice 1 2)
+      aabb (-> slice (aabb-slice 2) make-square)
+      _ (debugger aabb "aabb:")
+      flooded-leafs (fast-flood tree aabb slice)
+      ]
+  ;(gui-main flooded-leafs tree aabb "resources/pic/d1.png")
+  (convert-to-eulerian flooded-leafs tree aabb)
+  )
 ;(gui-main tree aabb [8])
 ;(index-to-aabb aabb tree-arity 8)
 

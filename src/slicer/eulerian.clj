@@ -20,7 +20,7 @@
 ;       :4 #{1 2 3}}}
 
 (defn neighbours
-  "give the flooded leafs and a leaf node, returns its neighbours"
+  "give the a list of nodes and a leaf node, returns its neighbours within the list of nodes"
   [node nodes t aabb & [neighbour-set]]
   (let [node-aabb (tree/index-to-aabb aabb tree/tree-arity node)
         leaf-size (tree/tree-leaf-size t aabb)
@@ -46,19 +46,43 @@
 ;(contains? (set [1 2 3]) 3)
 ;((keyword (str 3)) {:3 [1 2 3]})
 
+(defn remove-odd-deg-nodes
+  "remove adjacent nodes edge that connects nodes of both odd degree."
+  [nodes-with-odd-degrees t aabb pre-set]
+  (let [result-set (atom pre-set)]
+    (doseq [node-from nodes-with-odd-degrees]
+      (doseq [node-to (neighbours node-from nodes-with-odd-degrees t aabb @result-set)] ;neighbours of odd degrees
+          (swap! result-set update-in
+                 [:neg (keyword (str node-from))]
+                 conj node-to)
+          (swap! result-set update-in
+                 [:neg (keyword (str node-to))]
+                 conj node-from)))
+    @result-set))
+
+;(assoc-in {:neg {:1 #{2}}}
+;          [:neg :1]
+;          (conj (:1 (:neg {:neg {:1 #{2}}})) 3))
+
 (defn convert-to-eulerian
   "given a flooded leaf nodes,
   returns a neighbour-set that will convert the graph that has eularian path"
   [nodes t aabb]
   (let [nodes-with-odd-degrees (->> nodes
                                     (filter (fn [n] (odd? (count (neighbours n nodes t aabb))))))
-        pre-set {:neg {} :pos {}}
-        neg-set (remove-odd-deg-nodes nodes-with-odd-degrees nodes t aabb pre-set)
-        pos-set (connect-odd-deg-nodes nodes-with-odd-degrees nodes t aabb (assoc pre-set :neg neg-set))
+        init-set (zipmap
+                      (map (fn [n] (keyword (str n))) nodes-with-odd-degrees)
+                      (repeat #{}))
+        pre-set {:neg init-set :pos init-set}
+        neg-set (remove-odd-deg-nodes nodes-with-odd-degrees t aabb pre-set)
+        ;pos-set (connect-odd-deg-nodes nodes-with-odd-degrees nodes t aabb (assoc pre-set :neg neg-set))
         ]
+    neg-set
     )
   )
 
+
+;(zipmap [:1 :2 :3] (repeat #{}))
 ;(assoc {:neg {} :pos {}} :neg {:1 [2 3]})
 ;(assoc {:neg {:1 [4]} :pos {}} :neg {:1 [2 3]})
 
