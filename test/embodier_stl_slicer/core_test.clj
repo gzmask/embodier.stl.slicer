@@ -327,11 +327,22 @@
       aabb (-> slice (aabb-slice 2) make-square)
       _ (debugger aabb "aabb:")
       flooded-leafs (fast-flood tree aabb slice)
-      ]
-  ;(gui-main flooded-leafs tree aabb "resources/pic/d1.png")
-  (convert-to-eulerian flooded-leafs tree aabb)
+      fixing-set (convert-to-eulerian flooded-leafs tree aabb)
+      neg-set (reduce into (for [node-from (keys (:neg fixing-set))]
+                (for [node-to (node-from (:neg fixing-set))]
+                  [(index-to-center aabb tree-arity (Integer. (name node-from)))
+                   (index-to-center aabb tree-arity node-to)]
+                  )))]
+  (gui-main neg-set tree aabb "resources/pic/d2.png")
+  ;(gui-main fixing-set tree aabb "resources/pic/d2.png")
+  ;fixing-set
   )
 ;(gui-main tree aabb [8])
 ;(index-to-aabb aabb tree-arity 8)
+
+(reduce into [1 2] [[3 4] [5 6]])
+
+(for [a (keys {:1 #{} :2 #{}})]
+  (Integer. (name a)))
 
 ;(run-all-tests)

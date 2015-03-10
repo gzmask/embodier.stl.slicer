@@ -423,6 +423,14 @@
   (let [hrp (index-to-hrp i b)]
     (hr-to-aabb aabb b (:height hrp) (:row-index hrp))))
 
+(defn index-to-center
+  "given aabb, base and index, returns center point. OLogN time."
+  [aabb b i]
+  (let [[min-x min-y max-x max-y] (index-to-aabb aabb b i)
+        dx (/ (- max-x min-x) 2)
+        dy (/ (- max-y min-y) 2)]
+    [(+ min-x dx) (+ min-y dy)]))
+
 (defn tree-leaf-size
   "given tree or its leafs count and root AABB box, return its minimum AABB width"
   [t aabb]

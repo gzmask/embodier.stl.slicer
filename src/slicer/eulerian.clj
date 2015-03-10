@@ -5,6 +5,7 @@
 ; generate eulerian circuit for flooded nodes
 (ns slicer.eulerian
   (:require [clojure.core.match :refer [match]]
+            [clojure.set :as s]
             [slicer.tree :as tree]
             [slicer.flood :as flood])
   (:use slicer.util))
@@ -30,6 +31,8 @@
                      (map #(tree/point-leaf % t aabb))
                      ;remove ones that are not in the flooded nodes
                      (filter #(contains? (set nodes) %))
+                     set
+                     vec
                      )]
     (if (nil? neighbour-set)
       results
@@ -46,6 +49,11 @@
 ;(contains? (set [1 2 3]) 3)
 ;((keyword (str 3)) {:3 [1 2 3]})
 
+(defn bodd? [a]
+  (if (> a 2)
+    (odd? a)
+    false))
+
 (defn remove-odd-deg-nodes
   "remove adjacent nodes edge that connects nodes of both odd degree."
   [nodes-with-odd-degrees t aabb pre-set]
@@ -60,6 +68,33 @@
                  conj node-from)))
     @result-set))
 
+(defn first-odd-node
+  [nodes t aabb pre-set]
+  (loop [ind 0]
+    (cond (>= ind (count nodes))
+          nil
+          (bodd? (count (neighbours (nth nodes ind) nodes t aabb pre-set)))
+          (nth nodes ind)
+          :else (recur (inc ind)))))
+
+(defn remove-odd-deg-nodes
+  "remove adjacent odd-nodes edge that connects odd-nodes of both odd degree."
+  [odd-nodes nodes t aabb pre-set searched-nodes]
+  (let [node-odd-deg (first (s/difference odd-nodes searched-nodes))
+        neighbour-node-odd-deg (if (not (nil? node-odd-deg))
+                                  (first (neighbours node-odd-deg nodes t aabb pre-set))
+                                  nil)]
+    (debugger (count odd-nodes) "counting odd-nodes")
+    (debugger (count searched-nodes) "counting searched-odd-nodes")
+    (match [(nil? node-odd-deg) (nil? neighbour-node-odd-deg)]
+           [false false]; two adjacent odd-nodes with odd degrees are found
+           (recur odd-nodes nodes t aabb (update-in pre-set [:neg (keyword (str node-odd-deg))] conj neighbour-node-odd-deg) (conj searched-nodes node-odd-deg neighbour-node-odd-deg))
+           [false true]; one node of odd degree without neighbour of odd degrees are found, and not all odd-nodes are searched.
+           (recur odd-nodes nodes t aabb pre-set (conj searched-nodes node-odd-deg))
+           :else
+           pre-set
+           )))
+
 ;(assoc-in {:neg {:1 #{2}}}
 ;          [:neg :1]
 ;          (conj (:1 (:neg {:neg {:1 #{2}}})) 3))
@@ -68,13 +103,12 @@
   "given a flooded leaf nodes,
   returns a neighbour-set that will convert the graph that has eularian path"
   [nodes t aabb]
-  (let [nodes-with-odd-degrees (->> nodes
-                                    (filter (fn [n] (odd? (count (neighbours n nodes t aabb))))))
-        init-set (zipmap
-                      (map (fn [n] (keyword (str n))) nodes-with-odd-degrees)
+  (let [init-set (zipmap
+                      (map (fn [n] (keyword (str n))) nodes)
                       (repeat #{}))
         pre-set {:neg init-set :pos init-set}
-        neg-set (remove-odd-deg-nodes nodes-with-odd-degrees t aabb pre-set)
+        odd-nodes (set (filter (fn [n] (bodd? (count (neighbours n nodes t aabb)))) nodes))
+        neg-set (remove-odd-deg-nodes odd-nodes nodes t aabb pre-set #{})
         ;pos-set (connect-odd-deg-nodes nodes-with-odd-degrees nodes t aabb (assoc pre-set :neg neg-set))
         ]
     neg-set
