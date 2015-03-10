@@ -328,13 +328,14 @@
       _ (debugger aabb "aabb:")
       flooded-leafs (fast-flood tree aabb slice)
       fixing-set (convert-to-eulerian flooded-leafs tree aabb)
-      neg-set (reduce into (for [node-from (keys (:neg fixing-set))]
-                (for [node-to (node-from (:neg fixing-set))]
+      final-set (reduce into (for [node-from (keys (:pos fixing-set))]
+                (for [node-to (node-from (:pos fixing-set))]
                   [(index-to-center aabb tree-arity (Integer. (name node-from)))
                    (index-to-center aabb tree-arity node-to)]
-                  )))]
-  (gui-main neg-set tree aabb "resources/pic/d2.png")
-  ;(gui-main fixing-set tree aabb "resources/pic/d2.png")
+                  )))
+      ]
+  (gui-main final-set tree aabb "resources/pic/d3.png")
+  ;(gui-main fixing-set tree aabb "resources/pic/d3.png")
   ;fixing-set
   )
 ;(gui-main tree aabb [8])

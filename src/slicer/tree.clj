@@ -113,6 +113,15 @@
 ;(line-line-inc [-1 0] [2 0] [2 3] [2 1])
 ;(line-line-inc [0 0] [2 0] [0 1] [2 1])
 
+(defn point-point-distant
+  "distance between two points"
+  [[x1 y1] [x2 y2]]
+  (let [dx (Math/abs (- x2 x1))
+        dy (Math/abs (- y2 y1))]
+    (Math/sqrt (+ (* dx dx) (* dy dy)))))
+
+;(point-point-distant [0 0] [3 4])
+
 
 (defn distant-closer-to-point [[x1 y1 :as p1]]
   "give a point, returns a function taht takes two points,

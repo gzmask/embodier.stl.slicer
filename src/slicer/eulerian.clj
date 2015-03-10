@@ -54,21 +54,23 @@
     (odd? a)
     false))
 
-(defn remove-odd-deg-nodes
-  "remove adjacent nodes edge that connects nodes of both odd degree."
-  [nodes-with-odd-degrees t aabb pre-set]
-  (let [result-set (atom pre-set)]
-    (doseq [node-from nodes-with-odd-degrees]
-      (doseq [node-to (neighbours node-from nodes-with-odd-degrees t aabb @result-set)] ;neighbours of odd degrees
-          (swap! result-set update-in
-                 [:neg (keyword (str node-from))]
-                 conj node-to)
-          (swap! result-set update-in
-                 [:neg (keyword (str node-to))]
-                 conj node-from)))
-    @result-set))
+;this is too slow and not correct
+;(defn remove-odd-deg-nodes
+;  "remove adjacent nodes edge that connects nodes of both odd degree."
+;  [nodes-with-odd-degrees t aabb pre-set]
+;  (let [result-set (atom pre-set)]
+;    (doseq [node-from nodes-with-odd-degrees]
+;      (doseq [node-to (neighbours node-from nodes-with-odd-degrees t aabb @result-set)] ;neighbours of odd degrees
+;          (swap! result-set update-in
+;                 [:neg (keyword (str node-from))]
+;                 conj node-to)
+;          (swap! result-set update-in
+;                 [:neg (keyword (str node-to))]
+;                 conj node-from)))
+;    @result-set))
 
 (defn first-odd-node
+  "find the first node of the searching-nodes that has odd degrees within nodes."
   [searching-nodes nodes t aabb pre-set]
   (loop [ind 0]
     (cond (>= ind (count searching-nodes))
@@ -102,6 +104,35 @@
 ;          [:neg :1]
 ;          (conj (:1 (:neg {:neg {:1 #{2}}})) 3))
 
+(defn min-index [v]
+  (first (apply min-key second (map-indexed vector v))))
+
+(defn connect-odd-deg-nodes
+  "connect the nodes of odd degrees in a heruistic TSP fashion:
+  links each node to its closest non-neighbour"
+  [odd-nodes nodes current-node t aabb pre-set]
+  (let [neighbour-nodes (neighbours current-node nodes t aabb pre-set)
+        searching-odd-nodes (vec (s/difference odd-nodes neighbour-nodes))
+        searching-points (map #(tree/index-to-center aabb tree/tree-arity %) searching-odd-nodes)
+        searching-distances (map #(tree/point-point-distant
+                                   (tree/index-to-aabb aabb tree/tree-arity current-node) %)
+                                 searching-points)
+        _ (debugger (count searching-distances) "searching distances:")
+        min-node (if (not (empty? searching-distances))
+                   (nth searching-odd-nodes (min-index searching-distances))
+                   nil)]
+    (if (number? min-node)
+      (recur (disj odd-nodes current-node)
+             nodes
+             min-node
+             t aabb
+             (update-in pre-set [:pos (keyword (str current-node))] conj min-node))
+      pre-set)))
+
+;(disj #{1 2 3} 3 2 1)
+;(min-key (range 4) [4 4 4 1])
+;(min-index [1 2 3 0 4])
+
 (defn convert-to-eulerian
   "given a flooded leaf nodes,
   returns a neighbour-set that will convert the graph that has eularian path"
@@ -112,9 +143,10 @@
         pre-set {:neg init-set :pos init-set}
         odd-nodes (set (filter (fn [n] (bodd? (count (neighbours n nodes t aabb)))) nodes))
         neg-set (remove-odd-deg-nodes odd-nodes nodes t aabb pre-set #{})
-        ;pos-set (connect-odd-deg-nodes nodes-with-odd-degrees nodes t aabb (assoc pre-set :neg neg-set))
+        odd-nodes2 (set (filter (fn [n] (bodd? (count (neighbours n nodes t aabb neg-set)))) nodes))
+        pos-set (connect-odd-deg-nodes odd-nodes2 nodes (first odd-nodes2) t aabb neg-set)
         ]
-    neg-set
+    pos-set
     )
   )
 
