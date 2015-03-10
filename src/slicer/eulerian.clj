@@ -69,12 +69,12 @@
     @result-set))
 
 (defn first-odd-node
-  [nodes t aabb pre-set]
+  [searching-nodes nodes t aabb pre-set]
   (loop [ind 0]
-    (cond (>= ind (count nodes))
+    (cond (>= ind (count searching-nodes))
           nil
-          (bodd? (count (neighbours (nth nodes ind) nodes t aabb pre-set)))
-          (nth nodes ind)
+          (bodd? (count (neighbours (nth searching-nodes ind) nodes t aabb pre-set)))
+          (nth searching-nodes ind)
           :else (recur (inc ind)))))
 
 (defn remove-odd-deg-nodes
@@ -82,13 +82,16 @@
   [odd-nodes nodes t aabb pre-set searched-nodes]
   (let [node-odd-deg (first (s/difference odd-nodes searched-nodes))
         neighbour-node-odd-deg (if (not (nil? node-odd-deg))
-                                  (first (neighbours node-odd-deg nodes t aabb pre-set))
+                                  (first-odd-node (neighbours node-odd-deg nodes t aabb pre-set) nodes t aabb pre-set)
                                   nil)]
     (debugger (count odd-nodes) "counting odd-nodes")
     (debugger (count searched-nodes) "counting searched-odd-nodes")
     (match [(nil? node-odd-deg) (nil? neighbour-node-odd-deg)]
            [false false]; two adjacent odd-nodes with odd degrees are found
-           (recur odd-nodes nodes t aabb (update-in pre-set [:neg (keyword (str node-odd-deg))] conj neighbour-node-odd-deg) (conj searched-nodes node-odd-deg neighbour-node-odd-deg))
+           (recur odd-nodes
+                  nodes t aabb
+                  (update-in pre-set [:neg (keyword (str node-odd-deg))] conj neighbour-node-odd-deg)
+                  (conj searched-nodes node-odd-deg neighbour-node-odd-deg))
            [false true]; one node of odd degree without neighbour of odd degrees are found, and not all odd-nodes are searched.
            (recur odd-nodes nodes t aabb pre-set (conj searched-nodes node-odd-deg))
            :else
