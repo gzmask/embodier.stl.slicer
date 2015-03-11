@@ -317,8 +317,8 @@
 
 ;;eulerian path
 (let [f
-      ;(parse-stl "resources/stl/asc.stl")
-      (parse-stl "resources/stl/hotend_v2.stl")
+      (parse-stl "resources/stl/asc.stl")
+      ;(parse-stl "resources/stl/hotend_v2.stl")
       ts (:triangles f)
       planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
       slices (-> (slice ts planes :z) rm-nil tri-compressor)
@@ -328,15 +328,19 @@
       _ (debugger aabb "aabb:")
       flooded-leafs (fast-flood tree aabb slice)
       fixing-set (convert-to-eulerian flooded-leafs tree aabb)
-      final-set (reduce into (for [node-from (keys (:pos fixing-set))]
+      neg-set (reduce into (for [node-from (keys (:neg fixing-set))]
+                               (for [node-to (node-from (:neg fixing-set))]
+                                 [(index-to-center aabb tree-arity (Integer. (name node-from)))
+                                  (index-to-center aabb tree-arity node-to)])))
+      pos-set (reduce into (for [node-from (keys (:pos fixing-set))]
                 (for [node-to (node-from (:pos fixing-set))]
                   [(index-to-center aabb tree-arity (Integer. (name node-from)))
-                   (index-to-center aabb tree-arity node-to)]
-                  )))
-      ]
-  (gui-main final-set tree aabb "resources/pic/d3.png")
+                   (index-to-center aabb tree-arity node-to)])))
+      final-set (into neg-set pos-set)]
+  (gui-main final-set tree aabb "resources/pic/pd2.png")
   ;(gui-main fixing-set tree aabb "resources/pic/d3.png")
   ;fixing-set
+  ;(:pos fixing-set)
   )
 ;(gui-main tree aabb [8])
 ;(index-to-aabb aabb tree-arity 8)

@@ -47,7 +47,7 @@
 
 ;(contains? (set [1 2 3]) 4)
 ;(contains? (set [1 2 3]) 3)
-;((keyword (str 3)) {:3 [1 2 3]})
+;((keyword (str 3)) {:3 #{1 2 3}})
 
 (defn bodd? [a]
   (if (> a 2)
@@ -86,13 +86,15 @@
         neighbour-node-odd-deg (if (not (nil? node-odd-deg))
                                   (first-odd-node (neighbours node-odd-deg nodes t aabb pre-set) nodes t aabb pre-set)
                                   nil)]
-    (debugger (count odd-nodes) "counting odd-nodes")
-    (debugger (count searched-nodes) "counting searched-odd-nodes")
+    ;(debugger (count odd-nodes) "counting odd-nodes")
+    ;(debugger (count searched-nodes) "counting searched-odd-nodes")
     (match [(nil? node-odd-deg) (nil? neighbour-node-odd-deg)]
            [false false]; two adjacent odd-nodes with odd degrees are found
            (recur odd-nodes
                   nodes t aabb
-                  (update-in pre-set [:neg (keyword (str node-odd-deg))] conj neighbour-node-odd-deg)
+                  (-> pre-set
+                    (update-in [:neg (keyword (str node-odd-deg))] conj neighbour-node-odd-deg)
+                    (update-in [:neg (keyword (str neighbour-node-odd-deg))] conj node-odd-deg))
                   (conj searched-nodes node-odd-deg neighbour-node-odd-deg))
            [false true]; one node of odd degree without neighbour of odd degrees are found, and not all odd-nodes are searched.
            (recur odd-nodes nodes t aabb pre-set (conj searched-nodes node-odd-deg))
@@ -108,11 +110,11 @@
   (first (apply min-key second (map-indexed vector v))))
 
 (defn connect-odd-deg-nodes
-  "connect the nodes of odd degrees in a heruistic TSP fashion:
+  "connect the pair of nodes of odd degrees in a heruistic fashion:
   links each node to its closest non-neighbour"
   [odd-nodes nodes current-node t aabb pre-set]
   (let [neighbour-nodes (neighbours current-node nodes t aabb pre-set)
-        searching-odd-nodes (vec (s/difference odd-nodes neighbour-nodes))
+        searching-odd-nodes (vec (disj (s/difference odd-nodes neighbour-nodes) current-node))
         searching-points (map #(tree/index-to-center aabb tree/tree-arity %) searching-odd-nodes)
         searching-distances (map #(tree/point-point-distant
                                    (tree/index-to-aabb aabb tree/tree-arity current-node) %)
@@ -120,13 +122,24 @@
         _ (debugger (count searching-distances) "searching distances:")
         min-node (if (not (empty? searching-distances))
                    (nth searching-odd-nodes (min-index searching-distances))
-                   nil)]
-    (if (number? min-node)
-      (recur (disj odd-nodes current-node)
+                   nil)
+        next-node (if (>= (count searching-odd-nodes) 2)
+                    (first (disj (set searching-odd-nodes) min-node))
+                    nil)]
+    (cond
+      (number? next-node)
+      (recur (disj odd-nodes current-node min-node)
              nodes
-             min-node
+             next-node
              t aabb
-             (update-in pre-set [:pos (keyword (str current-node))] conj min-node))
+             (-> pre-set
+               (update-in [:pos (keyword (str current-node))] conj min-node)
+               (update-in [:pos (keyword (str min-node))] conj current-node)))
+      (number? min-node)
+      (-> pre-set
+               (update-in [:pos (keyword (str current-node))] conj min-node)
+               (update-in [:pos (keyword (str min-node))] conj current-node))
+      :else
       pre-set)))
 
 ;(disj #{1 2 3} 3 2 1)
@@ -143,10 +156,12 @@
         pre-set {:neg init-set :pos init-set}
         odd-nodes (set (filter (fn [n] (bodd? (count (neighbours n nodes t aabb)))) nodes))
         neg-set (remove-odd-deg-nodes odd-nodes nodes t aabb pre-set #{})
-        odd-nodes2 (set (filter (fn [n] (bodd? (count (neighbours n nodes t aabb neg-set)))) nodes))
-        pos-set (connect-odd-deg-nodes odd-nodes2 nodes (first odd-nodes2) t aabb neg-set)
+        odd-nodes2 (set (filter (fn [n] (odd? (count (neighbours n nodes t aabb neg-set)))) nodes))
+        final-set (connect-odd-deg-nodes odd-nodes2 nodes (first odd-nodes2) t aabb neg-set)
+        ;odd-nodes3 (filter (fn [n] (odd? (count (neighbours n nodes t aabb final-set)))) nodes)
         ]
-    pos-set
+    final-set
+    ;(vec odd-nodes3)
     )
   )
 
