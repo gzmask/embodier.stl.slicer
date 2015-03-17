@@ -171,21 +171,21 @@
 ;(assoc {:neg {:1 [4]} :pos {}} :neg {:1 [2 3]})
 
 (defn random-loop-walk
-  [walked-nodes nodes fix-set]
+  [unwalked-edges all-edges nodes]
   (let [
         ]
     )
   )
 
 (defn hierholzer
-  [walked-nodes nodes fix-set]
-  (if (= (count walked-nodes) (count nodes))
-    walked-nodes
+  [walked-edges all-edges nodes]
+  (if (= (count walked-nodes) (count all-edges))
+    walked-edges
     (let [
-          unwalked-nodes (s/difference (set nodes) (set walked-nodes))
+          unwalked-edges (s/difference (set all-edges) (set walked-edges))
           ]
       (recur
-        (random-loop-walk walked-nodes nodes fix-set)
-        nodes fix-set
+        (random-loop-walk unwalked-edges all-edges nodes)
+        all-edges fix-set
         ))))
 
