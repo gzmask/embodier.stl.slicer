@@ -21,7 +21,7 @@
 ;       :4 #{1 2 3}}}
 
 (defn neighbours
-  "give the a list of nodes and a leaf node, returns its neighbours within the list of nodes"
+  "give the a list of nodes and a leaf node and a neighbour set (neg and pos), returns its neighbours within the list of nodes"
   [node nodes t aabb & [neighbour-set]]
   (let [node-aabb (tree/index-to-aabb aabb tree/tree-arity node)
         leaf-size (tree/tree-leaf-size t aabb)
@@ -39,8 +39,7 @@
       (->> results
            (filter (fn [n] ;remove ones that are in the neg neighbour-set
                 (let [non-neighbours ((keyword (str node)) (:neg neighbour-set))]
-                  (not (contains? non-neighbours n))))
-              )
+                  (not (contains? non-neighbours n)))))
            (into ((keyword (str node)) (:pos neighbour-set))) ;add ones in pos neighbour-set
            vec
            ))))
@@ -49,7 +48,9 @@
 ;(contains? (set [1 2 3]) 3)
 ;((keyword (str 3)) {:3 #{1 2 3}})
 
-(defn bodd? [a]
+(defn bodd?
+  "bigger odd"
+  [a]
   (if (> a 2)
     (odd? a)
     false))
@@ -165,6 +166,21 @@
     )
   )
 
+(defn all-edges
+  "returns all edges of the flooded node"
+  [nodes t aabb & [fix-set]]
+  (let [result (atom #{})]
+    (doseq [node nodes]
+      (doseq [neighbour (if (nil? fix-set)
+                          (neighbours node nodes t aabb)
+                          (neighbours node nodes t aabb fix-set))]
+        (swap! result conj #{node neighbour})))
+    @result))
+
+
+;(= #{1 2} #{2 1})
+;(conj #{} #{1 2} #{2 1})
+
 
 ;(zipmap [:1 :2 :3] (repeat #{}))
 ;(assoc {:neg {} :pos {}} :neg {:1 [2 3]})
@@ -179,13 +195,14 @@
 
 (defn hierholzer
   [walked-edges all-edges nodes]
-  (if (= (count walked-nodes) (count all-edges))
+  (if (= (count walked-edges) (count all-edges))
     walked-edges
     (let [
           unwalked-edges (s/difference (set all-edges) (set walked-edges))
           ]
       (recur
         (random-loop-walk unwalked-edges all-edges nodes)
-        all-edges fix-set
+        all-edges
+        nodes
         ))))
 
