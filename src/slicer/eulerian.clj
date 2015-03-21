@@ -187,21 +187,23 @@
 ;(assoc {:neg {:1 [4]} :pos {}} :neg {:1 [2 3]})
 
 (defn random-loop-walk
-  [unwalked-edges all-edges nodes]
+  [start-node unwalked-edges nodes]
   (let [
         ]
     )
   )
 
 (defn hierholzer
+  "recursively randomly walk the flooded nodes until all edges are walked,
+  returns the walking path"
   [walked-edges all-edges nodes]
-  (if (= (count walked-edges) (count all-edges))
+  (if (= (count walked-edges) (count all-edges));if all edges are walked
     walked-edges
     (let [
-          unwalked-edges (s/difference (set all-edges) (set walked-edges))
+          unwalked-edges (s/difference all-edges (set walked-edges))
           ]
       (recur
-        (random-loop-walk unwalked-edges all-edges nodes)
+        (into walked-edges (random-loop-walk start-node unwalked-edges nodes))
         all-edges
         nodes
         ))))
