@@ -187,11 +187,52 @@
 ;(assoc {:neg {:1 [4]} :pos {}} :neg {:1 [2 3]})
 
 (defn random-loop-walk
-  [start-node unwalked-edges nodes]
-  (let [
+  [start-node unwalked-edges & [init-node walked-edges]]
+  (let [the-walked-edges (if (nil? walked-edges) [] walked-edges)
+        the-init-node (if (nil? init-node) start-node init-node)
+        step-edge (first (s/select #(contains? % start-node) unwalked-edges))
         ]
-    )
-  )
+    (cond
+      ;walked to an end without anymore step-edge, gives an error
+      (nil? step-edge) (throw (Exception. "loop walked failed, graph is not eulerian."))
+      ;walked to original position with a loop, walked is finished.
+      (= (first (disj step-edge start-node)) the-init-node) (conj the-walked-edges step-edge)
+      :else
+      (recur (first (disj step-edge start-node))
+             (disj unwalked-edges step-edge)
+             [the-init-node (conj the-walked-edges step-edge)]))))
+
+;(first (disj #{1 2} 1))
+
+;(random-loop-walk 1 #{#{1 2}
+;                      #{6 7}
+;                      #{5 7}
+;                      #{7 1}
+;                      #{2 3}
+;                      #{4 3}
+;                      #{4 5}
+;                      #{6 5}})
+
+;(disj #{#{1 2} #{2 3}} #{2 3})
+
+(defn get-start-node
+  [walked-edges all-edges]
+  (first (first
+    (for [x walked-edges
+          y all-edges
+          :when (not (empty? (s/intersection x y)))]
+      (s/intersection x y)))))
+
+;(get-start-node #{#{1 2} #{2 3}} #{#{3 4} #{4 1} #{4 5}})
+;(get-start-node #{#{6 2} #{2 3}} #{#{3 4} #{4 1} #{4 5}})
+;(get-start-node #{#{6 2} #{2 3}} #{#{7 4} #{4 1} #{4 5}})
+
+;(s/select #(contains? % 3) #{#{1 2} #{3 4}} )
+
+;(for [x #{#{1 2} #{2 3}}
+;      y #{#{3 4} #{4 1} #{4 5}}
+;      :when (not (empty? (s/intersection x y)))]
+;  (s/intersection x y))
 
 (defn hierholzer
   "recursively randomly walk the flooded nodes until all edges are walked,
@@ -199,11 +240,10 @@
   [walked-edges all-edges nodes]
   (if (= (count walked-edges) (count all-edges));if all edges are walked
     walked-edges
-    (let [
-          unwalked-edges (s/difference all-edges (set walked-edges))
-          ]
+    (let [unwalked-edges (s/difference all-edges (set walked-edges))
+          start-node (get-start-node walked-edges all-edges)]
       (recur
-        (into walked-edges (random-loop-walk start-node unwalked-edges nodes))
+        (into walked-edges (random-loop-walk start-node unwalked-edges))
         all-edges
         nodes
         ))))
