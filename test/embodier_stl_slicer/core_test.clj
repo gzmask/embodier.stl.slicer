@@ -370,4 +370,29 @@
       ]
   (gui-main final-set tree aabb "resources/pic/pd2.png")
   )
+
+;;hierholzer algorithmn test
+(let [f
+      ;(parse-stl "resources/stl/asc.stl")
+      (parse-stl "resources/stl/hotend_v2.stl")
+      ts (:triangles f)
+      planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
+      slices (-> (slice ts planes :z) rm-nil tri-compressor)
+      slice (:result (nth slices 1))
+      tree (generate-tree slice 1 2)
+      aabb (-> slice (aabb-slice 2) make-square)
+      _ (debugger aabb "aabb:")
+      flooded-leafs (fast-flood tree aabb slice)
+      fixing-set (convert-to-eulerian flooded-leafs tree aabb)
+      edges (all-edges flooded-leafs tree aabb fixing-set)
+      edge-path (hierholzer edges flooded-leafs)
+      ]
+  ;draw out edge-path
+  edge-path
+  ;(gui-main drawable-edges tree aabb "resources/pic/d1.png")
+  ;(gui-main fixing-set tree aabb "resources/pic/d3.png")
+  ;fixing-set
+  ;(:pos fixing-set)
+  )
+
 ;(run-all-tests)

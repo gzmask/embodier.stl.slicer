@@ -237,14 +237,15 @@
 (defn hierholzer
   "recursively randomly walk the flooded nodes until all edges are walked,
   returns the walking path"
-  [walked-edges all-edges nodes]
+  [all-edges nodes & [walked-edges]]
   (if (= (count walked-edges) (count all-edges));if all edges are walked
     walked-edges
-    (let [unwalked-edges (s/difference all-edges (set walked-edges))
+    (let [the-walked-edges (if (nil? walked-edges) [] walked-edges)
+          unwalked-edges (s/difference all-edges (set walked-edges))
           start-node (get-start-node walked-edges all-edges)]
       (recur
-        (into walked-edges (random-loop-walk start-node unwalked-edges))
         all-edges
         nodes
+        (into the-walked-edges (random-loop-walk start-node unwalked-edges))
         ))))
 
