@@ -204,28 +204,26 @@
 
 ;(first (disj #{1 2} 1))
 
-;(random-loop-walk 1 #{#{1 2}
-;                      #{6 7}
-;                      #{5 7}
-;                      #{7 1}
-;                      #{2 3}
-;                      #{4 3}
-;                      #{4 5}
-;                      #{6 5}})
+;(into
+;  (random-loop-walk 1 #{#{1 2} #{6 7} #{5 7} #{7 1} #{2 3} #{4 3} #{4 5} #{6 5}})
+;  (random-loop-walk 1 #{#{1 2} #{6 7} #{5 7} #{7 1} #{2 3} #{4 3} #{4 5} #{6 5}}))
 
 ;(disj #{#{1 2} #{2 3}} #{2 3})
 
 (defn get-start-node
-  [walked-edges all-edges]
-  (first (first
-    (for [x walked-edges
-          y all-edges
-          :when (not (empty? (s/intersection x y)))]
-      (s/intersection x y)))))
+  [walked-edges unwalked-edges]
+  (if (empty? walked-edges)
+    (first (first unwalked-edges))
+    (first (first
+      (for [x walked-edges
+            y unwalked-edges
+            :when (not (empty? (s/intersection x y)))]
+        (s/intersection x y))))))
 
 ;(get-start-node #{#{1 2} #{2 3}} #{#{3 4} #{4 1} #{4 5}})
 ;(get-start-node #{#{6 2} #{2 3}} #{#{3 4} #{4 1} #{4 5}})
 ;(get-start-node #{#{6 2} #{2 3}} #{#{7 4} #{4 1} #{4 5}})
+;(get-start-node #{} #{#{7 4} #{4 1} #{4 5}})
 
 ;(s/select #(contains? % 3) #{#{1 2} #{3 4}} )
 
@@ -237,15 +235,19 @@
 (defn hierholzer
   "recursively randomly walk the flooded nodes until all edges are walked,
   returns the walking path"
-  [all-edges nodes & [walked-edges]]
+  [all-edges nodes walked-edges]
   (if (= (count walked-edges) (count all-edges));if all edges are walked
     walked-edges
-    (let [the-walked-edges (if (nil? walked-edges) [] walked-edges)
+    (let [
           unwalked-edges (s/difference all-edges (set walked-edges))
-          start-node (get-start-node walked-edges all-edges)]
+          start-node (get-start-node walked-edges unwalked-edges)
+          _ (debugger start-node "start node")
+          _ (debugger walked-edges "walked edges")
+          ]
       (recur
         all-edges
         nodes
-        (into the-walked-edges (random-loop-walk start-node unwalked-edges))
+        (into walked-edges (random-loop-walk start-node unwalked-edges))
         ))))
+
 

@@ -385,7 +385,7 @@
       flooded-leafs (fast-flood tree aabb slice)
       fixing-set (convert-to-eulerian flooded-leafs tree aabb)
       edges (all-edges flooded-leafs tree aabb fixing-set)
-      edge-path (hierholzer edges flooded-leafs)
+      edge-path (hierholzer edges flooded-leafs [])
       ]
   ;draw out edge-path
   edge-path
