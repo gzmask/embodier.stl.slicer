@@ -120,7 +120,6 @@
         searching-distances (map #(tree/point-point-distant
                                    (tree/index-to-aabb aabb tree/tree-arity current-node) %)
                                  searching-points)
-        _ (debugger (count searching-distances) "searching distances:")
         min-node (if (not (empty? searching-distances))
                    (nth searching-odd-nodes (min-index searching-distances))
                    nil)
@@ -241,13 +240,10 @@
     (let [
           unwalked-edges (s/difference all-edges (set walked-edges))
           start-node (get-start-node walked-edges unwalked-edges)
-          _ (debugger start-node "start node")
-          _ (debugger walked-edges "walked edges")
           ]
       (recur
         all-edges
         nodes
         (into walked-edges (random-loop-walk start-node unwalked-edges))
         ))))
-
 
