@@ -247,3 +247,28 @@
         (into walked-edges (random-loop-walk start-node unwalked-edges))
         ))))
 
+(defn edge-to-node-path [edge-path]
+  (let [edge-path-s (conj (vec (rest edge-path)) (first edge-path)) ;shift the path
+        intersections (map (fn [a b] (first (s/intersection a b))) edge-path edge-path-s)
+        result (filter (complement nil?) intersections)
+        first-node (first (s/difference (first edge-path) (sorted-set (first result))))
+        last-node (first (s/difference (last edge-path) (sorted-set (last result))))
+        ]
+    (cond
+      (= 1 (count edge-path)) (vec (first edge-path)) ;single edge
+      (= (last result) first-node) (into [first-node] result) ;if a loop
+      (not= (last result) first-node) (into (into [first-node] result) [last-node]) ;if a path
+      :else (throw (Exception. "node path failed"))
+      )
+    ))
+
+;(conj [1 2] 3)
+;(map #(identity [%1 %2]) [1 2 3] [2 3])
+;(edge-to-node-path [#{1 2} #{3 2} #{3 4} #{4 5} #{5 1} ])
+;(edge-to-node-path [#{1 2} #{3 2} #{3 4}])
+;(edge-to-node-path [#{1 2} #{3 2}])
+;(edge-to-node-path [#{1 2} #{1 2}])
+;(edge-to-node-path [#{1 2}])
+;(s/intersection #{1 2} #{2 3})
+;(conj (vec (rest [1 2])) 1)
+
