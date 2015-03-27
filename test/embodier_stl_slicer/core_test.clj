@@ -386,10 +386,11 @@
       fixing-set (convert-to-eulerian flooded-leafs tree aabb)
       edges (all-edges flooded-leafs tree aabb fixing-set)
       edge-path (hierholzer edges flooded-leafs [])
+      ;node-path (edge-to-node-path edge-path)
       ]
   ;draw out edge-path
   edge-path
-  ;(gui-main drawable-edges tree aabb "resources/pic/d1.png")
+  ;(gui-main node-path tree aabb "resources/pic/d1.png")
   ;(gui-main fixing-set tree aabb "resources/pic/d3.png")
   ;fixing-set
   ;(:pos fixing-set)
