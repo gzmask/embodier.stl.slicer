@@ -366,10 +366,12 @@
                 (for [node-to (node-from (:pos fixing-set))]
                   [(index-to-center aabb tree-arity (Integer. (name node-from)))
                    (index-to-center aabb tree-arity node-to)])))
-      final-set (into neg-set pos-set)
+      ;final-set (into neg-set pos-set)
       ]
+  ;fixing-set
+  (:neg fixing-set)
   ;(gui-main neg-set tree aabb "resources/pic/pd1.png")
-  (gui-main pos-set tree aabb "resources/pic/pd2.png")
+  ;(gui-main pos-set tree aabb "resources/pic/pd2.png")
   )
 
 ;;hierholzer algorithmn test
@@ -387,7 +389,7 @@
       fixing-set (convert-to-eulerian flooded-leafs tree aabb)
       edges (all-edges flooded-leafs tree aabb fixing-set)
       edge-path (hierholzer edges flooded-leafs [])
-      drawable-edges (for [edge edge-path] [(index-to-center aabb tree-arity (first edge)) (index-to-center aabb tree-arity (second edge))])
+      drawable-edges (for [edge edges] [(index-to-center aabb tree-arity (first edge)) (index-to-center aabb tree-arity (second edge))])
       ;node-path (edge-to-node-path edge-path)
       ]
   ;draw out edge-path
