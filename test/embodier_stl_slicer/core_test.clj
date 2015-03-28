@@ -387,8 +387,8 @@
       _ (debugger aabb "aabb:")
       flooded-leafs (fast-flood tree aabb slice)
       fixing-set (convert-to-eulerian flooded-leafs tree aabb)
-      edges (all-edges flooded-leafs tree aabb fixing-set)
-      edge-path (hierholzer edges flooded-leafs [])
+      edges (all-edges flooded-leafs tree aabb)
+      ;edge-path (hierholzer edges flooded-leafs [])
       drawable-edges (for [edge edges] [(index-to-center aabb tree-arity (first edge)) (index-to-center aabb tree-arity (second edge))])
       ;node-path (edge-to-node-path edge-path)
       ]
