@@ -6,8 +6,8 @@
 
 ;(q/show-cats)
 ;(q/show-fns "sketch")
-(def screen-width 2000)
-(def screen-height 2000)
+(def screen-width 800)
+(def screen-height 600)
 
 (defn aabb-points
   "given AABB, returns the four points"
