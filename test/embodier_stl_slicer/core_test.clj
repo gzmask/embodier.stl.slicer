@@ -368,7 +368,8 @@
                    (index-to-center aabb tree-arity node-to)])))
       final-set (into neg-set pos-set)
       ]
-  (gui-main final-set tree aabb "resources/pic/pd2.png")
+  ;(gui-main neg-set tree aabb "resources/pic/pd1.png")
+  (gui-main pos-set tree aabb "resources/pic/pd2.png")
   )
 
 ;;hierholzer algorithmn test
