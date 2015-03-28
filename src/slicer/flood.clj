@@ -176,24 +176,6 @@
 ;
 ;(into [1 2 3] [4 5 6])
 
-;(defn move-point-towards-point
-;  "giveing two points, return the point distant d away from p1
-;  ---*-----d-------x---*----"
-;  [[x1 y1 :as p1] [x2 y2 :as p2] d]
-;  (let [dx (- x2 x1)
-;        dy (- y2 y1)]
-;    (match [(pos? dx) (pos? dy) (neg? dx) (neg? dy) (zero? dx) (zero? dy)]
-;           [true true _ _ _ _] [(+ x1 d) (+ y1 d)]
-;           [true _ _ true _ _] [(+ x1 d) (- y1 d)]
-;           [_ true true _ _ _] [(- x1 d) (+ y1 d)]
-;           [_ _ true true _ _] [(- x1 d) (- y1 d)]
-;           [_ true _ _ true _] [x1 (+ y1 d)]
-;           [true _ _ _ _ true] [(+ x1 d) y1]
-;           [_ _ true _ _ true] [(- x1 d) y1]
-;           [_ _ _ true true _] [x1 (- y1 d)]
-;           )))
-
-;(move-point-towards-point [0 0] [0 1] 0.1)
 
 (defn mid-point
   "given two points, return middle point"
