@@ -6,8 +6,8 @@
 
 ;(q/show-cats)
 ;(q/show-fns "sketch")
-(def screen-width 800)
-(def screen-height 600)
+(def screen-width 1800)
+(def screen-height 1600)
 
 (defn aabb-points
   "given AABB, returns the four points"
@@ -32,7 +32,7 @@
         [[x1 y1] [x2 y2] [x3 y3] [x4 y4]] (aabb-points node-aabb)
         [text-x text-y] (tree/index-to-center aabb tree/tree-arity node)]
     (q/text-size 12)
-    (q/text s (* text-x wpx) (* text-y hpx))
+    (q/text (str node) (* text-x wpx) (* text-y hpx))
     (->> [x1 y1 x2 y2] (map * [wpx hpx wpx hpx]) (apply q/line))
     (->> [x2 y2 x3 y3] (map * [wpx hpx wpx hpx]) (apply q/line))
     (->> [x3 y3 x4 y4] (map * [wpx hpx wpx hpx]) (apply q/line))

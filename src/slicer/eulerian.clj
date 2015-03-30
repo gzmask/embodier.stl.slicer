@@ -244,6 +244,7 @@
       (recur
         all-edges
         nodes
+        ;error: missing the reording or the walked-edges
         (into walked-edges (random-loop-walk start-node unwalked-edges))
         ))))
 
