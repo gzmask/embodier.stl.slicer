@@ -187,6 +187,7 @@
 
 (defn random-loop-walk
   [start-node unwalked-edges & [init-node walked-edges]]
+  {:pre [(set? unwalked-edges)]}
   (let [the-walked-edges (if (nil? walked-edges) [] walked-edges)
         the-init-node (if (nil? init-node) start-node init-node)
         step-edge (first (s/select #(contains? % start-node) unwalked-edges))
@@ -211,18 +212,32 @@
 
 (defn get-start-node
   [walked-edges unwalked-edges]
+  {:pre [(vector? walked-edges)]}
   (if (empty? walked-edges)
-    (first (first unwalked-edges))
-    (first (first
-      (for [x walked-edges
-            y unwalked-edges
-            :when (not (empty? (s/intersection x y)))]
-        (s/intersection x y))))))
+    [(first (first unwalked-edges)) 0]
+    (let [[edge node]
+          (first
+            (for [x walked-edges
+                  y unwalked-edges
+                  :when (not (empty? (s/intersection x y)))]
+              [x (first (s/intersection x y))]))
+          ;error: this index is not where it should be inserting the new loop.
+          ; need search again for the position
+          ; sometimes place after, sometimes place before
+          index  (.indexOf walked-edges edge)
+          ]
+      [node
+       (if (= node (s/difference
+                     (nth walked-edges index)
+                     (nth walked-edges (inc index))))
+         (inc index)
+         index)
+       ])))
 
-;(get-start-node #{#{1 2} #{2 3}} #{#{3 4} #{4 1} #{4 5}})
-;(get-start-node #{#{6 2} #{2 3}} #{#{3 4} #{4 1} #{4 5}})
-;(get-start-node #{#{6 2} #{2 3}} #{#{7 4} #{4 1} #{4 5}})
-;(get-start-node #{} #{#{7 4} #{4 1} #{4 5}})
+;(get-start-node [#{1 2} #{2 3}] #{#{3 4} #{4 1} #{4 5}})
+;(get-start-node [#{6 2} #{2 3}] #{#{3 4} #{4 1} #{4 5}})
+;(get-start-node [#{6 2} #{2 3}] #{#{7 4} #{4 1} #{4 5}})
+;(get-start-node [] #{#{7 4} #{4 1} #{4 5}})
 
 ;(s/select #(contains? % 3) #{#{1 2} #{3 4}} )
 
@@ -230,6 +245,29 @@
 ;      y #{#{3 4} #{4 1} #{4 5}}
 ;      :when (not (empty? (s/intersection x y)))]
 ;  (s/intersection x y))
+
+;(s/select #(contains? % 1) #{#{2 3} #{1 2}}) => #{#{1 2}}
+;(.indexOf [ #{1 2} #{2 3} #{3 4} ] #{1 2})
+;(.indexOf [ #{1 2} #{2 3} #{3 4} ] #{2 0}) => -1
+;(.indexOf [ #{1 2} #{2 3} #{3 4} ] nil) => -1
+;[1 2 3 4 5] => [4 5 1 2 3]
+;(subvec [#{1 2} #{2 3} #{3 4}] 0 1)
+;(subvec [#{1 2} #{2 3} #{3 4}] 1 3)
+
+(defn shift-edges
+  "shift the edges of walked-edges so that the start-node is the last"
+  [start-node walked-edges]
+  (let [end-edge (first (s/select #(contains? % start-node) (set walked-edges)))
+        index-end-edge (inc (.indexOf walked-edges end-edge))
+        first-segment (subvec walked-edges 0 index-end-edge)
+        last-segment (subvec walked-edges index-end-edge (count walked-edges))]
+    (into last-segment first-segment)))
+
+;(shift-edges 1 [#{1 2} #{2 3} #{3 4} #{4 1}])
+;(shift-edges 2 [#{1 2} #{2 3} #{3 4} #{4 1}])
+;(shift-edges 3 [#{1 2} #{2 3} #{3 4} #{4 1}])
+;(shift-edges 4 [#{1 2} #{2 3} #{3 4} #{4 1}])
+;(shift-edges 5 [#{1 2} #{2 3} #{3 4} #{4 1}])
 
 (defn hierholzer
   "recursively randomly walk the flooded nodes until all edges are walked,
@@ -239,14 +277,17 @@
     walked-edges
     (let [
           unwalked-edges (s/difference all-edges (set walked-edges))
-          start-node (get-start-node walked-edges unwalked-edges)
+          [start-node index-start-node] (get-start-node walked-edges unwalked-edges)
+          first-seg (subvec walked-edges 0 index-start-node)
+          new-loop (random-loop-walk start-node unwalked-edges)
+          last-seg (subvec walked-edges index-start-node (count walked-edges))
+          new-walked-edges (into (into first-seg new-loop) last-seg)
+          _ (debugger new-loop "new-loop:")
+          _ (debugger index-start-node "index-start-node:")
           ]
-      (recur
-        all-edges
-        nodes
-        ;error: missing the reording or the walked-edges
-        (into walked-edges (random-loop-walk start-node unwalked-edges))
-        ))))
+      (recur all-edges nodes new-walked-edges))))
+
+;(into [1] [2 3]) => [1 2 3]
 
 (defn edge-to-node-path [edge-path]
   (let [edge-path-s (conj (vec (rest edge-path)) (first edge-path)) ;shift the path
