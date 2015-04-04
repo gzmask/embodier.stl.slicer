@@ -373,8 +373,8 @@
 
 ;;hierholzer algorithmn test
 (let [f
-      (parse-stl "resources/stl/asc.stl")
-      ;(parse-stl "resources/stl/hotend_v2.stl")
+      ;(parse-stl "resources/stl/asc.stl")
+      (parse-stl "resources/stl/hotend_v2.stl")
       ts (:triangles f)
       planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
       slices (-> (slice ts planes :z) rm-nil tri-compressor)
@@ -392,7 +392,7 @@
   ;draw out edge-path
   ;edge-path
   (gui-main drawable-edges tree aabb "resources/pic/d1.png")
-  ;(gui-main node-path tree aabb "resources/pic/d1.png")
+  ;(gui-main flooded-leafs tree aabb "resources/pic/d1.png")
   ;(gui-main fixing-set tree aabb "resources/pic/d3.png")
   ;fixing-set
   ;(:pos fixing-set)

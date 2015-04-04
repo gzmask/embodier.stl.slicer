@@ -52,10 +52,10 @@
              (q/line (* x3 wpx) (* y3 hpx) (* x1 wpx) (* y1 hpx)))
          [[[x1 y1 & z1][x2 y2 & z2]]] ;line
          (do
-           (q/text-size 12)
+           (q/line (* x1 wpx) (* y1 hpx) (* x2 wpx) (* y2 hpx))
            (let [[x3 y3] (line-center [x1 y1] [x2 y2])]
-             (q/text s (* x3 wpx) (* y3 hpx)))
-           (q/line (* x1 wpx) (* y1 hpx) (* x2 wpx) (* y2 hpx)))
+             (q/text-size 12)
+             (q/text s (* x3 wpx) (* y3 hpx))))
          [[x1 y1 & z1]] ;point
          (do (q/line (- (* x1 wpx) (/ wpx 10)) (- (* y1 hpx) (/ hpx 10)) (+ (* x1 wpx) (/ wpx 10)) (+ (* y1 hpx) (/ hpx 10)))
              (q/line (- (* x1 wpx) (/ wpx 10)) (+ (* y1 hpx) (/ hpx 10)) (+ (* x1 wpx) (/ wpx 10)) (- (* y1 hpx) (/ hpx 10))))))
@@ -75,7 +75,7 @@
                 (q/background 200))
         draw (fn []
                (q/translate (/ screen-width 2) (/ screen-height 2))
-               (q/scale 1 -1) ;; matching the 3D printer coordinate
+               ;(q/scale 1 -1) ;; matching the 3D printer coordinate
                ;(q/translate 178 470)
                (doseq [node-or-geo nodes-or-geos]
                  (match [(number? node-or-geo)]

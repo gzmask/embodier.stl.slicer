@@ -225,14 +225,29 @@
           ; need search again for the position
           ; sometimes place after, sometimes place before
           index  (.indexOf walked-edges edge)
+          ;_ (debugger walked-edges "walked-edges")
+          ;_ (debugger (first (s/intersection (first walked-edges) (last walked-edges))) "first and last:")
+          ;_ (debugger (first (s/intersection (nth walked-edges index) (nth walked-edges (inc index)))) "this and after:")
+          insert-index (cond
+                         ;first and last node has the start node
+                         (=
+                           (first (s/intersection (first walked-edges) (last walked-edges)))
+                           node)
+                         0
+                         ;current and one after has the start node
+                         (=
+                           (first (s/intersection (nth walked-edges index) (nth walked-edges (inc index))))
+                           node)
+                         (inc index) ;insert between current and one after
+                         ;current and one before has the start node
+                         (=
+                           (first (s/intersection (nth walked-edges index) (nth walked-edges (dec index))))
+                           node)
+                         index ;insert between current and one after
+                         :else (throw (Exception. "loop insertion failed"))
+                         )
           ]
-      [node
-       (if (= node (s/difference
-                     (nth walked-edges index)
-                     (nth walked-edges (inc index))))
-         (inc index)
-         index)
-       ])))
+      [node insert-index])))
 
 ;(get-start-node [#{1 2} #{2 3}] #{#{3 4} #{4 1} #{4 5}})
 ;(get-start-node [#{6 2} #{2 3}] #{#{3 4} #{4 1} #{4 5}})
@@ -282,8 +297,9 @@
           new-loop (random-loop-walk start-node unwalked-edges)
           last-seg (subvec walked-edges index-start-node (count walked-edges))
           new-walked-edges (into (into first-seg new-loop) last-seg)
-          _ (debugger new-loop "new-loop:")
-          _ (debugger index-start-node "index-start-node:")
+          ;_ (debugger new-loop "new-loop:")
+          ;_ (debugger start-node "start-node:")
+          ;_ (debugger index-start-node "index-start-node:")
           ]
       (recur all-edges nodes new-walked-edges))))
 
