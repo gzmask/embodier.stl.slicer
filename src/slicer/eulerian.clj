@@ -305,6 +305,11 @@
 
 ;(into [1] [2 3]) => [1 2 3]
 
+(defn edge-to-lines
+  [edges aabb]
+  (for [edge edges]
+    [(tree/index-to-center aabb tree/tree-arity (first edge)) (tree/index-to-center aabb tree/tree-arity (second edge))]))
+
 (defn edge-to-node-path [edge-path]
   (let [edge-path-s (conj (vec (rest edge-path)) (first edge-path)) ;shift the path
         intersections (map (fn [a b] (first (s/intersection a b))) edge-path edge-path-s)
@@ -319,6 +324,12 @@
       :else (throw (Exception. "node path failed"))
       )
     ))
+
+(defn edge-to-points
+  [edges aabb]
+  (let [nodes (edge-to-node-path edges)]
+    (for [node nodes]
+      (tree/index-to-center aabb tree/tree-arity node))))
 
 ;(conj [1 2] 3)
 ;(map #(identity [%1 %2]) [1 2 3] [2 3])
