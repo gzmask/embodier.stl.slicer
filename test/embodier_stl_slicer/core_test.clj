@@ -373,12 +373,13 @@
 
 ;;hierholzer algorithmn test
 (let [f
-      ;(parse-stl "resources/stl/asc.stl")
-      (parse-stl "resources/stl/hotend_v2.stl")
+      (parse-stl "resources/stl/asc.stl")
+      ;(parse-stl "resources/stl/hotend_v2.stl")
       ts (:triangles f)
       planes (gen-planes (:min (find-min-max :z ts)) (:max (find-min-max :z ts)) 0.3 :z)
       slices (-> (slice ts planes :z) rm-nil tri-compressor)
-      slice (:result (nth slices 1))
+      slice (:result (nth slices 0))
+      _ (debugger slice "slice:")
       tree (generate-tree slice 1 2)
       aabb (-> slice (aabb-slice 2) make-square)
       _ (debugger aabb "aabb:")

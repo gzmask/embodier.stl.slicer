@@ -1,4 +1,11 @@
 (ns slicer.gcode
+  (:require [slicer.slice :as slice]
+            [slicer.util :refer :all]
+            [slicer.file :as file]
+            [slicer.tree :as tree]
+            [slicer.flood :as flood]
+            [slicer.draw :as draw]
+            [slicer.eulerian :as eulerian])
   (:use clojure.java.io))
 
 (def header-str
@@ -10,31 +17,18 @@
   (apply str
     (for [cut cuts]
       (let [z-str (str "G1 Z" (:cut-point cut) \newline)
-            xy-str (for [intersec (:result cut)]
-                     (cond
-                       (and (= 3 (count intersec))
-                            (number? (first intersec))
-                            (number? (second intersec))
-                            (number? (last intersec))) ; a point
-                       (str "G1 X"
-                            (first intersec) " Y" (second intersec) " E1" \newline) ;E number should be accumulative
-                       (and (vector? (first intersec))
-                            (vector? (second intersec))
-                            (= 2 (count intersec))) ; a line
-                       (str "G1 X"
-                            (first (first intersec)) " Y" (second (first intersec)) " E1" \newline "G1 X"
-                            (first (second intersec)) " Y" (second (second intersec)) " E1" \newline)
-
-                       (and (= 3 (count intersec))
-                            (vector? (first intersec))
-                            (vector? (second intersec))
-                            (vector? (last intersec))) ;whole triangle
-                       (str "G1 X"
-                            (first (first intersec)) " Y" (second (first intersec)) " E1" \newline "G1 X"
-                            (first (second intersec)) " Y" (second (second intersec)) " E1" \newline "G1 X"
-                            (first (last intersec)) " Y" (second (last intersec)) " E1" \newline)
-                       :else ;no intersection
-                       ""))]
+            xy-str (let [slice (:result cut)
+                         _ (debugger slice "slice:")
+                         tree (tree/generate-tree slice 1 2)
+                         aabb (-> slice (tree/aabb-slice 2) tree/make-square)
+                         flooded-leafs (flood/fast-flood tree aabb slice)
+                         fixing-set (eulerian/convert-to-eulerian flooded-leafs tree aabb)
+                         edges (eulerian/all-edges flooded-leafs tree aabb fixing-set)
+                         edge-path (eulerian/hierholzer edges flooded-leafs [])
+                         points (eulerian/edge-to-points edge-path aabb)]
+                     (apply str
+                            (for [p points]
+                              (str "G1 X" (first p) " Y" (second p) " E1" \newline))))]
         (str z-str (apply str xy-str))))))
 
 (defn write-gcode

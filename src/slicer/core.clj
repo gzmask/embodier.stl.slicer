@@ -33,7 +33,7 @@
 ;; If there are no errors and it's not a help request, process with file IO
 (defn -main [& args]
   (let [{opts :options args :arguments summary :summary errs :errors}
-        (parse-opts args cli-options) ]
+        (parse-opts args cli-options)]
     (when (not (empty? errs))
       (doseq [err errs]
         (println err))

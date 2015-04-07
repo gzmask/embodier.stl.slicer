@@ -33,6 +33,9 @@ Lein test-refresh
 * most of the time:
 ./target/embodier -s stl-file -g gcode-file
 
+ex:
+./target/embodier -s ./resources/stl/asc.stl -g test.gcode
+
 * if doesn't work, try:
 java -jar .\target\embodier.jar -h
 
