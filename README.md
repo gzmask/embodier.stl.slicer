@@ -13,7 +13,7 @@ Features:
 * using leiningen
 Lein bin
 
-* using boot
+* using boot (deprecated)
 boot build
 
 ## Documentation Generating
@@ -36,13 +36,13 @@ Lein test-refresh
 
 ex:
 
-./target/embodier -s ./resources/stl/asc.stl -g test.gcode
+./target/embodier -s ./resources/stl/asc.stl -g ./resources/gcode/asc_box.gcode
 
 java -jar .\target\embodier.jar -h
 
-* if doesn't work, try:
+* if doesn't work, try(very slow for lower-end machine):
 
-lein run -- -s ./resources/stl/asc.stl -g test.gcode
+lein run -- -s ./resources/stl/asc.stl -g ./resources/gcode/asc_box.gcode
 
 ## License
 

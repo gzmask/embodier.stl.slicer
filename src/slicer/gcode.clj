@@ -1,10 +1,7 @@
 (ns slicer.gcode
-  (:require [slicer.slice :as slice]
-            [slicer.util :refer :all]
-            [slicer.file :as file]
+  (:require [slicer.util :refer :all]
             [slicer.tree :as tree]
             [slicer.flood :as flood]
-            [slicer.draw :as draw]
             [slicer.eulerian :as eulerian])
   (:use clojure.java.io))
 
@@ -29,7 +26,7 @@
     (let [cut (first cuts)
           init-cmd (str "G1 Z" (:cut-point cut) \newline)
           slice (:result cut)
-          _ (debugger slice "slice:")
+          ;_ (debugger slice "slice:")
           tree (tree/generate-tree slice 1 2)
           aabb (-> slice (tree/aabb-slice 2) tree/make-square)
           flooded-leafs (flood/fast-flood tree aabb slice)

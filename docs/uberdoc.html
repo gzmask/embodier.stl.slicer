@@ -2866,7 +2866,7 @@ net.brehaut.ClojureTools = (function (SH) {
   };
 })(SyntaxHighlighter);
 </script><title>slicer -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name"><a href="http://example.com/FIXME">slicer</a></h1><h2 class="project-version">0.1.0-SNAPSHOT</h2><br /><p>FIXME: write description</p>
-</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.5.1</td></tr><tr><td class="dep-name">org.clojure/tools.cli</td><td class="dotted"><hr /></td><td class="dep-version">0.3.1</td></tr><tr><td class="dep-name">gloss</td><td class="dotted"><hr /></td><td class="dep-version">0.2.3</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#slicer.core">slicer.core</a></li><li><a href="#slicer.file">slicer.file</a></li><li><a href="#slicer.slice">slicer.slice</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.core" name="slicer.core"><h1 class="project-name">slicer.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>The Core</h1>
+</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.5.1</td></tr><tr><td class="dep-name">org.clojure/tools.cli</td><td class="dotted"><hr /></td><td class="dep-version">0.3.1</td></tr><tr><td class="dep-name">org.clojure/core.match</td><td class="dotted"><hr /></td><td class="dep-version">0.3.0-alpha4</td></tr><tr><td class="dep-name">quil</td><td class="dotted"><hr /></td><td class="dep-version">2.2.5</td></tr><tr><td class="dep-name">com.jakemccrary/lein-test-refresh</td><td class="dotted"><hr /></td><td class="dep-version">0.7.0</td></tr><tr><td class="dep-name">gloss</td><td class="dotted"><hr /></td><td class="dep-version">0.2.3</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#slicer.core">slicer.core</a></li><li><a href="#slicer.draw">slicer.draw</a></li><li><a href="#slicer.eulerian">slicer.eulerian</a></li><li><a href="#slicer.file">slicer.file</a></li><li><a href="#slicer.flood">slicer.flood</a></li><li><a href="#slicer.gcode">slicer.gcode</a></li><li><a href="#slicer.slice">slicer.slice</a></li><li><a href="#slicer.tree">slicer.tree</a></li><li><a href="#slicer.util">slicer.util</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.core" name="slicer.core"><h1 class="project-name">slicer.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>The Core</h1>
 
 <p>First of all, we need to take care of the cmd line parameters.
 I heard that tools.clj is pretty good.
@@ -2876,7 +2876,9 @@ Literature programming with margonilia for help doc.
 Lein marg will generate this html help doc in docs folder.</p>
 </td><td class="codes"><pre class="brush: clojure">(ns slicer.core
   (:require [clojure.tools.cli :refer [parse-opts]]
-            [slicer.file :as f])
+            [slicer.file :as f]
+            [slicer.slice :as s]
+            [slicer.gcode :as g])
   (:gen-class))</pre></td></tr><tr><td class="docs"><h2>cli specs</h2>
 
 <p>declare the specs for the cmd args</p>
@@ -2894,7 +2896,7 @@ Lein marg will generate this html help doc in docs folder.</p>
 If there are no errors and it's not a help request, process with file IO</p>
 </td><td class="codes"><pre class="brush: clojure">(defn -main [&amp; args]
   (let [{opts :options args :arguments summary :summary errs :errors}
-        (parse-opts args cli-options) ]
+        (parse-opts args cli-options)]
     (when (not (empty? errs))
       (doseq [err errs]
         (println err))
@@ -2903,7 +2905,400 @@ If there are no errors and it's not a help request, process with file IO</p>
       (println help-txt)
       (exit 0 summary))
     (when (:stl opts)
-      (println (prn-str (f/parse-stl (:stl opts)))))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.file" name="slicer.file"><h1 class="project-name">slicer.file</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>File processing</h1>
+      (println (prn-str (f/parse-stl (:stl opts)))))
+    (when (and (:gcode opts) (:stl opts))
+      (g/write-gcode (:gcode opts)
+                     (-&gt; (s/slice (:triangles (f/parse-stl (:stl opts)))
+                                  (s/gen-planes (:min (s/find-min-max :z (:triangles (f/parse-stl (:stl opts))))) (:max (s/find-min-max :z (:triangles (f/parse-stl (:stl opts))))) 0.3 :z)
+                                  :z)
+                         s/rm-nil
+                         s/tri-compressor
+                         g/gcode)))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.draw" name="slicer.draw"><h1 class="project-name">slicer.draw</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(ns slicer.draw
+  (:require [quil.core :as q]
+            [clojure.core.match :refer [match]]
+            [slicer.tree :as tree]))</pre></td></tr><tr><td class="docs"><p>(q/show-cats)
+(q/show-fns "sketch")</p>
+</td><td class="codes"><pre class="brush: clojure">(def screen-width 1800)
+(def screen-height 1600)</pre></td></tr><tr><td class="docs"><p>given AABB, returns the four points</p>
+</td><td class="codes"><pre class="brush: clojure">(defn aabb-points
+  [[min-x min-y max-x max-y :as aabb]]
+  [[min-x min-y]
+   [min-x max-y]
+   [max-x max-y]
+   [max-x min-y]])</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn line-center
+  [[x1 y1] [x2 y2]]
+  [(/ (+ x1 x2) 2) (/ (+ y1 y2) 2)])</pre></td></tr><tr><td class="docs"><p>(line-center [0 0] [1 1])
+(line-center [-3 -3] [-1 -1])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>draws the node</p>
+</td><td class="codes"><pre class="brush: clojure">(defn draw-node
+  [node collided aabb wpx hpx s]
+  (let [node-aabb (tree/index-to-aabb aabb tree/tree-arity node)
+        [[x1 y1] [x2 y2] [x3 y3] [x4 y4]] (aabb-points node-aabb)
+        [text-x text-y] (tree/index-to-center aabb tree/tree-arity node)]
+    (q/text-size 12)
+    (q/text (str node) (* text-x wpx) (* text-y hpx))
+    (-&gt;&gt; [x1 y1 x2 y2] (map * [wpx hpx wpx hpx]) (apply q/line))
+    (-&gt;&gt; [x2 y2 x3 y3] (map * [wpx hpx wpx hpx]) (apply q/line))
+    (-&gt;&gt; [x3 y3 x4 y4] (map * [wpx hpx wpx hpx]) (apply q/line))
+    (-&gt;&gt; [x4 y4 x1 y1] (map * [wpx hpx wpx hpx]) (apply q/line))
+    (when collided
+      (-&gt;&gt; [x3 y3 x1 y1] (map * [wpx hpx wpx hpx]) (apply q/line))
+      (-&gt;&gt; [x4 y4 x2 y2] (map * [wpx hpx wpx hpx]) (apply q/line)))))</pre></td></tr><tr><td class="docs"><p>draw a geo from a slice, can be a triangle, a line or a point</p>
+</td><td class="codes"><pre class="brush: clojure">(defn draw-geo
+  [geo wpx hpx s]
+  (match [geo]
+         [[[x1 y1 &amp; z1][x2 y2 &amp; z2][x3 y3 &amp; z3]]] ;triangle
+         (do (q/line (* x1 wpx) (* y1 hpx) (* x2 wpx) (* y2 hpx))
+             (q/line (* x2 wpx) (* y2 hpx) (* x3 wpx) (* y3 hpx))
+             (q/line (* x3 wpx) (* y3 hpx) (* x1 wpx) (* y1 hpx)))
+         [[[x1 y1 &amp; z1][x2 y2 &amp; z2]]] ;line
+         (do
+           (q/line (* x1 wpx) (* y1 hpx) (* x2 wpx) (* y2 hpx))
+           (let [[x3 y3] (line-center [x1 y1] [x2 y2])]
+             (q/text-size 12)
+             (q/text s (* x3 wpx) (* y3 hpx))))
+         [[x1 y1 &amp; z1]] ;point
+         (do (q/line (- (* x1 wpx) (/ wpx 10)) (- (* y1 hpx) (/ hpx 10)) (+ (* x1 wpx) (/ wpx 10)) (+ (* y1 hpx) (/ hpx 10)))
+             (q/line (- (* x1 wpx) (/ wpx 10)) (+ (* y1 hpx) (/ hpx 10)) (+ (* x1 wpx) (/ wpx 10)) (- (* y1 hpx) (/ hpx 10))))))</pre></td></tr><tr><td class="docs"><p>the gui engine</p>
+</td><td class="codes"><pre class="brush: clojure">(defn gui-main
+  [nodes-or-geos t [min-x min-y max-x max-y :as aabb] &amp; [filename]]
+  (let [count (atom 0)
+        h (- max-y min-y)
+        hpx (/ screen-height h)
+        w (- max-x min-x)
+        wpx (/ screen-width w)
+        setup (fn []
+                (q/smooth)                          ;; Turn on anti-aliasing
+                (q/frame-rate 1)                    ;; Set framerate to 1 FPS
+                (q/background 200))
+        draw (fn []
+               (q/translate (/ screen-width 2) (/ screen-height 2))
+               ;(q/scale 1 -1) ;; matching the 3D printer coordinate
+               ;(q/translate 178 470)
+               (doseq [node-or-geo nodes-or-geos]
+                 (match [(number? node-or-geo)]
+                        [true] (draw-node node-or-geo (nth t node-or-geo) aabb wpx hpx (str @count))
+                        [false] (draw-geo node-or-geo wpx hpx (str @count)))
+                 (swap! count inc))
+               (q/save (if (nil? filename)
+                         &quot;debug.png&quot;
+                         filename))
+               (q/exit))]
+    (q/sketch  :title &quot;Oh so many grey squares&quot;    ;; Set the title of the sketch
+               :setup setup                        ;; Specify the setup fn
+               :draw draw                          ;; Specify the draw fn
+               :size [screen-width screen-height])))</pre></td></tr><tr><td class="docs"><p>repls
+(def asc (slicer.file/parse-stl "asc.stl"))
+(def bin (slicer.file/parse-stl "bin.stl"))
+(def slicings
+ (-> (slicer.slice/slice (:triangles asc) (slicer.slice/gen-planes (:min (slicer.slice/find-min-max :z (:triangles asc))) (:max (slicer.slice/find-min-max :z (:triangles asc))) 0.3 :z) :z)
+     slicer.slice/rm-nil
+     slicer.slice/tri-compressor))
+(def tree (slicer.tree/generate-tree (:result (second slicings)) 0.3))
+(def aabb (-> (:result (second slicings)) (slicer.tree/aabb-slice 0.6) slicer.tree/make-square))
+(gui-main tree aabb [1 5 4 20])
+(gui-main [true false false false true nil nil nil nil nil nil nil nil nil nil nil nil false false false nil]
+         [-10 -10 10 10]
+         [0 4 20])</p>
+
+<p>(q/sketch  :title "Oh so many grey squares"
+          :setup (fn [] (q/smooth)
+                        (q/frame-rate 1)
+                        (q/background 200))
+          :draw (fn []
+                  (q/translate 320 240)
+                  (q/scale 1 -1)
+                  (q/line 0 0 20 20))
+          :size [640 480])</p>
+</td><td class="codes"></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.eulerian" name="slicer.eulerian"><h1 class="project-name">slicer.eulerian</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(ns slicer.eulerian
+  (:require [clojure.core.match :refer [match]]
+            [clojure.set :as s]
+            [slicer.tree :as tree]
+            [slicer.flood :as flood])
+  (:use slicer.util))</pre></td></tr><tr><td class="docs"><p>exmple of an neighbour-set:
+{:neg {:1 #{2 3 4}
+      :2 #{4 1}
+      :3 #{4 1}
+      :4 #{1 2 3}}
+:pos {:1 #{2 3 4}
+      :2 #{4 1}
+      :3 #{4 1}
+      :4 #{1 2 3}}}</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>give the a list of nodes and a leaf node and a neighbour set (neg and pos), returns its neighbours within the list of nodes</p>
+</td><td class="codes"><pre class="brush: clojure">(defn neighbours
+  [node nodes t aabb &amp; [neighbour-set]]
+  (let [node-aabb (tree/index-to-aabb aabb tree/tree-arity node)
+        leaf-size (tree/tree-leaf-size t aabb)
+        neighbour-points (flood/aabb-flood-points node-aabb leaf-size)
+        results (-&gt;&gt; neighbour-points
+                     ;find leaf of each poine
+                     (map #(tree/point-leaf % t aabb))
+                     ;remove ones that are not in the flooded nodes
+                     (filter #(contains? (set nodes) %))
+                     set
+                     vec)]
+    (if (nil? neighbour-set)
+      results
+      (-&gt;&gt; results
+           (filter (fn [n] ;remove ones that are in the neg neighbour-set
+                (let [non-neighbours ((keyword (str node)) (:neg neighbour-set))]
+                  (not (contains? non-neighbours n)))))
+           (into ((keyword (str node)) (:pos neighbour-set))) ;add ones in pos neighbour-set
+           vec))))</pre></td></tr><tr><td class="docs"><p>(contains? (set [1 2 3]) 4)
+(contains? (set [1 2 3]) 3)
+((keyword (str 3)) {:3 #{1 2 3}})</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>bigger odd</p>
+</td><td class="codes"><pre class="brush: clojure">(defn bodd?
+  [a]
+  (if (&gt; a 2)
+    (odd? a)
+    false))</pre></td></tr><tr><td class="docs"><p>this is too slow and not correct
+(defn remove-odd-deg-nodes
+ "remove adjacent nodes edge that connects nodes of both odd degree."
+ [nodes-with-odd-degrees t aabb pre-set]
+ (let [result-set (atom pre-set)]
+   (doseq [node-from nodes-with-odd-degrees]
+     (doseq [node-to (neighbours node-from nodes-with-odd-degrees t aabb @result-set)] ;neighbours of odd degrees
+         (swap! result-set update-in
+                [:neg (keyword (str node-from))]
+                conj node-to)
+         (swap! result-set update-in
+                [:neg (keyword (str node-to))]
+                conj node-from)))
+   @result-set))</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>find the first node of the searching-nodes that has odd degrees within nodes.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn first-odd-node
+  [searching-nodes nodes t aabb pre-set]
+  (loop [ind 0]
+    (cond (&gt;= ind (count searching-nodes))
+          nil
+          (bodd? (count (neighbours (nth searching-nodes ind) nodes t aabb pre-set)))
+          (nth searching-nodes ind)
+          :else (recur (inc ind)))))</pre></td></tr><tr><td class="docs"><p>remove adjacent odd-nodes edge that connects odd-nodes of both odd degree.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn remove-odd-deg-nodes
+  [odd-nodes nodes t aabb pre-set searched-nodes]
+  (let [node-odd-deg (first (s/difference odd-nodes searched-nodes))
+        neighbour-node-odd-deg (if (not (nil? node-odd-deg))
+                                  (first-odd-node (neighbours node-odd-deg nodes t aabb pre-set) nodes t aabb pre-set)
+                                  nil)]
+    ;(debugger (count odd-nodes) &quot;counting odd-nodes&quot;)
+    ;(debugger (count searched-nodes) &quot;counting searched-odd-nodes&quot;)
+    (match [(nil? node-odd-deg) (nil? neighbour-node-odd-deg)]
+           [false false]; two adjacent odd-nodes with odd degrees are found
+           (recur odd-nodes
+                  nodes t aabb
+                  (-&gt; pre-set
+                    (update-in [:neg (keyword (str node-odd-deg))] conj neighbour-node-odd-deg)
+                    (update-in [:neg (keyword (str neighbour-node-odd-deg))] conj node-odd-deg))
+                  (conj searched-nodes node-odd-deg neighbour-node-odd-deg))
+           [false true]; one node of odd degree without neighbour of odd degrees are found, and not all odd-nodes are searched.
+           (recur odd-nodes nodes t aabb pre-set (conj searched-nodes node-odd-deg))
+           :else
+           pre-set)))</pre></td></tr><tr><td class="docs"><p>(assoc-in {:neg {:1 #{2}}}
+         [:neg :1]
+         (conj (:1 (:neg {:neg {:1 #{2}}})) 3))</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn min-index [v]
+  (first (apply min-key second (map-indexed vector v))))</pre></td></tr><tr><td class="docs"><p>connect the pair of nodes of odd degrees in a heruistic fashion:
+  links each node to its closest non-neighbour</p>
+</td><td class="codes"><pre class="brush: clojure">(defn connect-odd-deg-nodes
+  [odd-nodes nodes current-node t aabb pre-set]
+  (let [neighbour-nodes (neighbours current-node nodes t aabb pre-set)
+        searching-odd-nodes (vec (disj (s/difference odd-nodes neighbour-nodes) current-node))
+        searching-points (map #(tree/index-to-center aabb tree/tree-arity %) searching-odd-nodes)
+        searching-distances (map #(tree/point-point-distant
+                                   (tree/index-to-aabb aabb tree/tree-arity current-node) %)
+                                 searching-points)
+        min-node (if (not (empty? searching-distances))
+                   (nth searching-odd-nodes (min-index searching-distances))
+                   nil)
+        next-node (if (&gt;= (count searching-odd-nodes) 2)
+                    (first (disj (set searching-odd-nodes) min-node))
+                    nil)]
+    (cond
+      (number? next-node)
+      (recur (disj odd-nodes current-node min-node)
+             nodes
+             next-node
+             t aabb
+             (-&gt; pre-set
+               (update-in [:pos (keyword (str current-node))] conj min-node)
+               (update-in [:pos (keyword (str min-node))] conj current-node)))
+      (number? min-node)
+      (-&gt; pre-set
+               (update-in [:pos (keyword (str current-node))] conj min-node)
+               (update-in [:pos (keyword (str min-node))] conj current-node))
+      :else
+      pre-set)))</pre></td></tr><tr><td class="docs"><p>(disj #{1 2 3} 3 2 1)
+(min-key (range 4) [4 4 4 1])
+(min-index [1 2 3 0 4])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given a flooded leaf nodes,
+  returns a neighbour-set that will convert the graph that has eularian path</p>
+</td><td class="codes"><pre class="brush: clojure">(defn convert-to-eulerian
+  [nodes t aabb]
+  (let [init-set (zipmap
+                      (map (fn [n] (keyword (str n))) nodes)
+                      (repeat #{}))
+        pre-set {:neg init-set :pos init-set}
+        odd-nodes (set (filter (fn [n] (bodd? (count (neighbours n nodes t aabb)))) nodes))
+        neg-set (remove-odd-deg-nodes odd-nodes nodes t aabb pre-set #{})
+        odd-nodes2 (set (filter (fn [n] (odd? (count (neighbours n nodes t aabb neg-set)))) nodes))
+        final-set (connect-odd-deg-nodes odd-nodes2 nodes (first odd-nodes2) t aabb neg-set)
+        ;odd-nodes3 (filter (fn [n] (odd? (count (neighbours n nodes t aabb final-set)))) nodes)
+        ]
+    final-set
+    ;(vec odd-nodes3)))</pre></td></tr><tr><td class="docs"><p>returns all edges of the flooded node</p>
+</td><td class="codes"><pre class="brush: clojure">(defn all-edges
+  [nodes t aabb &amp; [fix-set]]
+  (let [result (atom #{})]
+    (doseq [node nodes]
+      (doseq [neighbour (if (nil? fix-set)
+                          (neighbours node nodes t aabb)
+                          (neighbours node nodes t aabb fix-set))]
+        (swap! result conj #{node neighbour})))
+    @result))</pre></td></tr><tr><td class="docs"><p>(= #{1 2} #{2 1})
+(conj #{} #{1 2} #{2 1})</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(zipmap [:1 :2 :3] (repeat #{}))
+(assoc {:neg {} :pos {}} :neg {:1 [2 3]})
+(assoc {:neg {:1 [4]} :pos {}} :neg {:1 [2 3]})</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn random-loop-walk
+  [start-node unwalked-edges &amp; [init-node walked-edges]]
+  {:pre [(set? unwalked-edges)]}
+  (let [the-walked-edges (if (nil? walked-edges) [] walked-edges)
+        the-init-node (if (nil? init-node) start-node init-node)
+        step-edge (first (s/select #(contains? % start-node) unwalked-edges))
+        ]
+    (cond
+      ;walked to an end without anymore step-edge, gives an error
+      (nil? step-edge) (throw (Exception. &quot;loop walked failed, graph is not eulerian.&quot;))
+      ;walked to original position with a loop, walked is finished.
+      (= (first (disj step-edge start-node)) the-init-node) (conj the-walked-edges step-edge)
+      :else
+      (recur (first (disj step-edge start-node))
+             (disj unwalked-edges step-edge)
+             [the-init-node (conj the-walked-edges step-edge)]))))</pre></td></tr><tr><td class="docs"><p>(first (disj #{1 2} 1))</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(into
+ (random-loop-walk 1 #{#{1 2} #{6 7} #{5 7} #{7 1} #{2 3} #{4 3} #{4 5} #{6 5}})
+ (random-loop-walk 1 #{#{1 2} #{6 7} #{5 7} #{7 1} #{2 3} #{4 3} #{4 5} #{6 5}}))</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(disj #{#{1 2} #{2 3}} #{2 3})</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn get-start-node
+  [walked-edges unwalked-edges]
+  {:pre [(vector? walked-edges)]}
+  (if (empty? walked-edges)
+    [(first (first unwalked-edges)) 0]
+    (let [[edge node]
+          (first
+            (for [x walked-edges
+                  y unwalked-edges
+                  :when (not (empty? (s/intersection x y)))]
+              [x (first (s/intersection x y))]))
+          ;error: this index is not where it should be inserting the new loop.
+          ; need search again for the position
+          ; sometimes place after, sometimes place before
+          index  (.indexOf walked-edges edge)
+          ;_ (debugger walked-edges &quot;walked-edges&quot;)
+          ;_ (debugger (first (s/intersection (first walked-edges) (last walked-edges))) &quot;first and last:&quot;)
+          ;_ (debugger (first (s/intersection (nth walked-edges index) (nth walked-edges (inc index)))) &quot;this and after:&quot;)
+          insert-index (cond
+                         ;first and last node has the start node
+                         (=
+                           (first (s/intersection (first walked-edges) (last walked-edges)))
+                           node)
+                         0
+                         ;current and one after has the start node
+                         (=
+                           (first (s/intersection (nth walked-edges index) (nth walked-edges (inc index))))
+                           node)
+                         (inc index) ;insert between current and one after
+                         ;current and one before has the start node
+                         (=
+                           (first (s/intersection (nth walked-edges index) (nth walked-edges (dec index))))
+                           node)
+                         index ;insert between current and one after
+                         :else (throw (Exception. &quot;loop insertion failed&quot;)))
+          ]
+      [node insert-index])))</pre></td></tr><tr><td class="docs"><p>(get-start-node [#{1 2} #{2 3}] #{#{3 4} #{4 1} #{4 5}})
+(get-start-node [#{6 2} #{2 3}] #{#{3 4} #{4 1} #{4 5}})
+(get-start-node [#{6 2} #{2 3}] #{#{7 4} #{4 1} #{4 5}})
+(get-start-node [] #{#{7 4} #{4 1} #{4 5}})</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(s/select #(contains? % 3) #{#{1 2} #{3 4}} )</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(for [x #{#{1 2} #{2 3}}
+     y #{#{3 4} #{4 1} #{4 5}}
+     :when (not (empty? (s/intersection x y)))]
+ (s/intersection x y))</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(s/select #(contains? % 1) #{#{2 3} #{1 2}}) => #{#{1 2}}
+(.indexOf [ #{1 2} #{2 3} #{3 4} ] #{1 2})
+(.indexOf [ #{1 2} #{2 3} #{3 4} ] #{2 0}) => -1
+(.indexOf [ #{1 2} #{2 3} #{3 4} ] nil) => -1
+[1 2 3 4 5] => [4 5 1 2 3]
+(subvec [#{1 2} #{2 3} #{3 4}] 0 1)
+(subvec [#{1 2} #{2 3} #{3 4}] 1 3)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>shift the edges of walked-edges so that the start-node is the last</p>
+</td><td class="codes"><pre class="brush: clojure">(defn shift-edges
+  [start-node walked-edges]
+  (let [end-edge (first (s/select #(contains? % start-node) (set walked-edges)))
+        index-end-edge (inc (.indexOf walked-edges end-edge))
+        first-segment (subvec walked-edges 0 index-end-edge)
+        last-segment (subvec walked-edges index-end-edge (count walked-edges))]
+    (into last-segment first-segment)))</pre></td></tr><tr><td class="docs"><p>(shift-edges 1 [#{1 2} #{2 3} #{3 4} #{4 1}])
+(shift-edges 2 [#{1 2} #{2 3} #{3 4} #{4 1}])
+(shift-edges 3 [#{1 2} #{2 3} #{3 4} #{4 1}])
+(shift-edges 4 [#{1 2} #{2 3} #{3 4} #{4 1}])
+(shift-edges 5 [#{1 2} #{2 3} #{3 4} #{4 1}])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>recursively randomly walk the flooded nodes until all edges are walked,
+  returns the walking path</p>
+</td><td class="codes"><pre class="brush: clojure">(defn hierholzer
+  [all-edges nodes walked-edges]
+  (if (= (count walked-edges) (count all-edges));if all edges are walked
+    walked-edges
+    (let [
+          unwalked-edges (s/difference all-edges (set walked-edges))
+          [start-node index-start-node] (get-start-node walked-edges unwalked-edges)
+          first-seg (subvec walked-edges 0 index-start-node)
+          new-loop (random-loop-walk start-node unwalked-edges)
+          last-seg (subvec walked-edges index-start-node (count walked-edges))
+          new-walked-edges (into (into first-seg new-loop) last-seg)
+          ;_ (debugger new-loop &quot;new-loop:&quot;)
+          ;_ (debugger start-node &quot;start-node:&quot;)
+          ;_ (debugger index-start-node &quot;index-start-node:&quot;)
+          ]
+      (recur all-edges nodes new-walked-edges))))</pre></td></tr><tr><td class="docs"><p>(into [1] [2 3]) => [1 2 3]</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn edge-to-lines
+  [edges aabb]
+  (for [edge edges]
+    [(tree/index-to-center aabb tree/tree-arity (first edge)) (tree/index-to-center aabb tree/tree-arity (second edge))]))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn edge-to-node-path [edge-path]
+  (let [edge-path-s (conj (vec (rest edge-path)) (first edge-path)) ;shift the path
+        intersections (map (fn [a b] (first (s/intersection a b))) edge-path edge-path-s)
+        result (filter (complement nil?) intersections)
+        first-node (first (s/difference (first edge-path) (sorted-set (first result))))
+        last-node (first (s/difference (last edge-path) (sorted-set (last result))))
+        ]
+    (cond
+      (= 1 (count edge-path)) (vec (first edge-path)) ;single edge
+      (= (last result) first-node) (into [first-node] result) ;if a loop
+      (not= (last result) first-node) (into (into [first-node] result) [last-node]) ;if a path
+      :else (throw (Exception. &quot;node path failed&quot;)))))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn edge-to-points
+  [edges aabb]
+  (let [nodes (edge-to-node-path edges)]
+    (for [node nodes]
+      (tree/index-to-center aabb tree/tree-arity node))))</pre></td></tr><tr><td class="docs"><p>(conj [1 2] 3)
+(map #(identity [%1 %2]) [1 2 3] [2 3])
+(edge-to-node-path [#{1 2} #{3 2} #{3 4} #{4 5} #{5 1} ])
+(edge-to-node-path [#{1 2} #{3 2} #{3 4}])
+(edge-to-node-path [#{1 2} #{3 2}])
+(edge-to-node-path [#{1 2} #{1 2}])
+(edge-to-node-path [#{1 2}])
+(s/intersection #{1 2} #{2 3})
+(conj (vec (rest [1 2])) 1)</p>
+</td><td class="codes"></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.file" name="slicer.file"><h1 class="project-name">slicer.file</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>File processing</h1>
 </td><td class="codes"></td></tr><tr><td class="docs"><p>Reading the binary STL is done with the gloss library.
 Serialization order might not be a problem when encoding/decoding through gloss codec.
 But if I am decoding an externally defined STL format into a map I will need to use Gloss' ordered-map which encodes/decodes map values in the order they are defined.</p>
@@ -2915,38 +3310,30 @@ But if I am decoding an externally defined STL format into a map I will need to 
 </td><td class="codes"></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defcodec b-triangle
   (ordered-map
-   :normal (ordered-map
-            :x :float32-le :y :float32-le :z :float32-le)
-   :vertex-1 (ordered-map
-              :x :float32-le :y :float32-le :z :float32-le)
-   :vertex-2 (ordered-map
-              :x :float32-le :y :float32-le :z :float32-le)
-   :vertex-3 (ordered-map
-              :x :float32-le :y :float32-le :z :float32-le)
+   :normal [:float32-le :float32-le :float32-le]
+   :vertex-1 [:float32-le :float32-le :float32-le]
+   :vertex-2 [:float32-le :float32-le :float32-le]
+   :vertex-3 [:float32-le :float32-le :float32-le]
    :attribute :uint16))</pre></td></tr><tr><td class="docs"><h2>ascii triangle frame</h2>
 </td><td class="codes"></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defcodec a-triangle
   (ordered-map
    :_ (string :utf-8 :delimiters [&quot;normal &quot;])
-   :normal (ordered-map
-            :x (string-float :utf-8 :delimiters [\space])
-            :y (string-float :utf-8 :delimiters [\space])
-            :z (string-float :utf-8 :delimiters delimiters))
+   :normal [(string-float :utf-8 :delimiters [\space])
+            (string-float :utf-8 :delimiters [\space])
+            (string-float :utf-8 :delimiters delimiters)]
    :_ (string :utf-8 :delimiters [&quot;vertex &quot;])
-   :vertex-1 (ordered-map
-              :x (string-float :utf-8 :delimiters [\space])
-              :y (string-float :utf-8 :delimiters [\space])
-              :z (string-float :utf-8 :delimiters delimiters))
+   :vertex-1 [(string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters delimiters)]
    :_ (string :utf-8 :delimiters [&quot;vertex &quot;])
-   :vertex-2 (ordered-map
-              :x (string-float :utf-8 :delimiters [\space])
-              :y (string-float :utf-8 :delimiters [\space])
-              :z (string-float :utf-8 :delimiters delimiters))
+   :vertex-2 [(string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters delimiters)]
    :_ (string :utf-8 :delimiters [&quot;vertex &quot;])
-   :vertex-3 (ordered-map
-              :x (string-float :utf-8 :delimiters [\space])
-              :y (string-float :utf-8 :delimiters [\space])
-              :z (string-float :utf-8 :delimiters delimiters))
+   :vertex-3 [(string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters [\space])
+              (string-float :utf-8 :delimiters delimiters)]
    :_ (string :utf-8 :delimiters [&quot;endfacet&quot;])
    :_ (string :utf-8 :delimiters delimiters)))</pre></td></tr><tr><td class="docs"><h2>binary stl frame</h2>
 </td><td class="codes"></td></tr><tr><td class="docs"><p>[header triangles]
@@ -2991,16 +3378,279 @@ Then I tested the codec and finds out that it's the endianess that is messing wi
            :vertex-3 [3.0 1.0 1.0]
            :attribute 0}]
          ]))))</p>
-</td><td class="codes"></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.slice" name="slicer.slice"><h1 class="project-name">slicer.slice</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>slicing algorithms</h1>
+</td><td class="codes"></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.flood" name="slicer.flood"><h1 class="project-name">slicer.flood</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>after sliced the model, we need to check for watertight and discretized the slice shape</p>
+</td><td class="codes"><pre class="brush: clojure">(ns slicer.flood
+  (:require [clojure.core.match :refer [match]]
+            [slicer.tree :as tree])
+  (:use slicer.util))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn flooding-aabb-gen
+  [[min-x min-y max-x max-y :as aabb]]
+  (let [w (- max-x min-x)
+        h (- max-y min-y)]
+  [[(- min-x w) min-y min-x max-y] ;left box
+   [min-x max-y max-x (+ max-y h)] ;upper box
+   [max-x min-y (+ max-x w) max-y] ;right box
+   [min-x (- min-y h) max-x min-y]])) ;lower box</pre></td></tr><tr><td class="docs"><p>lower box</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given a tree and aabb generated from the slice,
+  flood the tree from outside and return the nodes that are flooded.
+  Perfect flood compare to fast-flood, and no border is required.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn slow-flood
+  [t aabb]
+  (let [flooding-aabbs (atom (flooding-aabb-gen aabb))
+        leafs (tree/leafs t)
+        flooded-nodes (atom #{})]
+    (loop [flooded-count (count @flooded-nodes)]
+      (doseq [[leaf collided] leafs
+              flooding-aabb @flooding-aabbs]
+        (let [leaf-aabb (tree/index-to-aabb aabb tree/tree-arity leaf)]
+          (match [(tree/aabb-inc leaf-aabb flooding-aabb)
+                  (contains? @flooded-nodes leaf)
+                  collided]
+                 [true false false] ;when the leaf is intersecting with the flooding nodes; and not flooded before; and is not part of the slice matters; flood it now
+                 (swap! flooded-nodes conj leaf)
+                 :else :do-not-care)))
+      (reset! flooding-aabbs
+              (-&gt;&gt; @flooded-nodes
+                   vec
+                   (map #(tree/index-to-aabb aabb tree/tree-arity %))
+                   vec))
+      (if (&lt;= (count @flooded-nodes) flooded-count) ;when flooded nodes are not increasing. water has reach all parts
+        (vec @flooded-nodes)
+        (recur (count @flooded-nodes))))))</pre></td></tr><tr><td class="docs"><p>since aabb can be smaller than nozzle-diameter, this functin needs extra care</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>generate flooding points for interseciton check from aabb</p>
+
+<p>(range 0.5 1 0.5)</p>
+</td><td class="codes"><pre class="brush: clojure">(defn aabb-flood-points
+  [[min-x min-y max-x max-y :as aabb] leaf-size]
+  (let [hl (/ leaf-size 2)
+        x-points (range (+ min-x hl)  max-x hl)
+        y-points (range (+ min-y hl)  max-y hl)
+        left-points (map #(identity [(- min-x hl) %]) y-points)
+        right-points (map #(identity [(+ max-x hl) %]) y-points)
+        up-points (map #(identity [% (+ max-y hl)]) x-points)
+        low-points (map #(identity [% (- min-y hl)]) x-points)]
+    (-&gt; left-points
+        (into right-points)
+        (into up-points)
+        (into low-points))))</pre></td></tr><tr><td class="docs"><p>(aabb-flood-points [0 0 1 1] 1) => ([1/2 -1/2] [1/2 3/2] [3/2 1/2] [-1/2 1/2])
+(aabb-flood-points [0 0 2 2] 1)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(defn aabb-flood-points
+ "generate flooding points for interseciton check from aabb"
+ [[min-x min-y max-x max-y :as aabb] leaf-size]
+ (let [[mx my :as mid-point] [(-> (- max-x min-x)
+                                  (/ 2)
+                                  (+ min-x))
+                              (-> (- max-y min-y)
+                                  (/ 2)
+                                  (+ min-y))]
+       dx (min leaf-size (- max-x min-x))
+       dy (min leaf-size (- max-y min-y))]
+        [;left column
+          [(- min-x (/ dx 2)) (- my (/ dy 2))]
+          [(- min-x (/ dx 2)) (+ my (/ dy 2))]
+          ;right column
+          [(+ max-x (/ dx 2)) (- my (/ dy 2))]
+          [(+ max-x (/ dx 2)) (+ my (/ dy 2))]
+          ;upper row
+          [(- mx (/ dx 2)) (+ max-y (/ dy 2))]
+          [(+ mx (/ dx 2)) (+ max-y (/ dy 2))]
+          ;lower row
+          [(- mx (/ dx 2)) (- min-y (/ dy 2))]
+          [(+ mx (/ dx 2)) (- min-y (/ dy 2))]]
+          ))</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(count (range -10 10 0.1))
+(aabb-flood-points [-10 -10 10 10] 0.1)
+(aabb-flood-points [-0.5 -0.5 0.5 0.5] 1)
+(into #{} [1 2 3])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(def debugging (atom []))
+(def tree-debug (atom nil))
+(def aabb-debug (atom nil))
+(count @debugging)
+(nth @debugging 1)
+(slicer.draw/gui-main @debugging @tree-debug @aabb-debug (str "resources/pic/fdd-1.png"))</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>geometrically flood the nodes that are intersecting with the given aabbs,
+  given collision of either true or false.
+  the second aabb is the root aabb box for the tree t.
+  returns:
+  #{leaf-index ...}</p>
+</td><td class="codes"><pre class="brush: clojure">(defn flood-node
+  [aabbs-or-points aabb t leaf-size collision]
+  (let [init-flood-points (match [(count (first aabbs-or-points))]
+                                 [2] aabbs-or-points
+                                 [4] (-&gt;&gt; aabbs-or-points
+                                          (map (fn [ab] (aabb-flood-points ab leaf-size)))
+                                          (reduce into #{})
+                                          vec))
+        init-flooded-leafs (-&gt;&gt; init-flood-points
+                                (map (fn [p] (tree/point-leaf p t aabb)))
+                                (filter (complement nil?))
+                                (filter (fn [i] (= collision (nth t i)))))
+        flooded-set (atom (set init-flooded-leafs))]
+    (loop [flooding-leafs init-flooded-leafs]
+      (let [flood-points (-&gt;&gt; flooding-leafs
+                              (map (fn [i] (tree/index-to-aabb aabb tree/tree-arity i)))
+                              (map (fn [ab] (aabb-flood-points ab leaf-size)))
+                              (reduce into #{})
+                              (filter (complement nil?)))
+            flooded-leafs (-&gt;&gt; flood-points
+                               (map (fn [p] (tree/point-leaf p t aabb))) ;;get leafs for the points
+                               (filter (complement nil?))
+                               (filter (fn [node] (not (contains? @flooded-set node)))) ;; remove the flooded ones
+                               (filter (fn [i] (= collision (nth t i)))) ;;filtered according to collision boolean)]
+        (swap! flooded-set into flooded-leafs)
+        (if (empty? flooded-leafs) ;; if the new flooded set is not grew, flooding is done
+          @flooded-set
+          (recur flooded-leafs))))))</pre></td></tr><tr><td class="docs"><p>(keys (zipmap (map (comp keyword str) [1 2 3]) (repeat nil)))
+(vec (reduce into #{} '([1 2 3] [4 5 6])))
+(map inc #{1 2 3})</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(contains? #{1 2 3} 4)
+(conj #{} 1)
+(set nil)
+(set [0 1 2 3 4])
+(trampoline (flood [true false true true true])) => 1
+(trampoline (flood [true true true true false])) => 4
+(tree/leafs [true false true true true])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(let [a [1 2 3]
+     b (atom a)
+     _ (swap! b rest)]
+ [a @b]
+ )</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(map vector
+ (map vector [1 2 3] [3 4 5])
+ (map vector [1 2 3] [3 4 5]))</p>
+
+<p>(into [1 2 3] [4 5 6])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given two points, return middle point</p>
+</td><td class="codes"><pre class="brush: clojure">(defn mid-point
+  [[x1 y1 :as p1] [x2 y2 :as p2]]
+  (let [dx (/ (- x2 x1) 2)
+        dy (/ (- y2 y1) 2)]
+    [(double (+ x1 dx)) (double (+ y1 dy))]))</pre></td></tr><tr><td class="docs"><p>(mid-point [0 0] [2 2])
+(mid-point [0 0] [-2 -2])
+(mid-point [1 0] [-2 -2])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>give a line segment, a slice, returns the flood point or nil if none exist.
+  --<em>x</em>------------<em>--x</em>---</p>
+</td><td class="codes"><pre class="brush: clojure">(defn line-slice-flood-point
+  [line a-slice leaf-size]
+  (let [intersections (tree/line-slice-inc line a-slice)]
+    (cond
+      (empty? intersections)
+      nil
+      (even? (count intersections)) ;there are some missing intersecitons, even? will filter those out.
+      (let [[x1 y1 :as p1] (first intersections)
+            [x2 y2 :as p2] (second intersections)]
+        (cond
+          (or ;if a min-node aabb can fit in first two points
+            (&gt; (Math/abs (- x2 x1)) leaf-size)
+            (&gt; (Math/abs (- y2 y1)) leaf-size))
+          (mid-point p1 p2) ;(move-point-towards-point p1 p2 (* 1.1 leaf-size)) ;return the middle point
+          :else nil ))
+      :else
+      nil)))</pre></td></tr><tr><td class="docs"><p>generate a list of parallel lines from AABB of a slice,
+  find the point that is contained in the slice</p>
+</td><td class="codes"><pre class="brush: clojure">(defn find-contained-flooding-point
+  [a-slice leaf-size [min-x min-y max-x max-y :as aabb]]
+  (let [x-points (range (+ min-x (* leaf-size 1.5)) (- max-x (* leaf-size 1.5)) (/ leaf-size 2))
+        x-start-points (map vector x-points (repeat max-y))
+        x-end-points (map vector x-points (repeat min-y))
+        x-lines (map vector x-start-points x-end-points)
+        y-points (range (+ min-y (* leaf-size 1.5)) (- max-y (* leaf-size 1.5)) (/ leaf-size 2))
+        y-start-points (map vector (repeat max-x) y-points)
+        y-end-points (map vector (repeat min-x) y-points)
+        y-lines (map vector y-start-points y-end-points)
+        lines (into x-lines y-lines)]
+    (loop [ind 0
+           results []]
+      (if (&gt;= ind (count lines))
+        results
+        (let [flood-point (line-slice-flood-point (nth lines ind) a-slice leaf-size)]
+          (if (not (nil? flood-point))
+            (recur (inc ind) (conj results flood-point))
+            (recur (inc ind) results)))))))</pre></td></tr><tr><td class="docs"><p>(find-contained-flooding-point [[[10 10 1] [10 -10 1]]
+                               [[-10 -10 1] [10 10 1] [10 -10 1]]
+                               [[1 1]]]
+                               1)</p>
+
+<p>(find-contained-flooding-point [[[1 1 1] [1 -1 1]]
+                               [[-1 -1 1] [1 1 1] [1 -1 1]]
+                               [[1 1]]]
+                              1)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>above flood is so slow, why not a new one.
+  faster, but sacrificed some accuracy.
+  This will not flood a slice correctly if tree is not generated with a border.
+  border needs to be at least two times of the nozzle size</p>
+</td><td class="codes"><pre class="brush: clojure">(defn fast-flood
+  [t aabb a-slice]
+  (let [
+        ;outer-aabbs (flooding-aabb-gen aabb)
+        ;_ (debugger outer-aabbs &quot;outer aabbs:&quot;)
+        ;outer-nodes (flood-node outer-aabbs aabb t leaf-size false)
+        ;debug-nodes (-&gt;&gt; contained-points (map (fn [p] (tree/point-leaf p t aabb))) (filter (complement nil?)))
+        leaf-size (tree/tree-leaf-size t aabb)
+        edges (filter (fn [i] (nth t i)) (map first (tree/leafs t)))
+        contained-points (find-contained-flooding-point a-slice leaf-size aabb)
+        contained-nodes (if (empty? contained-points)
+                          nil
+                          (flood-node contained-points aabb t leaf-size false))]
+    (into edges contained-nodes)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.gcode" name="slicer.gcode"><h1 class="project-name">slicer.gcode</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(ns slicer.gcode
+  (:require [slicer.util :refer :all]
+            [slicer.tree :as tree]
+            [slicer.flood :as flood]
+            [slicer.eulerian :as eulerian])
+  (:use clojure.java.io))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(def header-str
+  (str &quot;; generated by embodier 0.0.1&quot; \newline))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn point-str [p e]
+  (str &quot;G1 X&quot; (first p) &quot; Y&quot; (second p) &quot; E&quot; e \newline))</pre></td></tr><tr><td class="docs"><p>[1 2 3] => [1 3 6]</p>
+</td><td class="codes"><pre class="brush: clojure">(defn sum-lst
+  [a]
+  (vec (reverse (take (count a) (map #(reduce + %) (iterate drop-last a))))))</pre></td></tr><tr><td class="docs"><p>(reduce + [1 2 3 4])
+(def a [10 1 1 1 1 5])
+(sum-lst a)</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn slice-str
+  [cuts last-cmd last-e-height]
+  (if (empty? cuts)
+    last-cmd
+    (let [cut (first cuts)
+          init-cmd (str &quot;G1 Z&quot; (:cut-point cut) \newline)
+          slice (:result cut)
+          _ (debugger slice &quot;slice:&quot;)
+          tree (tree/generate-tree slice 1 2)
+          aabb (-&gt; slice (tree/aabb-slice 2) tree/make-square)
+          flooded-leafs (flood/fast-flood tree aabb slice)
+          fixing-set (eulerian/convert-to-eulerian flooded-leafs tree aabb)
+          edges (eulerian/all-edges flooded-leafs tree aabb fixing-set)
+          edge-path (eulerian/hierholzer edges flooded-leafs [])
+          points (eulerian/edge-to-points edge-path aabb)
+          point-distants (into [last-e-height]
+                               (map tree/point-point-distant (drop-last points) (rest points)))
+          extrusions (sum-lst point-distants)
+          current-e-height (last extrusions)]
+      #(slice-str (rest cuts)
+                  (str last-cmd
+                       init-cmd
+                       (apply str (map point-str points extrusions)))
+                  current-e-height))))</pre></td></tr><tr><td class="docs"><p>this funciton is just a placepo for watertight, outline, infill, traversal and extruding accumulation</p>
+</td><td class="codes"><pre class="brush: clojure">(defn gcode
+  [cuts]
+  (trampoline slice-str cuts header-str 0))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn write-gcode
+  [gcode-file gcode-str]
+  (with-open [g (writer (file gcode-file))]
+    (.write g gcode-str)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.slice" name="slicer.slice"><h1 class="project-name">slicer.slice</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>slicing algorithms</h1>
 
 <p>This is the core of the algorithm.
 Mainly to get the intersection between triangles and a sequence of Z planes.</p>
 </td><td class="codes"><pre class="brush: clojure">(ns slicer.slice)</pre></td></tr><tr><td class="docs"><p>  Dot Product</p>
 
-<p>  This is a lazy version of dot product just for 3-tuples</p>
+<p>  This is a simple version of dot product just for 3-tuples</p>
 </td><td class="codes"><pre class="brush: clojure">(defn dot*
   [[x1 y1 z1 :as p1]
    [x2 y2 z2 :as p2]]
+  {:pre [(float? x1) (float? y1) (float? z1)
+         (float? x2) (float? y2) (float? z2)]}
   (+
    (* x1 x2)
    (* y1 y2)
@@ -3012,16 +3662,12 @@ Mainly to get the intersection between triangles and a sequence of Z planes.</p>
 <p>  Returns the distance.
   If result is positive, point is at the side of the normal,
   if the result is negative, point is at the other side of the normal.</p>
-
-<p>  i.e</p>
-
-<pre><code>(point-plane [0 -1 0] [[0 1 0] [0 0 0]]) =&gt; -1
-(point-plane [0 1 0] [[0 1 0] [0 0 0]]) =&gt; 1
-(point-plane [0 0 0] [[0 1 0] [0 0 0]]) =&gt; 0
-</code></pre>
 </td><td class="codes"><pre class="brush: clojure">(defn point-plane
   [[x0 y0 z0 :as point]
    [[x2 y2 z2 :as normal] [x1 y1 z1 :as position] :as plane]]
+  {:pre [(float? x1) (float? y1) (float? z1)
+         (float? x2) (float? y2) (float? z2)
+         (float? x0) (float? y0) (float? z0)]}
   (/
     (dot* normal (map - point position))
     (norm normal)))</pre></td></tr><tr><td class="docs"><p>  Ray/Segment and Plane intersection</p>
@@ -3031,18 +3677,13 @@ Mainly to get the intersection between triangles and a sequence of Z planes.</p>
   returns the intersection point if there is one,
   returns nil when not having any,
   returns the line when the line is on the plane.</p>
-
-<p>  i.e</p>
-
-<pre><code>(plane-line-inc [[5 1.1 0] [-2 1.1 0]] [[1 0 0] [0 0 0]]) =&gt; [0 1 0]
-(plane-line-inc [[5 1.1 0] [-2 1.1 0]] [[0 1 0] [0 0 0]]) =&gt; nil
-(plane-line-inc [[0 1 0] [0 2 0]] [[0 1 0] [0 0 0]]) =&gt; nil
-(plane-line-inc [[0 0.1 0] [0 2 0]] [[0 1 0] [0 0 0]]) =&gt; nil
-(plane-line-inc [[5 1.1 0] [-2 1.1 0]] [[0 1 0] [0 1.1 0]]) =&gt; [[5 1.1 0] [-2 1.1 0]]
-</code></pre>
 </td><td class="codes"><pre class="brush: clojure">(defn plane-line-inc
   [[[x1 y1 z1 :as start-point]  [x2 y2 z2 :as end-point] :as line]
    [[x3 y3 z3 :as normal] [x4 y4 z4 :as position] :as plane]]
+  {:pre [(float? x1) (float? y1) (float? z1)
+         (float? x2) (float? y2) (float? z2)
+         (float? x3) (float? y3) (float? z3)
+         (float? x4) (float? y4) (float? z4)]}
   (let [d (dot* normal (map - end-point start-point))]
     (cond (and (zero? (point-plane start-point plane)) (zero? (point-plane end-point plane))) line
           (zero? d) nil
@@ -3053,38 +3694,710 @@ Mainly to get the intersection between triangles and a sequence of Z planes.</p>
   If the entire triangle sits on the plane, returns the whole triangle;
   If one segment of the triangle sits on the plane, that's what you got;
   If a point of the triangle sits there, you have it;
-  Otherwise, you have the intersection line.</p>
-
-<pre><code>(triangle-plane-inc [[0.0 1 0] [-1 -1 0] [1 -1 0]] [[0 1 0] [0 0 0]]) =&gt; ([-0.5 0 0] [0.5 0 0])
-(triangle-plane-inc [[0 0 0] [-1 -1 0] [1 -1 0]] [[0 1 0] [0 0 0]]) =&gt; [0 0 0]
-(triangle-plane-inc [[0 -1 0] [-1 -2 0] [1 -2 0]] [[0 1 0] [0 0 0]]) =&gt; nil
-</code></pre>
+  If not intersecting, nil;
+  Otherwise, you have the intersection</p>
 </td><td class="codes"><pre class="brush: clojure">(defn triangle-plane-inc
   [[[x1 y1 z1 :as p1]
     [x2 y2 z2 :as p2]
     [x3 y3 z3 :as p3] :as triangle]
    [[x4 y4 z4 :as normal]
     [x5 y5 z5 :as position] :as plane]]
+  {:pre [(float? x1) (float? y1) (float? z1)
+         (float? x2) (float? y2) (float? z2)
+         (float? x3) (float? y3) (float? z3)
+         (float? x5) (float? y5) (float? z5)
+         (float? x4) (float? y4) (float? z4)]}
   (let [ds (map #(point-plane % plane) triangle)]
     (cond
       (= 3 (count (filter zero? ds)))
       triangle
       (= 2 (count (filter zero? ds)))
-      (filter #(zero? (point-plane % plane)) triangle)
+      (vec (filter #(zero? (point-plane % plane)) triangle))
       (= 1 (count (filter zero? ds)))
       (if (neg? (apply * (filter (complement zero?) ds)))
         [(first (filter #(zero? (point-plane % plane)) triangle))
          (plane-line-inc
            (vec (filter #(not (zero? (point-plane % plane))) triangle))
            plane)]
-        (first (filter #(zero? (point-plane % plane)) triangle)))
+        (vec (first (filter #(zero? (point-plane % plane)) triangle))))
       :else
       (if (or (empty? (filter neg? ds)) (empty? (filter pos? ds)))
         nil
-        (filter (complement nil?)
+        (vec (filter (complement nil?)
                 [(plane-line-inc [p1 p2] plane)
                  (plane-line-inc [p2 p3] plane)
-                 (plane-line-inc [p3 p1] plane)])))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_slicer.core">slicer.core</li><li class="floating-toc-li" id="floating-toc_slicer.file">slicer.file</li><li class="floating-toc-li" id="floating-toc_slicer.slice">slicer.slice</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+                 (plane-line-inc [p3 p1] plane)]))))))</pre></td></tr><tr><td class="docs"><p>  Given a x/y/z axis value and the axis keyword :x/:y/:z, returns the plane [[x y z :as normal] [x y z :as plane]]</p>
+</td><td class="codes"><pre class="brush: clojure">(defn slicing-plane
+  [a b]
+  {:pre [(float? a)
+         (keyword? b)]}
+  (cond
+   (= b :x) [[1.0 0.0 0.0] [a 0.0 0.0]]
+   (= b :y) [[0.0 1.0 0.0] [0.0 a 0.0]]
+   (= b :z) [[0.0 0.0 1.0] [0.0 0.0 a]]))</pre></td></tr><tr><td class="docs"><p>  Generate a series of slicing-planes from 'start' to 'end' each 'step' along the provided 'axis'</p>
+</td><td class="codes"><pre class="brush: clojure">(defn gen-planes
+  [start end step axis]
+  {:pre [(number? start)
+         (number? end)
+         (number? step)
+         (keyword? axis)]}
+  (vec
+   (for [i (range (bigdec start) (bigdec (+ end step)) (bigdec step))]
+     (slicing-plane (double i) axis))))</pre></td></tr><tr><td class="docs"><p>finds the highest and lowest point in axis of a collection of triangles along provided axis</p>
+</td><td class="codes"><pre class="brush: clojure">(defn find-min-max
+  [axis
+   [{[x1 y1 z1 :as p1] :vertex-1 [x2 y2 z2 :as p2] :vertex-2 [x3 y3 z3 :as p3] :vertex-3} &amp; tris :as triangles]]
+  {:pre [(number? x1) (number? x2) (number? x3) (number? y1) (number? y2) (number? y3) (number? z1) (number? z2) (number? z3) (keyword? axis)]}
+  {:min
+   (reduce (fn [min-num tri]
+            (cond
+              (= axis :x)
+              (min
+                min-num
+                (min (first (:vertex-1 tri))
+                     (first (:vertex-2 tri))
+                     (first (:vertex-3 tri))))
+              (= axis :y)
+              (min
+                min-num
+                (min (second (:vertex-1 tri))
+                     (second (:vertex-2 tri))
+                     (second (:vertex-3 tri))))
+              (= axis :z)
+              (min
+                min-num
+                (min (last (:vertex-1 tri))
+                     (last (:vertex-2 tri))
+                     (last (:vertex-3 tri))))))
+          (cond (= axis :x) (min x1 x2 x3)
+                (= axis :y) (min y1 y2 y3)
+                (= axis :z) (min z1 z2 z3))
+          tris)
+   :max
+   (reduce (fn [max-num tri]
+            (cond
+              (= axis :x)
+              (max
+                max-num
+                (max (first (:vertex-1 tri))
+                     (first (:vertex-2 tri))
+                     (first (:vertex-3 tri))))
+              (= axis :y)
+              (max
+                max-num
+                (max (second (:vertex-1 tri))
+                     (second (:vertex-2 tri))
+                     (second (:vertex-3 tri))))
+              (= axis :z)
+              (max
+                max-num
+                (max (last (:vertex-1 tri))
+                     (last (:vertex-2 tri))
+                     (last (:vertex-3 tri))))))
+          (cond (= axis :x) (max x1 x2 x3)
+                (= axis :y) (max y1 y2 y3)
+                (= axis :z) (max z1 z2 z3))
+          tris)})</pre></td></tr><tr><td class="docs"><p>convert triangle map to vector</p>
+</td><td class="codes"><pre class="brush: clojure">(defn triangle-map2vector
+  [{v3 :vertex-3, v2 :vertex-2, v1 :vertex-1, :as triangle}]
+  [v1 v2 v3])</pre></td></tr><tr><td class="docs"><p>slice every triangle of the model with every plane along the axis</p>
+</td><td class="codes"><pre class="brush: clojure">(defn slice
+  [triangles planes axis]
+  {:pre [(map? (first triangles))
+         (map? (last triangles))
+         (vector? triangles)
+         (vector? planes)
+         (vector? (first planes))
+         (keyword? axis)]
+   :post [(seq? %)
+          (map? (first %))]}
+  (for [triangle triangles
+        plane planes]
+    (let [result (triangle-plane-inc (triangle-map2vector triangle) plane)]
+      {;:axis axis
+       :cut-point (cond (= axis :x) (first (second plane))
+                        (= axis :y) (second (second plane))
+                        (= axis :z) (last (second plane)))
+       ;:plane plane
+       ;:triangle triangle
+       :result result})))</pre></td></tr><tr><td class="docs"><p>remove nil results</p>
+</td><td class="codes"><pre class="brush: clojure">(defn rm-nil
+  [results]
+  {:pre [(seq? results)
+         (map? (first results))]
+   :post [(seq? %)
+          (map? (first %))]}
+  (filter
+    (fn [result]
+      ((complement nil?) (:result result))) results))</pre></td></tr><tr><td class="docs"><p>transpose results to collections of triangles based on their cut-points</p>
+</td><td class="codes"><pre class="brush: clojure">(defn tri-compressor
+  [[{;axis :axis
+     cut-point :cut-point
+     ;plane :plane
+     ;triangle :triangle
+     result :result} &amp; more :as results]]
+  (let [cuts (-&gt; (group-by :cut-point (vec results)) sort)]
+    (for [cut cuts]
+      {:cut-point (first cut)
+       :result (for [line (second cut)]
+                 (:result line))})))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.tree" name="slicer.tree"><h1 class="project-name">slicer.tree</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>this is tree generation according to the sliced data</p>
+</td><td class="codes"><pre class="brush: clojure">(ns slicer.tree
+  (:require [clojure.core.match :refer [match]])
+  (:use slicer.util))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(def tree-arity 4);changing this will affect the performance of this algorithm. aware that some functions (split-aabb ...) are not arity changable</pre></td></tr><tr><td class="docs"><p>changing this will affect the performance of this algorithm. aware that some functions (split-aabb ...) are not arity changable</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>check if a line start and end by two points is intersected with an AABB box. Imprative since performance is important</p>
+</td><td class="codes"><pre class="brush: clojure">(defn line-box-inc
+  ([[x1 y1 :as line-start] [x2 y2 :as line-end]
+    [min-x min-y max-x max-y :as aabb]]
+   (line-box-inc [x1 y1] [x2 y2] [min-x min-y] [max-x max-y]))
+  ([[x1 y1 :as line-start] [x2 y2 :as line-end]
+   [min-x min-y :as box-min] [max-x max-y :as box-max]]
+    (let [m (atom 0.0)
+          x (atom 0.0)
+          y (atom 0.0)]
+      (cond
+       (or
+         (and (&lt; x1 min-x) (&lt; x2 min-x))
+         (and (&lt; y1 min-y) (&lt; y2 min-y))
+         (and (&gt; x1 max-x) (&gt; x2 max-x))
+         (and (&gt; y1 max-y) (&gt; y2 max-y))) false
+       (= x2 x1) true
+       (do
+         (reset! m (/ (- y2 y1) (- x2 x1)))
+         (reset! y (+ (* @m (- min-x x1)) y1))
+         (and (s&gt;= @y min-y 0.000001) (s&lt;= @y max-y 0.000001))) true
+       (do
+         (reset! y (+ (* @m (- max-x x1)) y1))
+         (and (s&gt;= @y min-y 0.000001) (s&lt;= @y max-y 0.000001))) true
+       (do
+         (reset! x (+ (/ (- min-y y1) @m) x1))
+         (and (s&gt;= @x min-x 0.000001) (s&lt;= @x max-x 0.000001))) true
+       (do
+         (reset! x (+ (/ (- max-y y1) @m) x1))
+         (and (s&gt;= @x min-x 0.000001) (s&lt;= @x max-x 0.000001))) true
+       :else false))))</pre></td></tr><tr><td class="docs"><p>check if a triangle intersects with an AABB box.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn tri-box-inc
+  ([[x1 y1 :as tri-1] [x2 y2 :as tri-2] [x3 y3 :as tri-3]
+    [min-x min-y max-x max-y :as aabb]]
+   (tri-box-inc [x1 y1] [x2 y2] [x3 y3] [min-x min-y] [max-x max-y]))
+  ([[x1 y1 :as tri-1] [x2 y2 :as tri-2] [x3 y3 :as tri-3]
+   [min-x min-y :as box-min] [max-x max-y :as box-max]]
+    (cond
+     (or
+       (and (&lt; x1 min-x) (&lt; x2 min-x) (&lt; x3 min-x))
+       (and (&lt; y1 min-y) (&lt; y2 min-y) (&lt; y3 min-y))
+       (and (&gt; x1 max-x) (&gt; x2 max-x) (&gt; x3 max-x))
+       (and (&gt; y1 max-y) (&gt; y2 max-y) (&gt; y3 max-y))) false ;tri completely outside
+     (and
+      (and (&lt; x1 min-x) (&gt; x1 max-x) (&lt; y1 min-y) (&gt; y1 max-y))
+      (and (&lt; x2 min-x) (&gt; x2 max-x) (&lt; y2 min-y) (&gt; y2 max-y))
+      (and (&lt; x3 min-x) (&gt; x3 max-x) (&lt; y3 min-y) (&gt; y3 max-y))) true ;tri completely inside box
+     (or
+      (line-box-inc [x1 y1] [x2 y2] [min-x min-y] [max-x max-y])
+      (line-box-inc [x2 y2] [x3 y3] [min-x min-y] [max-x max-y])
+      (line-box-inc [x3 y3] [x1 y1] [min-x min-y] [max-x max-y])) true ; edge intersecting
+     (and
+      (&lt; (min x1 x2 x3) min-x)
+      (&gt; (max x1 x2 x3) max-x)
+      (&lt; (min y1 y2 y3) min-y)
+      (&gt; (max y1 y2 y3) max-y)) true ;box completely inside tri
+     :else false)))</pre></td></tr><tr><td class="docs"><p>check if a point is inside an AABB</p>
+</td><td class="codes"><pre class="brush: clojure">(defn point-box-inc
+  ([[x1 y1 :as point]
+    [min-x min-y :as box-min]
+    [max-x max-y :as box-max]]
+   (and (s&gt;= x1 min-x 0.000001) (s&lt;= x1 max-x 0.000001)
+        (s&gt;= y1 min-y 0.000001) (s&lt;= y1 max-y 0.000001)))
+  ([point [min-x min-y max-x max-y :as aabb]]
+   (point-box-inc point [min-x min-y] [max-x max-y])))</pre></td></tr><tr><td class="docs"><p>check if two lines intersects</p>
+</td><td class="codes"><pre class="brush: clojure">(defn line-line-inc
+  [[x1 y1 :as start-1] [x2 y2 :as end-1] [x3 y3 :as start-2] [x4 y4 :as end-2]]
+  (let [aabb1
+        [(min x1 x2) (min y1 y2)
+         (max x1 x2) (max y1 y2)]
+        aabb2
+        [(min x3 x4) (min y3 y4)
+         (max x3 x4) (max y3 y4)]
+        a1 (- y2 y1)
+        b1 (- x1 x2)
+        c1 (+ (* a1 x1) (* b1 y1))
+        a2 (- y4 y3)
+        b2 (- x3 x4)
+        c2 (+ (* a2 x3) (* b2 y3))
+        det (- (* a1 b2) (* a2 b1))]
+    (if (zero? det)
+      nil
+      (let [x (/ (- (* b2 c1) (* b1 c2)) det)
+            y (/ (- (* a1 c2) (* a2 c1)) det)
+            intersect? (and (point-box-inc [x y] aabb1)
+                            (point-box-inc [x y] aabb2))]
+        (if intersect?
+          [(double x) (double y)]
+          nil)))))</pre></td></tr><tr><td class="docs"><p>(line-line-inc [0 10] [0 -10] [0 0] [1 0])
+(line-line-inc [-1 0] [1 0] [0 -1] [0 1])
+(line-line-inc [-1 0] [1 0] [-1 1] [1 1])
+(line-line-inc [-1 0] [1 0] [2 -1] [2 1])
+(line-line-inc [-1 0] [2 0] [2 -1] [2 1])
+(line-line-inc [-1 0] [2 0] [2 3] [2 1])
+(line-line-inc [0 0] [2 0] [0 1] [2 1])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>distance between two points</p>
+</td><td class="codes"><pre class="brush: clojure">(defn point-point-distant
+  [[x1 y1] [x2 y2]]
+  (let [dx (Math/abs (- x2 x1))
+        dy (Math/abs (- y2 y1))]
+    (Math/sqrt (+ (* dx dx) (* dy dy)))))</pre></td></tr><tr><td class="docs"><p>(point-point-distant [0 0] [3 4])</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn distant-closer-to-point [[x1 y1 :as p1]]
+  &quot;give a point, returns a function taht takes two points,
+  and returns if the distance between two points are closer to the first point&quot;
+  (fn [[x2 y2 :as p2] [x3 y3 :as p3]]
+    (match [p2 p3]
+           [[x2 y2 ] [x3 y3]]
+           (let [delta-x1 (Math/abs (- x2 x1))
+                 delta-y1 (Math/abs (- y2 y1))
+                 delta-x2 (Math/abs (- x3 x1))
+                 delta-y2 (Math/abs (- y3 y1))]
+             (&lt; (+ delta-x1 delta-y1) (+ delta-x2 delta-y2)))
+           [p2 nil] false
+           [nil p3] true
+           :else false)))</pre></td></tr><tr><td class="docs"><p>(reduce into (sorted-set-by (distant-point [0 0]))
+       [[[3 4] [4 4] nil nil [1 1] nil [2 2]]
+        nil
+        [[4 3] [3 3]]])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>check segment of line and slice intersection.
+  returns first intersections in order of their distance to start point</p>
+</td><td class="codes"><pre class="brush: clojure">(defn line-slice-inc
+  [[[sx1 sy1 :as start] [ex2 ey2 :as end] :as line] a-slice]
+  (vec (filter (complement nil?) (reduce into (sorted-set-by (distant-closer-to-point start))
+    (for [geo a-slice]
+      (match [geo]
+             [[[x1 y1 &amp; [z1]][x2 y2 &amp; [z2]][x3 y3 &amp; [z3]]]] ;triangle
+             [(line-line-inc start end [x1 y1] [x2 y2])
+              (line-line-inc start end [x2 y2] [x3 y3])
+              (line-line-inc start end [x3 y3] [x1 y1])]
+             [[[x1 y1 &amp; [z1]][x2 y2 &amp; [z2]]]] ;line
+             [(line-line-inc start end [x1 y1] [x2 y2])]
+             :else nil ))))))</pre></td></tr><tr><td class="docs"><p>(line-slice-inc [[32 4.5] [-32 4.5]]
+               [[[28 10] [28 0]]
+                [[29 10] [29 0]]])</p>
+
+<p>(line-line-inc [32 4.5] [-32 4.5] [28 3.5] [28 4.5])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(line-slice-inc [[0 0] [10 0]]
+               [[[1 1 1] [1 -1 1]]
+                [[-1 -1 1] [1 1 1] [1 -1 1]]
+                [[1 1]]])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(line-line-inc [0 0] [10 0] [1 1] [1 -1])
+(line-line-inc [-1 0] [10 0] [-1 1] [1 -1])
+(line-line-inc [-1 0] [10 0] [-1 -1] [1 1])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>check if a slice is intersecting an AABB</p>
+</td><td class="codes"><pre class="brush: clojure">(defn slice-box-inc
+  [[min-x min-y max-x max-y :as aabb-box] a-slice]
+  (reduce #(or %1 %2) false
+    (for [geo a-slice]
+      (match [geo]
+             [[[x1 y1 z1][x2 y2 z2][x3 y3 z3]]]
+               (tri-box-inc [x1 y1] [x2 y2] [x3 y3] [min-x min-y] [max-x max-y])
+             [[[x1 y1 z1][x2 y2 z2]]]
+               (line-box-inc [x1 y1] [x2 y2] [min-x min-y] [max-x max-y])
+             [[x1 y1 z1]]
+               (point-box-inc [x1 y1] [min-x min-y] [max-x max-y])
+             :else false))))</pre></td></tr><tr><td class="docs"><p>get aabb from triangle</p>
+</td><td class="codes"><pre class="brush: clojure">(defn aabb-tri
+  [[[x1 y1 _] [x2 y2 _] [x3 y3 _] :as tri]]
+  [(min x1 x2 x3) (min y1 y2 y3) (max x1 x2 x3) (max y1 y2 y3)])</pre></td></tr><tr><td class="docs"><p>get aabb from line</p>
+</td><td class="codes"><pre class="brush: clojure">(defn aabb-line
+  [[[x1 y1 _] [x2 y2 _] :as line]]
+  [(min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)])</pre></td></tr><tr><td class="docs"><p>get aabb box from a list of geometries</p>
+</td><td class="codes"><pre class="brush: clojure">(defn aabb-slice
+  [a-slice &amp; [border]]
+  (loop [geos a-slice
+         min-x 0
+         min-y 0
+         max-x 0
+         max-y 0]
+    (if (&lt;= (count geos) 0)
+      (if (nil? border)
+                 [min-x min-y max-x max-y]
+                 [(- min-x border) (- min-y border) (+ max-x border) (+ max-y border)])
+      (match [(first geos)]
+             [[[x1 y1 _] [x2 y2 _] [x3 y3 _]]] ;triangle
+               (let [[mx my maxx mayy] (aabb-tri (first geos))]
+                 (recur (rest geos) (min min-x mx) (min min-y my) (max max-x maxx) (max max-y mayy)))
+             [[[x1 y1 _] [x2 y2 _]]] ;line
+               (let [[mx my maxx mayy] (aabb-line (first geos))]
+                 (recur (rest geos) (min min-x mx) (min min-y my) (max max-x maxx) (max max-y mayy)))
+             [[x1 y1 _]] ;point
+               (recur (rest geos) (min min-x x1) (min min-y y1) (max max-x x1) (max max-y y1))
+             :else
+               (if (nil? border)
+                 [min-x min-y max-x max-y]
+                 [(- min-x border) (- min-y border) (+ max-x border) (+ max-y border)])))))</pre></td></tr><tr><td class="docs"><p>is the current aabb is smaller than the nozzle</p>
+</td><td class="codes"><pre class="brush: clojure">(defn smaller-than-nozzle?
+  [[min-x min-y max-x max-y :as aabb] nozzle-diameter]
+  (cond
+   (&lt;= (- max-x min-x) nozzle-diameter) true
+   (&lt;= (- max-y min-y) nozzle-diameter) true
+   :else false))</pre></td></tr><tr><td class="docs"><p>make an aabb BOX square / width = height</p>
+</td><td class="codes"><pre class="brush: clojure">(defn make-square
+  [[min-x min-y max-x max-y :as aabb]]
+  (let [delta-x (Math/abs (- max-x min-x))
+        delta-y (Math/abs (- max-y min-y))]
+    (if (&gt; delta-x delta-y)
+      [min-x min-y max-x (+ delta-x min-y)]
+      [min-x min-y (+ delta-y min-x) max-y])))</pre></td></tr><tr><td class="docs"><p>split aabb box to four smaller boxes</p>
+</td><td class="codes"><pre class="brush: clojure">(defn split-aabb
+  ([aabb pos]
+  {:pre [(keyword? pos)]}
+   (let [aabbs (split-aabb aabb)]
+     (case pos
+       :upper-left (first aabbs)
+       :upper-right (second aabbs)
+       :lower-left (nth aabbs 2)
+       :lower-right (nth aabbs 3)
+       :else nil)))
+  ([[min-x min-y max-x max-y :as aabb]]
+   (let [delta-x (/ (Math/abs (- max-x min-x)) 2)
+         delta-y (/ (Math/abs (- max-y min-y)) 2)]
+     [[min-x (+ min-y delta-y) (- max-x delta-x) max-y]
+      [(+ min-x delta-x) (+ min-y delta-y) max-x  max-y]
+      [min-x min-y (- max-x delta-x) (- max-y delta-y)]
+      [(+ min-x delta-x) min-y max-x (- max-y delta-y)]])))</pre></td></tr><tr><td class="docs"><p>tree construction from a layer of slice</p>
+
+<p>follwing three functions are deprecated due to potential StackOverflowErrors. commented out as referencing matters.</p>
+</td><td class="codes"><pre class="brush: clojure">(comment
+(declare make-node)
+(defn make-leaf
+  [aabb a-slice pos nozzle-diameter]
+  (let [aabb-node (split-aabb aabb pos)
+        toosmall? (smaller-than-nozzle? aabb-node nozzle-diameter)
+        intersects? (slice-box-inc aabb-node a-slice)]
+    (cond (and toosmall? intersects?) [:leaf aabb-node intersects?]
+          (and toosmall? (not intersects?)) [:emptyleaf aabb-node intersects?]
+          (and (not toosmall?) (not intersects?)) [:emptyleaf aabb-node intersects?]
+          (and (not toosmall?) intersects?) (make-node [(case pos
+                                                          :upper-left :floodingleafA
+                                                          :upper-right :floodingleafB
+                                                          :lower-left :floodingleafC
+                                                          :lower-right :floodingleafD)]
+                                                       aabb-node a-slice nozzle-diameter)
+          :else [:error aabb-node])))
+;;this is a non-tail call recusive function. Need core.async optimization later
+;;a better way is to use a set of BFS nodes of the whole tree down to the smallest node
+;;then use pmap to check AABB collision and assigned the true/false value
+;;way easier and fasters, no conrecursion too.
+(defn make-node
+  [tree aabb a-slice nozzle-diameter]
+  (let [m-leaf #(identity
+                 [:node [(make-leaf (split-aabb aabb %) a-slice :upper-left nozzle-diameter)
+                         (make-leaf (split-aabb aabb %) a-slice :upper-right nozzle-diameter)
+                         (make-leaf (split-aabb aabb %) a-slice :lower-left nozzle-diameter)
+                         (make-leaf (split-aabb aabb %) a-slice :lower-right nozzle-diameter)]
+                  aabb (slice-box-inc aabb a-slice)])]
+    (match [(first tree)]
+           [:floodingleafA]
+            (m-leaf :upper-left)
+           [:floodingleafB]
+            (m-leaf :upper-right)
+           [:floodingleafC]
+            (m-leaf :lower-left)
+           [:floodingleafD]
+            (m-leaf :lower-right))))
+(defn make-tree
+  [a-slice nozzle-diameter]
+  {:pre [(seq? a-slice)
+         (number? nozzle-diameter)]}
+  (let [aabb (-&gt; (aabb-slice a-slice)
+                 make-square)
+        aabbs (split-aabb aabb)
+        tree [:node
+              (make-node [:floodingleafA] (first aabbs) a-slice nozzle-diameter)
+              (make-node [:floodingleafB] (second aabbs) a-slice nozzle-diameter)
+              (make-node [:floodingleafC] (nth aabbs 2) a-slice nozzle-diameter)
+              (make-node [:floodingleafD] (nth aabbs 3) a-slice nozzle-diameter)
+              aabb
+              (slice-box-inc aabb a-slice)]]
+    tree)))</pre></td></tr><tr><td class="docs"><p>the totoal number of nodes from height for K-arity based tree</p>
+</td><td class="codes"><pre class="brush: clojure">(defn tree-nodes-count
+  [height base]
+  (/ (dec (Math/pow base height)) (dec base)))</pre></td></tr><tr><td class="docs"><p>given tree or its leafs count, return its height</p>
+</td><td class="codes"><pre class="brush: clojure">(defn height
+  [t b]
+  (cond
+   (or (seq? t) (vector? t)); if given a tree, return its height
+   (let [d (dec b)
+         c (count t)
+         a (Math/log (inc (* c d)))]
+     (int (Math/ceil (/ a (Math/log b)))))
+   (number? t); if given a leaf count, return its height
+   (let [d (Math/log 4)
+        c (Math/log t)]
+    (int (inc (Math/ceil (/ c d)))))
+   :else nil))</pre></td></tr><tr><td class="docs"><p>(height [1] 4)
+(height (vec (range 5)) 4)
+(height (vec (range 21)) 4)
+(height (vec (range 85)) 4)
+(height 4 4)
+(height 16 4)
+(height 65 4)
+(Math/log 4)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given tree arity base and the index to one of its node, return height and level position across the same level. OLogN time.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn index-to-hrp
+  [ind base]
+  {:pre [(pos? base) (not (neg? ind))]
+   }
+  (loop [h 1]
+    (if (&gt;= (tree-nodes-count h base) (inc ind))
+      (let [i (int (- ind (tree-nodes-count (dec h) base)))]
+      {:height h
+       :row-index i})
+      (recur (inc h)))))</pre></td></tr><tr><td class="docs"><p>repl tests
+(clojure.repl/doc case)
+(case 2
+ 1 :1
+ 2 :2)
+(mod 4 4)
+(index-to-hrp 4 4)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given base, height and row-index, returns a walk from the root to the node. OLogN time.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn aabb-walk
+  [b h r]
+  {:pre [(&lt; r (Math/pow b h))]}
+  (let [div #(quot % b)
+        divs #(iterate div %)
+        pos #(mod % tree-arity)
+        aabb-walk (map #(identity {:position
+                                   (case (mod %1 tree-arity) 0 :upper-left 1 :upper-right 2 :lower-left 3 :lower-right)
+                                   :height %2})
+                       (take h (divs r)) ;reverse walking in row indexes
+                       (reverse (range 1 (inc h))))
+        ]
+    aabb-walk))</pre></td></tr><tr><td class="docs"><p>(aabb-walk 4 1 0)
+(aabb-walk 4 2 0)
+(aabb-walk 4 4 16)
+(mod 15 4)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given aabb, base, height and row index, return AABB box in OLogN time.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn hr-to-aabb
+  [aabb b h r]
+  (if (= 1 h)
+    aabb
+    (loop [walkings (reverse (drop-last (aabb-walk b h r)))
+           p (:position (first walkings))
+           current-aabb (split-aabb aabb p)]
+      (let [next-walkings (rest walkings)]
+      (if (empty? next-walkings)
+        current-aabb
+        (recur next-walkings (:position (first next-walkings)) (split-aabb current-aabb (:position (first next-walkings)))))))))</pre></td></tr><tr><td class="docs"><p>(hr-to-aabb [-10 -10 10 10] 4 2 0)
+(hr-to-aabb [-10 -10 10 10] 4 3 15)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>(quot (quot 63 4) 4)
+(def tt1 #(quot % 4))
+(def tt2 #(iterate tt1 %))
+(def tt3 #(nth (tt2 %1) (- %2 2)))
+(tt3 16 4)
+(take 3 (tt2 30))
+(iterate #(quot % 4) 63)
+(iterate #(quot % 4) 15)
+(iterate #(quot % 4) 3)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given aabb, base and index, returns aabb. OLogN time.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn index-to-aabb
+  [aabb b i]
+  (let [hrp (index-to-hrp i b)]
+    (hr-to-aabb aabb b (:height hrp) (:row-index hrp))))</pre></td></tr><tr><td class="docs"><p>given aabb, base and index, returns center point. OLogN time.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn index-to-center
+  [aabb b i]
+  (let [[min-x min-y max-x max-y] (index-to-aabb aabb b i)
+        dx (/ (- max-x min-x) 2)
+        dy (/ (- max-y min-y) 2)]
+    [(+ min-x dx) (+ min-y dy)]))</pre></td></tr><tr><td class="docs"><p>given tree or its leafs count and root AABB box, return its minimum AABB width</p>
+</td><td class="codes"><pre class="brush: clojure">(defn tree-leaf-size
+  [t aabb]
+  (let [last-index (if (number? t)
+                     (dec t)
+                     (dec (count t)))
+        [minx miny maxx maxy] (index-to-aabb aabb tree-arity last-index)]
+    (min (- maxx minx) (- maxy miny))))</pre></td></tr><tr><td class="docs"><p>given a node index, returns parent index</p>
+</td><td class="codes"><pre class="brush: clojure">(defn parent
+  [i]
+  {:pre [(integer? i)]}
+  (cond
+   (= i 0) nil
+   (&lt; i 5) 0
+   :else (let [hr (index-to-hrp i tree-arity)
+               grandparent-node-count (tree-nodes-count (- (:height hr) 2) tree-arity)
+               parent-row-index (Math/floor (/ (:row-index hr) tree-arity))]
+           (int (+ grandparent-node-count parent-row-index)))))</pre></td></tr><tr><td class="docs"><p>(parent 1)
+(parent 5)
+(parent 21)
+(parent 85)
+(parent 341)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given a node index, returns children indexes:
+  [child-upper-left child upper-right child-lower-left child-lower-right]</p>
+</td><td class="codes"><pre class="brush: clojure">(defn children
+  [i]
+  {:pre [(integer? i)]}
+  (let [hr (index-to-hrp i tree-arity)
+        a (-&gt; (-&gt;&gt; hr
+                   :height)
+              (tree-nodes-count tree-arity))
+        e (-&gt; hr
+              :row-index
+              inc
+              (* 4)
+              (+ a)
+              dec
+              int)]
+    [(- e 3) (- e 2) (dec e) e]))</pre></td></tr><tr><td class="docs"><p>(children 0)
+(children 1)
+(children 2)
+(children 3)
+(children 4)
+(children 5)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>generate tree down to the lowest level in BFS order. O(NLogN) time</p>
+</td><td class="codes"><pre class="brush: clojure">(defn generate-tree
+  [a-slice nozzle-diameter &amp; [border]]
+  {:pre [(seq? a-slice)
+         (number? nozzle-diameter)]}
+  (let [[min-x min-y max-x max-y :as aabb] (if (nil? border)
+                                             (-&gt; a-slice aabb-slice make-square)
+                                             (-&gt; a-slice (aabb-slice border) make-square))
+        diff-x (- max-x min-x)
+        leaf-num (let [round-up (/ diff-x nozzle-diameter)]
+                   (int (Math/pow round-up 2)))
+        tree-height (height leaf-num tree-arity)
+        node-count (tree-nodes-count tree-height tree-arity)
+        result (atom (vec (repeat node-count nil)))]
+    (doseq [ind (range node-count)]
+      (cond
+       (= ind 0);get collsion test for root node
+       (swap! result assoc ind
+              (-&gt; (index-to-aabb aabb tree-arity ind)
+                  (slice-box-inc a-slice)))
+       (true? (nth @result (parent ind)));only get collision test for nodes which parent is collided
+       (swap! result assoc ind
+              (-&gt; (index-to-aabb aabb tree-arity ind)
+                  (slice-box-inc a-slice)))))
+    @result))</pre></td></tr><tr><td class="docs"><p>given indexes of two nodes, returns if their AABB boxes are adjacent to each other</p>
+</td><td class="codes"><pre class="brush: clojure">(defn adjacent
+  [n1 n2 aabb]
+  {:pre [(integer? n1) (integer? n2)]}
+  (let [[min-x1 min-y1 max-x1 max-y1 :as n1-aabb] (index-to-aabb aabb tree-arity n1)
+        [min-x2 min-y2 max-x2 max-y2 :as n2-aabb] (index-to-aabb aabb tree-arity n2)]
+    (cond
+     (= min-x1 max-x2) true
+     (= min-x2 max-x1) true
+     (= min-y1 max-y2) true
+     (= min-y2 max-y1) true
+     :else false)))</pre></td></tr><tr><td class="docs"><p>given two aabb returns if they are intersecting with each other</p>
+</td><td class="codes"><pre class="brush: clojure">(defn aabb-inc
+  [[min-x1 min-y1 max-x1 max-y1 :as aabb1] [min-x2 min-y2 max-x2 max-y2 :as aabb2]]
+  (cond
+       (and
+        (or (and (&gt;= min-x2 min-x1) (&lt;= min-x2 max-x1))
+            (and (&gt;= max-x2 min-x1) (&lt;= max-x2 max-x1)))
+        (or (and (&gt;= min-y2 min-y1) (&lt;= min-y2 max-y1))
+            (and (&gt;= max-y2 min-y1) (&lt;= max-y2 max-y1)))) true
+     :else false))</pre></td></tr><tr><td class="docs"><p>given indexes of two nodes, returns if their AABB boxes are intersecting with each other</p>
+</td><td class="codes"><pre class="brush: clojure">(defn node-inc
+  [n1 n2 aabb]
+  {:pre [(integer? n1) (integer? n2)]}
+  (let [n1-aabb (index-to-aabb aabb tree-arity n1)
+        n2-aabb (index-to-aabb aabb tree-arity n2)]
+    (aabb-inc n1-aabb n2-aabb)))</pre></td></tr><tr><td class="docs"><p>given a tree and an index of an nil node. returns its ancestor which is a false node</p>
+</td><td class="codes"><pre class="brush: clojure">(defn false-ancestor
+  [t i]
+  {:pre [(-&gt; t (nth i) nil?)]}
+  (loop [parent-node (parent i)]
+    (cond
+      (false? (nth t parent-node)) parent-node
+      :else (recur (parent parent-node)))))</pre></td></tr><tr><td class="docs"><p>(false-ancestor [false nil nil nil false nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil] 17)</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given a tree, returns its leafs</p>
+</td><td class="codes"><pre class="brush: clojure">(defn leafs
+  [t]
+  (let [last-index (-&gt; t count dec)
+        hr (index-to-hrp last-index tree-arity)
+        last-row-start-index (-&gt; hr :height dec (tree-nodes-count tree-arity) int)]
+    (-&gt;
+     (for [i (range last-row-start-index (inc last-index))]
+       (if (nil? (nth t i))
+         (let [anc (false-ancestor t i)] [anc (nth t anc)])
+         [i (nth t i)]))
+     set
+     vec)))</pre></td></tr><tr><td class="docs"><p>(leafs [true false false false true nil nil nil nil nil nil nil nil nil nil nil nil true false false false])
+(leafs (range 5))
+(leafs (range 21))
+(leafs (range 85))</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>give aabb, put it to the center so that [0 0 20 20] becomes [-10 -10 10 10]</p>
+</td><td class="codes"><pre class="brush: clojure">(defn center-aabb
+  [[min-x min-y max-x max-y :as aabb]]
+  (let [delta-x (-&gt; (- max-x min-x) (/ 2) (+ min-x))
+        delta-y (-&gt; (- max-y min-y) (/ 2) (+ min-y))]
+    [(- min-x delta-x)  (- min-y delta-y)  (- max-x delta-x)  (- max-y delta-y)]))</pre></td></tr><tr><td class="docs"><p>(center-aabb [-1 -1 5 5])
+(center-aabb [-11 -11 -5 -5])
+(center-aabb [11 11 15 15])</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>given a point, returns the leaf node where it sits on</p>
+</td><td class="codes"><pre class="brush: clojure">(defn point-leaf
+  [p t aabb]
+  {:pre [
+         ;(do (debugger p &quot;P:&quot;) true)
+         (number? (first p)) (number? (second p)) (vector? t) (number? (first aabb))
+         ]}
+  (if (point-box-inc p aabb)
+    (let [child-nodes (children 0)
+          child-aabbs (map (fn [i] (index-to-aabb aabb tree-arity i)) child-nodes)
+          sits-in-node (match [(point-box-inc p (first child-aabbs))
+                               (point-box-inc p (nth child-aabbs 1))
+                               (point-box-inc p (nth child-aabbs 2))
+                               (point-box-inc p (nth child-aabbs 3))]
+                              [true _ _ _] (first child-nodes)
+                              [_ true _ _] (nth child-nodes 1)
+                              [_ _ true _] (nth child-nodes 2)
+                              [_ _ _ true] (nth child-nodes 3))]
+      (loop [node sits-in-node]
+        (cond
+          ;out of bounce
+          (-&gt; (children node)
+              last
+              (&gt;= (count t)))
+          node
+          ;false node is a leaf node
+          (false? (nth t node))
+          node
+          ;true node needs check deeper level
+          (nth t node)
+          (let [c-nodes (children node)
+                c-aabbs (map (fn [i] (index-to-aabb aabb tree-arity i)) c-nodes)]
+            (recur (match [(point-box-inc p (first c-aabbs))
+                           (point-box-inc p (nth c-aabbs 1))
+                           (point-box-inc p (nth c-aabbs 2))
+                           (point-box-inc p (nth c-aabbs 3))]
+                          [true _ _ _] (first c-nodes)
+                          [_ true _ _] (nth c-nodes 1)
+                          [_ _ true _] (nth c-nodes 2)
+                          [_ _ _ true] (nth c-nodes 3))))
+          ;you shouldn't be here
+          :else :warning-intruder-alert! )))
+    nil))</pre></td></tr><tr><td class="docs"><p>(point-leaf [1 1] [true false true false false nil nil nil nil false true false false nil nil nil nil nil nil nil nil] [-10 -10 10 10])
+(point-leaf [-1 1] [true false true false false nil nil nil nil false true false false nil nil nil nil nil nil nil nil] [-10 -10 10 10])
+(point-leaf [-1 -1] [true false true false false nil nil nil nil false true false false nil nil nil nil nil nil nil nil] [-10 -10 10 10])
+(point-leaf [1 -1] [true false true false false nil nil nil nil false true false false nil nil nil nil nil nil nil nil] [-10 -10 10 10])</p>
+</td><td class="codes"></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.util" name="slicer.util"><h1 class="project-name">slicer.util</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(ns slicer.util
+  (:require [clojure.core.match :refer [match]]))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defmacro debugger [expr &amp; [msg]]
+  `(do
+     (when ~msg (println ~msg))
+     (println ~expr)
+     ~expr))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defmacro s=
+  [a b d]
+    `(&lt; (Math/abs (- ~a ~b)) ~d))</pre></td></tr><tr><td class="docs"><p>(s= 1.1 1.2 0.1)</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defmacro s&gt;=
+  [a b d]
+  `(&gt;= ~a (- ~b ~d)))</pre></td></tr><tr><td class="docs"><p>(s>= 1 1.1 0.1)</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defmacro s&lt;=
+  [a b d]
+  `(&lt;= ~a (+ ~b ~d)))</pre></td></tr><tr><td class="docs"><p>(s&lt;= 1 0.9 0.1)</p>
+</td><td class="codes"></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_slicer.core">slicer.core</li><li class="floating-toc-li" id="floating-toc_slicer.draw">slicer.draw</li><li class="floating-toc-li" id="floating-toc_slicer.eulerian">slicer.eulerian</li><li class="floating-toc-li" id="floating-toc_slicer.file">slicer.file</li><li class="floating-toc-li" id="floating-toc_slicer.flood">slicer.flood</li><li class="floating-toc-li" id="floating-toc_slicer.gcode">slicer.gcode</li><li class="floating-toc-li" id="floating-toc_slicer.slice">slicer.slice</li><li class="floating-toc-li" id="floating-toc_slicer.tree">slicer.tree</li><li class="floating-toc-li" id="floating-toc_slicer.util">slicer.util</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
 SyntaxHighlighter.all();
 
 // hackity hack
