@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8" content="text/html" http-equiv="Content-Type" /><meta content="FIXME: write description" name="description" /><style type="text/css">/**
+<html><head><meta charset="utf-8" content="text/html" http-equiv="Content-Type" /><meta content="The Embodier Slicer" name="description" /><style type="text/css">/**
  * SyntaxHighlighter
  * http://alexgorbatchev.com/SyntaxHighlighter
  *
@@ -2865,7 +2865,7 @@ net.brehaut.ClojureTools = (function (SH) {
     build_tree: build_tree
   };
 })(SyntaxHighlighter);
-</script><title>slicer -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name"><a href="http://example.com/FIXME">slicer</a></h1><h2 class="project-version">0.1.0-SNAPSHOT</h2><br /><p>FIXME: write description</p>
+</script><title>slicer -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name"><a href="http://embodier.com">slicer</a></h1><h2 class="project-version">0.1.0-SNAPSHOT</h2><br /><p>The Embodier Slicer</p>
 </div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.5.1</td></tr><tr><td class="dep-name">org.clojure/tools.cli</td><td class="dotted"><hr /></td><td class="dep-version">0.3.1</td></tr><tr><td class="dep-name">org.clojure/core.match</td><td class="dotted"><hr /></td><td class="dep-version">0.3.0-alpha4</td></tr><tr><td class="dep-name">quil</td><td class="dotted"><hr /></td><td class="dep-version">2.2.5</td></tr><tr><td class="dep-name">com.jakemccrary/lein-test-refresh</td><td class="dotted"><hr /></td><td class="dep-version">0.7.0</td></tr><tr><td class="dep-name">gloss</td><td class="dotted"><hr /></td><td class="dep-version">0.2.3</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#slicer.core">slicer.core</a></li><li><a href="#slicer.draw">slicer.draw</a></li><li><a href="#slicer.eulerian">slicer.eulerian</a></li><li><a href="#slicer.file">slicer.file</a></li><li><a href="#slicer.flood">slicer.flood</a></li><li><a href="#slicer.gcode">slicer.gcode</a></li><li><a href="#slicer.slice">slicer.slice</a></li><li><a href="#slicer.tree">slicer.tree</a></li><li><a href="#slicer.util">slicer.util</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#slicer.core" name="slicer.core"><h1 class="project-name">slicer.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>The Core</h1>
 
 <p>First of all, we need to take care of the cmd line parameters.
@@ -2904,8 +2904,8 @@ If there are no errors and it's not a help request, process with file IO</p>
     (when (:help opts)
       (println help-txt)
       (exit 0 summary))
-    (when (:stl opts)
-      (println (prn-str (f/parse-stl (:stl opts)))))
+    ;(when (:stl opts)
+      ;(println (prn-str (f/parse-stl (:stl opts)))))
     (when (and (:gcode opts) (:stl opts))
       (g/write-gcode (:gcode opts)
                      (-&gt; (s/slice (:triangles (f/parse-stl (:stl opts)))
@@ -3616,7 +3616,7 @@ Then I tested the codec and finds out that it's the endianess that is messing wi
     (let [cut (first cuts)
           init-cmd (str &quot;G1 Z&quot; (:cut-point cut) \newline)
           slice (:result cut)
-          _ (debugger slice &quot;slice:&quot;)
+          ;_ (debugger slice &quot;slice:&quot;)
           tree (tree/generate-tree slice 1 2)
           aabb (-&gt; slice (tree/aabb-slice 2) tree/make-square)
           flooded-leafs (flood/fast-flood tree aabb slice)
