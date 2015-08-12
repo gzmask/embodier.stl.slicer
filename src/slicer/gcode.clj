@@ -34,9 +34,9 @@
           edges (eulerian/all-edges flooded-leafs tree aabb fixing-set)
           edge-path (eulerian/hierholzer edges flooded-leafs [])
           points (eulerian/edge-to-points edge-path aabb)
-          point-distants (into [last-e-height]
+          point-distances (into [last-e-height]
                                (map tree/point-point-distant (drop-last points) (rest points)))
-          extrusions (sum-lst point-distants)
+          extrusions (sum-lst point-distances)
           current-e-height (last extrusions)]
       #(slice-str (rest cuts)
                   (str last-cmd
