@@ -46,7 +46,9 @@
     (when (and (:gcode opts) (:stl opts))
       (g/write-gcode (:gcode opts)
                      (-> (s/slice (:triangles (f/parse-stl (:stl opts)))
-                                  (s/gen-planes (:min (s/find-min-max :z (:triangles (f/parse-stl (:stl opts))))) (:max (s/find-min-max :z (:triangles (f/parse-stl (:stl opts))))) 0.3 :z)
+                                  (s/gen-planes (:min (s/find-min-max :z (:triangles (f/parse-stl (:stl opts))))) 
+                                                (:max (s/find-min-max :z (:triangles (f/parse-stl (:stl opts))))) 
+                                                0.3 :z)
                                   :z)
                          s/rm-nil
                          s/tri-compressor
