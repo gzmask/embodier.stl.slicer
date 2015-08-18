@@ -130,9 +130,10 @@
          (number? end)
          (number? step)
          (keyword? axis)]}
-  (vec
-   (for [i (range (bigdec start) (bigdec (+ end step)) (bigdec step))]
-     (slicing-plane (double i) axis))))
+  (conj (vec 
+          (for [i (range (bigdec start) (bigdec end) (bigdec step))] 
+            (slicing-plane (double i) axis)))
+        (slicing-plane (double (bigdec end)) axis)))
 
 (defn find-min-max
   "finds the highest and lowest point in axis of a collection of triangles along provided axis"
